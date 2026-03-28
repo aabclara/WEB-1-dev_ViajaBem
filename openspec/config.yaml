@@ -1,0 +1,32 @@
+schema: spec-driven
+context: |
+  Por favor, gere todos os artefatos em Português do Brasil.
+  O sistema MUST seguir rigidamente as diretivas operacionais abaixo para blindar contra invenções.
+
+  # TECH STACK - BACKEND
+  - Framework: FastAPI (Uso mandatório de Pydantic v2)
+  - Banco de Dados / ORM: PostgreSQL manipulado estritamente por SQLAlchemy 2.0
+  - Orquestração: Docker e docker-compose (Obrigatórios para toda a build env)
+
+  # TECH STACK - FRONTEND
+  - Framework: Next.js (Módulo App Router exclusivo)
+  - Linguagem: TypeScript rígido (Proibido cláusula `any`)
+  - Componentes: Restritos ao ecossistema `shadcn/ui` puro e `Tailwind CSS`. Criação de componentes UI interativos abstraídos do zero estão proibidos.
+  - Orquestração: Docker e docker-compose acoplados.
+
+  # DOMAIN E IDENTIDADE VISUAL
+  - Sistema de Gestão de Viagens "Viaje Bem".
+  - A identidade visual indexada nas imagens dentro do diretório `docs/` constrói o manual inegociável da UI. 
+  - Proíbe-se Emojis. Ícones MUST advir da biblioteca `lucide-react`.
+
+rules:
+  all: |
+    - A gramática de regras arquiteturais MUST usar cláusulas RFC 2119 (MUST, SHALL, SHOULD, MUST NOT).
+  specs: |
+    - Escreva cenários de teste obrigatoriamente sob o framework comportamental Gherkin (Dado/Quando/Então).
+    - As specs MUST descrever SOMENTE trajetórias de negócio, falhas e exceções comportamentais; É EXPRESSAMENTE PROIBIDO citar bibliotecas Python ou frameworks JS nos arquivos das `specs/`.
+  design: |
+    - Especifique a topologia de Containers Docker, os relatórios de banco e separe inegociavelmente as fronteiras "use client" das fatias de Next.js.
+  tasks: |
+    - O cronograma de ações do SDD engata execução micro-gerenciada e sequencial proibindo pular steps.
+    - Ordem forçada: Configurar Docker -> Modelagem PostgreSQL base -> Rotas FastAPI -> Consumo Next.js e UI shadcn.
