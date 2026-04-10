@@ -1,7 +1,7 @@
 import enum
 from datetime import datetime, date
 from sqlalchemy import (
-    BigInteger, String, Text, Date, DateTime, Boolean,
+    BigInteger, Integer, String, Text, Date, DateTime, Boolean,
     Enum as SAEnum, ForeignKey, Numeric, func
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -37,7 +37,7 @@ class SubstatusReserva(str, enum.Enum):
 class Usuario(Base):
     __tablename__ = "usuario"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     email: Mapped[str] = mapped_column(String(255), unique=True, nullable=False, index=True)
     senha_hash: Mapped[str] = mapped_column(String(255), nullable=False)
     nome: Mapped[str] = mapped_column(String(150), nullable=False)
@@ -56,7 +56,7 @@ class Usuario(Base):
 class TokenRedefinicaoSenha(Base):
     __tablename__ = "token_redefinicao_senha"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_usuario: Mapped[int] = mapped_column(ForeignKey("usuario.id", ondelete="CASCADE"), nullable=False)
     token: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     criado_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
@@ -69,7 +69,7 @@ class TokenRedefinicaoSenha(Base):
 class Viagem(Base):
     __tablename__ = "viagem"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     titulo: Mapped[str] = mapped_column(String(255), nullable=False)
     descricao_precos: Mapped[str | None] = mapped_column(Text, nullable=True)
     data_partida: Mapped[date] = mapped_column(Date, nullable=False)
@@ -85,7 +85,7 @@ class Viagem(Base):
 class ReservaGrupo(Base):
     __tablename__ = "reserva_grupo"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_viagem: Mapped[int] = mapped_column(ForeignKey("viagem.id", ondelete="CASCADE"), nullable=False)
     id_lider: Mapped[int] = mapped_column(ForeignKey("usuario.id"), nullable=False)
     qtd_vagas: Mapped[int] = mapped_column(nullable=False)
@@ -113,7 +113,7 @@ class ReservaGrupo(Base):
 class Passageiro(Base):
     __tablename__ = "passageiro"
 
-    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     id_reserva: Mapped[int] = mapped_column(ForeignKey("reserva_grupo.id", ondelete="CASCADE"), nullable=False)
     nome: Mapped[str | None] = mapped_column(String(150), nullable=True)
     documento: Mapped[str | None] = mapped_column(String(20), nullable=True)

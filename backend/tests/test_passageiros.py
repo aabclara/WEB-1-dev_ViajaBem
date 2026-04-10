@@ -6,13 +6,11 @@ pytestmark = pytest.mark.asyncio
 
 
 async def _setup_reserva(sessao, email_lider, cpf_lider, dias=30, qtd=3):
-    from app.infra.modelos import Viagem, ReservaGrupo, Passageiro
-    from passlib.context import CryptContext
-    from app.infra.modelos import Usuario
-    bcrypt = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    from app.infra.modelos import Usuario, Viagem, ReservaGrupo, Passageiro
+    from app.core.seguranca import gerar_hash_senha
 
     lider = Usuario(
-        email=email_lider, senha_hash=bcrypt.hash("Senha123!"),
+        email=email_lider, senha_hash=gerar_hash_senha("Senha123!"),
         nome="Lider", cpf=cpf_lider, telefone="11999",
         data_nascimento=date(1990, 1, 1), tipo=TipoUsuario.LIDER,
     )

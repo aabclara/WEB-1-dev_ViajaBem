@@ -1,7 +1,8 @@
 import csv
 import io
 import datetime as dt
-from datetime import date
+from datetime import date, timedelta
+from app.core.tempo import obter_agora
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -42,7 +43,7 @@ async def _vagas_disponiveis(id_viagem: int, sessao: AsyncSession) -> int:
 
 
 def _dentro_da_trava(data_partida: date) -> bool:
-    return date.today() >= (data_partida - dt.timedelta(days=configuracoes.DIAS_TRAVA_SEGURO))
+    return obter_agora().date() >= (data_partida - timedelta(days=configuracoes.DIAS_TRAVA_SEGURO))
 
 
 # ─── Viagens (Admin) ─────────────────────────────────────────────────────────
@@ -204,8 +205,13 @@ async def atualizar_reserva_admin(
     reserva.admin_responsavel_id = admin.id
 
     await sessao.commit()
-    await sessao.refresh(reserva)
-    return reserva
+    # Recarregar com selectinload para evitar erro de lazy loading no schema
+    res_final = await sessao.execute(
+        select(ReservaGrupo)
+        .options(selectinload(ReservaGrupo.passageiros), selectinload(ReservaGrupo.viagem))
+        .where(ReservaGrupo.id == reserva.id)
+    )
+    return res_final.scalar_one()
 
 
 @roteador_admin.get("/reservas/{id_reserva}/resumo-whatsapp", response_model=ResumoWhatsappSchema, tags=["Admin — Reservas"])

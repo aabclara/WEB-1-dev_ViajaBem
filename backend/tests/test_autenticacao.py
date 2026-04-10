@@ -51,14 +51,22 @@ class TestLogin:
     async def test_login_valido(self, cliente, sessao_teste):
         from tests.conftest import _criar_usuario
         await _criar_usuario(sessao_teste, email="loginvalido@test.com", cpf="66666666666")
-        r = await cliente.post("/auth/login", json={"email": "loginvalido@test.com", "senha": "Senha123!"})
+        r = await cliente.post("/auth/login", data={"username": "loginvalido@test.com", "password": "Senha123!"})
         assert r.status_code == 200
-        assert "access_token" in r.json()
+        dados = r.json()
+        assert "access_token" in dados
+        assert dados["nome"] == "Teste"
+        assert dados["email"] == "loginvalido@test.com"
+        assert dados["tipo"] == "LIDER"
 
     async def test_login_senha_invalida(self, cliente, sessao_teste):
         from tests.conftest import _criar_usuario
         await _criar_usuario(sessao_teste, email="loginsenha@test.com", cpf="77777777777")
-        r = await cliente.post("/auth/login", json={"email": "loginsenha@test.com", "senha": "errada"})
+        r = await cliente.post("/auth/login", data={"username": "loginsenha@test.com", "password": "errada"})
+        assert r.status_code == 401
+
+    async def test_login_usuario_inexistente(self, cliente):
+        r = await cliente.post("/auth/login", data={"username": "naoexiste@test.com", "password": "Senha123!"})
         assert r.status_code == 401
 
 

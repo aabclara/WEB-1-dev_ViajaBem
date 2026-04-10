@@ -31,6 +31,9 @@ class LoginSchema(BaseModel):
 class TokenSchema(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    nome: str
+    email: str
+    tipo: TipoUsuario
 
 
 class EsqueciSenhaSchema(BaseModel):

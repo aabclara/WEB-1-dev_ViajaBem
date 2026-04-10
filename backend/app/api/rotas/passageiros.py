@@ -1,4 +1,5 @@
-from datetime import date
+from datetime import date, timedelta
+from app.core.tempo import obter_agora
 import datetime as dt
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -15,7 +16,7 @@ roteador_passageiros = APIRouter(prefix="/passageiros", tags=["Passageiros"])
 
 
 def _dentro_da_trava(data_partida: date) -> bool:
-    return date.today() >= (data_partida - dt.timedelta(days=configuracoes.DIAS_TRAVA_SEGURO))
+    return obter_agora().date() >= (data_partida - timedelta(days=configuracoes.DIAS_TRAVA_SEGURO))
 
 
 @roteador_passageiros.patch("/{id_passageiro}", response_model=PassageiroSchema)

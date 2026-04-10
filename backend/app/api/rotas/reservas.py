@@ -1,4 +1,5 @@
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timezone, timedelta
+from app.core.tempo import obter_agora
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -23,8 +24,8 @@ roteador_reservas = APIRouter(prefix="/reservas", tags=["Reservas"])
 
 def _trava_seguro(data_partida: date) -> bool:
     """Retorna True se estamos dentro da trava de 7 dias."""
-    hoje = date.today()
-    return hoje >= (data_partida - __import__("datetime").timedelta(days=configuracoes.DIAS_TRAVA_SEGURO))
+    hoje = obter_agora().date()
+    return hoje >= (data_partida - timedelta(days=configuracoes.DIAS_TRAVA_SEGURO))
 
 
 @roteador_reservas.post("/", response_model=ReservaSchema, status_code=status.HTTP_201_CREATED)

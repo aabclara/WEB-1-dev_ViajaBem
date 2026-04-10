@@ -1,3 +1,5 @@
+import os
+import time
 from contextlib import asynccontextmanager
 from datetime import date
 
@@ -37,6 +39,11 @@ async def _criar_admin_seed():
 
 @asynccontextmanager
 async def ciclo_de_vida(app: FastAPI):
+    # Configuração de Fuso Horário (Unix/Docker)
+    os.environ["TZ"] = configuracoes.TIMEZONE
+    if hasattr(time, "tzset"):
+        time.tzset()
+    
     await _criar_admin_seed()
     yield
 

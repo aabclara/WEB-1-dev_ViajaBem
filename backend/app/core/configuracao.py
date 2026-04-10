@@ -29,6 +29,7 @@ class Configuracoes(BaseSettings):
     CHAVE_PIX: str = ""
     DIAS_TRAVA_SEGURO: int = 7
     LIMIAR_ULTIMAS_VAGAS: int = 5
+    TIMEZONE: str = "America/Sao_Paulo"
 
     # Next.js
     NEXT_PUBLIC_API_URL: str = "http://localhost:8000"

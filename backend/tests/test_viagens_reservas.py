@@ -134,3 +134,34 @@ class TestReservas:
         dados = r.json()
         assert float(dados["sinal"]) == 600.0
         assert float(dados["valor_por_pessoa"]) == 300.0
+
+    async def test_link_acompanhante(self, cliente, sessao_teste):
+        from tests.conftest import _criar_usuario
+        lider = await _criar_usuario(sessao_teste, email="lider_link@test.com", cpf="55555555551")
+        viagem = await _criar_viagem(sessao_teste, titulo="Viagem Acompanhante")
+        reserva = await _criar_reserva(sessao_teste, viagem.id, lider.id, 2)
+        reserva.valor_acordado = Decimal("400.00")
+        await sessao_teste.commit()
+        
+        # Rota pública (não precisa de token)
+        r = await cliente.get(f"/reservas/{reserva.id}/link-acompanhante")
+        assert r.status_code == 200
+        assert r.json()["titulo_viagem"] == "Viagem Acompanhante"
+        assert float(r.json()["valor_por_pessoa"]) == 200.0
+
+    async def test_listar_passageiros_reserva(self, cliente, sessao_teste):
+        from tests.conftest import _criar_usuario, _token
+        lider = await _criar_usuario(sessao_teste, email="lider_pass@test.com", cpf="77777777771")
+        viagem = await _criar_viagem(sessao_teste)
+        tk = await _token(cliente, "lider_pass@test.com")
+        
+        # Criar reserva (gera passageiros automaticamente)
+        r_post = await cliente.post("/reservas/", json={"id_viagem": viagem.id, "qtd_vagas": 2}, 
+                                   headers={"Authorization": f"Bearer {tk}"})
+        reserva_id = r_post.json()["id"]
+        
+        # Listar passageiros
+        r = await cliente.get(f"/reservas/{reserva_id}/passageiros", headers={"Authorization": f"Bearer {tk}"})
+        assert r.status_code == 200
+        assert len(r.json()) == 2
+        assert r.json()[0]["eh_lider"] is True

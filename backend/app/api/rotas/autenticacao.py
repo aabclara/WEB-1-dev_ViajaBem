@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta, timezone, date
+from app.core.tempo import obter_agora
 from typing import Optional
 import uuid
 
@@ -22,7 +23,7 @@ roteador_auth = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 
 def _calcular_idade(data_nascimento: date) -> int:
-    hoje = date.today()
+    hoje = obter_agora().date()
     return hoje.year - data_nascimento.year - (
         (hoje.month, hoje.day) < (data_nascimento.month, data_nascimento.day)
     )
@@ -76,7 +77,12 @@ async def login(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Credenciais inválidas")
 
     token = criar_token_acesso({"sub": str(usuario.id), "email": usuario.email, "tipo": usuario.tipo.value})
-    return TokenSchema(access_token=token)
+    return TokenSchema(
+        access_token=token,
+        nome=usuario.nome,
+        email=usuario.email,
+        tipo=usuario.tipo,
+    )
 
 
 
