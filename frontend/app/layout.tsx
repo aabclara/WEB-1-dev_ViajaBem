@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Montserrat } from "next/font/google";
+import { Header } from "@/src/components/Header";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"] });
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Viaje Bem — Gestão de Viagens",
@@ -15,8 +20,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR">
-      <body className={inter.className}>
+    <html lang="pt-BR" className={montserrat.variable}>
+      <body className={montserrat.className}>
+        <Header />
         <main className="min-h-screen bg-background text-foreground">
           {children}
         </main>
@@ -24,3 +30,4 @@ export default function RootLayout({
     </html>
   );
 }
+
