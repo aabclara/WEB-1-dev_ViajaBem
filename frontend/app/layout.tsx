@@ -23,7 +23,7 @@ export default function RootLayout({
     <html lang="pt-BR" className={montserrat.variable}>
       <body className={montserrat.className}>
         <Header />
-        <main className="min-h-screen bg-background text-foreground">
+        <main className="min-h-screen bg-background text-on-background pt-20">
           {children}
         </main>
       </body>

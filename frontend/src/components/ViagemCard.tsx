@@ -1,5 +1,5 @@
-import { MapPin, CalendarDays, Users } from "lucide-react";
-import { Button } from "@/src/components/Button";
+import Link from "next/link";
+import { CalendarCheck } from "lucide-react";
 import type { Viagem } from "@/src/types/viagem";
 
 interface ViagemCardProps {
@@ -7,62 +7,74 @@ interface ViagemCardProps {
 }
 
 export function ViagemCard({ viagem }: ViagemCardProps) {
-  /** Format ISO date to locale "23 abr. 2026" */
-  const dataFormatada = new Date(viagem.data_partida + "T12:00:00").toLocaleDateString("pt-BR", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
-
-  /** Derive destination from title (e.g. "Bertioga - 2026.1" → "Bertioga") */
-  const destino = viagem.titulo.split("-")[0]?.trim() ?? viagem.titulo;
+  const ocupacao = viagem.vagas_totais > 0
+    ? Math.round(((viagem.vagas_totais - viagem.vagas_disponiveis) / viagem.vagas_totais) * 100)
+    : 0;
 
   return (
-    <article className="flex flex-col justify-between rounded-2xl border border-stone-200 bg-stone-50 p-6 shadow-sm transition-shadow hover:shadow-md">
-      {/* Header */}
-      <div>
-        <h3 className="text-lg font-bold text-stone-800 leading-snug">
+    <div className="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden group hover:scale-[1.02] transition-all duration-300">
+      {/* Image area */}
+      <div className="relative aspect-[3/2] overflow-hidden bg-surface-container-high">
+        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 via-secondary/10 to-surface-container-high">
+          <CalendarCheck size={48} className="text-primary/40" />
+        </div>
+
+        {/* Badge */}
+        {viagem.ultimas_vagas && (
+          <div className="absolute top-4 right-4 bg-error text-on-error text-sm font-bold px-3 py-1 rounded-full shadow-sm">
+            Ultimas Vagas
+          </div>
+        )}
+        {!viagem.ultimas_vagas && ocupacao >= 70 && (
+          <div className="absolute top-4 right-4 bg-primary text-on-primary text-sm font-bold px-3 py-1 rounded-full shadow-sm">
+            Em Alta
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className="p-6">
+        <h3 className="text-xl font-bold mb-2 text-on-background">
           {viagem.titulo}
         </h3>
 
-        {viagem.descricao_precos && (
-          <p className="mt-1 text-sm text-viaje-neutral line-clamp-2">
-            {viagem.descricao_precos}
-          </p>
-        )}
-
-        {/* Meta info */}
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-viaje-neutral">
-          <span className="flex items-center gap-1.5">
-            <MapPin size={14} className="text-viaje-primary" />
-            {destino}
-          </span>
-
-          <span className="flex items-center gap-1.5">
-            <CalendarDays size={14} className="text-viaje-primary" />
-            {dataFormatada}
-          </span>
-
-          <span className="flex items-center gap-1.5">
-            <Users size={14} className="text-viaje-primary" />
-            {viagem.vagas_disponiveis}/{viagem.vagas_totais} vagas
-          </span>
+        {/* Price */}
+        <div className="flex items-baseline gap-2 mb-4">
+          {viagem.descricao_precos ? (
+            <span className="text-primary text-2xl font-black">
+              {viagem.descricao_precos}
+            </span>
+          ) : (
+            <span className="text-on-surface-variant text-sm font-medium">
+              Consulte valores
+            </span>
+          )}
         </div>
 
-        {/* Ultimas vagas badge */}
-        {viagem.ultimas_vagas && (
-          <span className="mt-3 inline-block rounded-full bg-red-100 px-3 py-0.5 text-xs font-semibold text-red-700">
-            Ultimas vagas
-          </span>
-        )}
-      </div>
+        {/* Occupation bar */}
+        <div className="space-y-2 mb-6">
+          <div className="flex justify-between items-center text-sm font-bold">
+            <span className="text-on-background">Ocupacao</span>
+            <span className={viagem.ultimas_vagas ? "text-error" : "text-primary"}>
+              {ocupacao}%
+            </span>
+          </div>
+          <div className="h-3 w-full bg-[#E2E8F0] rounded-full overflow-hidden">
+            <div
+              className="h-full bg-primary rounded-full transition-all duration-500"
+              style={{ width: `${ocupacao}%` }}
+            />
+          </div>
+        </div>
 
-      {/* Action */}
-      <div className="mt-6">
-        <Button variant="primary" className="w-full">
-          Ver Detalhes
-        </Button>
+        {/* CTA */}
+        <Link href={`/viagens/${viagem.id}`}>
+          <button className="w-full h-14 bg-secondary text-on-secondary rounded-xl font-bold flex items-center justify-center gap-2 shadow-sm active:scale-95 transition-transform">
+            <CalendarCheck size={20} />
+            Reservar Agora
+          </button>
+        </Link>
       </div>
-    </article>
+    </div>
   );
 }
