@@ -19,13 +19,16 @@ from app.schemas.viagem_schemas import (
     AcompanhanteSchema, PassageiroSchema,
 )
 
+from app.core.excecoes import (
+    ViagemNaoEncontradaException, ViagemEsgotadaException, ReservaNaoEncontradaException,
+    AcessoNegadoException, ValorAcordadoNaoDefinidoException
+)
+from app.casos_uso.reservas_service import ReservasService
+
 roteador_reservas = APIRouter(prefix="/reservas", tags=["Reservas"])
 
 
-def _trava_seguro(data_partida: date) -> bool:
-    """Retorna True se estamos dentro da trava de 7 dias."""
-    hoje = obter_agora().date()
-    return hoje >= (data_partida - timedelta(days=configuracoes.DIAS_TRAVA_SEGURO))
+
 
 
 @roteador_reservas.post("/", response_model=ReservaSchema, status_code=status.HTTP_201_CREATED)
@@ -37,9 +40,9 @@ async def criar_reserva(
     res_viagem = await sessao.execute(select(Viagem).where(Viagem.id == dados.id_viagem))
     viagem = res_viagem.scalar_one_or_none()
     if not viagem:
-        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+        raise ViagemNaoEncontradaException()
     if viagem.status == StatusViagem.ESGOTADO:
-        raise HTTPException(status_code=409, detail="Viagem esgotada")
+        raise ViagemEsgotadaException()
 
     reserva = ReservaGrupo(
         id_viagem=dados.id_viagem,
@@ -52,15 +55,8 @@ async def criar_reserva(
     await sessao.flush()  # Obter id da reserva
 
     # Criar slots de passageiros automaticamente
-    for i in range(dados.qtd_vagas):
-        eh_lider = i == 0
-        passageiro = Passageiro(
-            id_reserva=reserva.id,
-            nome=usuario.nome if eh_lider else None,
-            documento=None,
-            eh_lider=eh_lider,
-        )
-        sessao.add(passageiro)
+    servico_reservas = ReservasService(sessao)
+    await servico_reservas.criar_slots_passageiros(reserva, usuario.nome)
 
     await sessao.commit()
     await sessao.refresh(reserva)
@@ -82,9 +78,9 @@ async def obter_reserva(
     )
     reserva = res.scalar_one_or_none()
     if not reserva:
-        raise HTTPException(status_code=404, detail="Reserva não encontrada")
+        raise ReservaNaoEncontradaException()
     if usuario.tipo != "ADMIN" and reserva.id_lider != usuario.id:
-        raise HTTPException(status_code=403, detail="Acesso negado")
+        raise AcessoNegadoException()
     return reserva
 
 
@@ -97,11 +93,11 @@ async def resumo_financeiro(
     res = await sessao.execute(select(ReservaGrupo).where(ReservaGrupo.id == id_reserva))
     reserva = res.scalar_one_or_none()
     if not reserva:
-        raise HTTPException(status_code=404, detail="Reserva não encontrada")
+        raise ReservaNaoEncontradaException()
     if usuario.tipo != "ADMIN" and reserva.id_lider != usuario.id:
-        raise HTTPException(status_code=403, detail="Acesso negado")
+        raise AcessoNegadoException()
     if not reserva.valor_acordado:
-        raise HTTPException(status_code=422, detail="Valor acordado ainda não definido")
+        raise ValorAcordadoNaoDefinidoException()
 
     valor = Decimal(str(reserva.valor_acordado))
     sinal = round(valor * Decimal("0.5"), 2)
@@ -120,7 +116,7 @@ async def link_acompanhante(
     )
     reserva = res.scalar_one_or_none()
     if not reserva:
-        raise HTTPException(status_code=404, detail="Reserva não encontrada")
+        raise ReservaNaoEncontradaException()
 
     por_pessoa = None
     if reserva.valor_acordado:
@@ -142,9 +138,9 @@ async def listar_passageiros(
     res_r = await sessao.execute(select(ReservaGrupo).where(ReservaGrupo.id == id_reserva))
     reserva = res_r.scalar_one_or_none()
     if not reserva:
-        raise HTTPException(status_code=404, detail="Reserva não encontrada")
+        raise ReservaNaoEncontradaException()
     if usuario.tipo != "ADMIN" and reserva.id_lider != usuario.id:
-        raise HTTPException(status_code=403, detail="Acesso negado")
+        raise AcessoNegadoException()
 
     res_p = await sessao.execute(select(Passageiro).where(Passageiro.id_reserva == id_reserva))
     return res_p.scalars().all()

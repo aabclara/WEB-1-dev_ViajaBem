@@ -23,27 +23,16 @@ from app.schemas.viagem_schemas import (
     ReservaSchema, AtualizarReservaAdminSchema, KanbanViagemSchema,
     ResumoWhatsappSchema, PassageiroSchema,
 )
+from app.core.excecoes import (
+    ViagemNaoEncontradaException, ReservaNaoEncontradaException,
+    CancelamentoBloqueadoException, VagasInsuficientesException,
+    ValorAcordadoNaoDefinidoException
+)
+from app.casos_uso.viagens_service import ViagensService
+from app.casos_uso.reservas_service import ReservasService
 
 roteador_admin = APIRouter(prefix="/admin", tags=["Admin"])
 
-
-# ─── Helpers ─────────────────────────────────────────────────────────────────
-
-async def _vagas_disponiveis(id_viagem: int, sessao: AsyncSession) -> int:
-    res_viagem = await sessao.execute(select(Viagem).where(Viagem.id == id_viagem))
-    viagem = res_viagem.scalar_one()
-    res = await sessao.execute(
-        select(func.coalesce(func.sum(ReservaGrupo.qtd_vagas), 0)).where(
-            ReservaGrupo.id_viagem == id_viagem,
-            ReservaGrupo.status.in_([StatusReserva.BLOQUEADO, StatusReserva.CONFIRMADO]),
-        )
-    )
-    ocupadas = int(res.scalar())
-    return viagem.vagas_totais - ocupadas
-
-
-def _dentro_da_trava(data_partida: date) -> bool:
-    return obter_agora().date() >= (data_partida - timedelta(days=configuracoes.DIAS_TRAVA_SEGURO))
 
 
 # ─── Viagens (Admin) ─────────────────────────────────────────────────────────
@@ -102,7 +91,7 @@ async def editar_viagem(
     res = await sessao.execute(select(Viagem).where(Viagem.id == id_viagem))
     viagem = res.scalar_one_or_none()
     if not viagem:
-        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+        raise ViagemNaoEncontradaException()
     for campo, valor in dados.model_dump(exclude_none=True).items():
         setattr(viagem, campo, valor)
     await sessao.commit()
@@ -121,7 +110,7 @@ async def kanban_reservas(
     res_v = await sessao.execute(select(Viagem).where(Viagem.id == id_viagem))
     viagem = res_v.scalar_one_or_none()
     if not viagem:
-        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+        raise ViagemNaoEncontradaException()
 
     res_r = await sessao.execute(
         select(ReservaGrupo)
@@ -154,16 +143,14 @@ async def atualizar_reserva_admin(
     )
     reserva = res.scalar_one_or_none()
     if not reserva:
-        raise HTTPException(status_code=404, detail="Reserva não encontrada")
+        raise ReservaNaoEncontradaException()
 
     viagem = reserva.viagem
+    servico_reservas = ReservasService(sessao)
 
     # Trava de seguro para CANCELADO
-    if dados.status == StatusReserva.CANCELADO and _dentro_da_trava(viagem.data_partida):
-        raise HTTPException(
-            status_code=422,
-            detail="Cancelamento não permitido: viagem em menos de 7 dias",
-        )
+    if dados.status == StatusReserva.CANCELADO and servico_reservas.dentro_da_trava_seguro(viagem.data_partida):
+        raise CancelamentoBloqueadoException()
 
     # Trava de concorrência para BLOQUEADO
     if dados.status == StatusReserva.BLOQUEADO:
@@ -187,13 +174,7 @@ async def atualizar_reserva_admin(
             candidatos = [
                 {"id": c.id, "qtd_vagas": c.qtd_vagas} for c in res_candidatos.scalars().all()
             ]
-            raise HTTPException(
-                status_code=409,
-                detail={
-                    "mensagem": "Vagas insuficientes para bloqueio",
-                    "candidatos_cancelamento": candidatos,
-                },
-            )
+            raise VagasInsuficientesException(candidatos=candidatos)
 
     # Aplicar atualizações
     if dados.status is not None:
@@ -225,9 +206,9 @@ async def resumo_whatsapp(
     )
     reserva = res.scalar_one_or_none()
     if not reserva:
-        raise HTTPException(status_code=404, detail="Reserva não encontrada")
+        raise ReservaNaoEncontradaException()
     if not reserva.valor_acordado:
-        raise HTTPException(status_code=422, detail="Defina o valor acordado antes de gerar o resumo")
+        raise ValorAcordadoNaoDefinidoException("Defina o valor acordado antes de gerar o resumo")
 
     valor = Decimal(str(reserva.valor_acordado))
     sinal = round(valor * Decimal("0.5"), 2)
@@ -260,7 +241,7 @@ async def exportar_passageiros(
     res_v = await sessao.execute(select(Viagem).where(Viagem.id == id_viagem))
     viagem = res_v.scalar_one_or_none()
     if not viagem:
-        raise HTTPException(status_code=404, detail="Viagem não encontrada")
+        raise ViagemNaoEncontradaException()
 
     res = await sessao.execute(
         select(Passageiro)

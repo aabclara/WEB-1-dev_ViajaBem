@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
 import { Header } from "@/src/components/Header";
+import { Footer } from "@/src/components/Footer";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -26,6 +27,7 @@ export default function RootLayout({
         <main className="min-h-screen bg-background text-on-background pt-20">
           {children}
         </main>
+        <Footer />
       </body>
     </html>
   );

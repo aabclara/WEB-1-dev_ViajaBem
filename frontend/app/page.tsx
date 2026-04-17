@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarCheck, SearchX } from "lucide-react";
+import { CalendarCheck, SearchX, Bus } from "lucide-react";
 import type { Viagem } from "@/src/types/viagem";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://backend:8000";
@@ -98,21 +98,23 @@ export default async function PaginaInicial() {
   return (
     <div className="min-h-screen bg-background text-on-background">
       {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-8 py-20 flex flex-col items-center text-center pt-28">
+      <section className="max-w-7xl mx-auto px-8 py-20 flex flex-col items-center text-center pt-10">
         <div className="mb-10">
-          <div className="w-48 h-48 mx-auto flex items-center justify-center">
-            <span className="text-primary text-[80px] font-black leading-none tracking-tighter opacity-20">
-              VB
+          <div className="mx-auto flex items-center justify-center gap-3">
+            <Bus size={48} strokeWidth={2.2} className="text-primary" />
+            <span className="text-4xl font-black tracking-tighter text-on-background">
+              Viaje Bem
             </span>
           </div>
         </div>
 
-        <h1 className="text-5xl sm:text-[60px] font-black leading-none tracking-tighter text-on-background max-w-4xl mb-6">
-          Viagens rapidas. Lotacao coletiva.
+        <h1 className="text-3xl sm:text-4xl font-black leading-tight tracking-tight text-on-background max-w-4xl mb-4">
+          Viagens rápidas. <br />
+          Experiências inesquecíveis.
         </h1>
 
-        <p className="text-lg font-medium text-on-surface-variant max-w-2xl mb-12">
-          A forma mais inteligente de viajar. Economize com grupos organizados e conforto garantido!
+        <p className="text-base font-medium text-on-surface-variant max-w-2xl mb-10">
+          A forma mais inteligente de viajar. Conforto e segurança garantidos!
         </p>
 
         <div className="flex flex-row gap-6">
@@ -126,7 +128,7 @@ export default async function PaginaInicial() {
             href="/sobre"
             className="h-14 px-10 bg-secondary text-on-secondary rounded-xl font-bold text-lg shadow-sm hover:scale-[1.02] transition-transform active:scale-95 flex items-center"
           >
-            Conheca nossa agencia
+            Conheça nossa agência
           </Link>
         </div>
       </section>
@@ -135,7 +137,7 @@ export default async function PaginaInicial() {
       <section id="viagens" className="max-w-7xl mx-auto px-8 py-16">
         <div className="flex items-center justify-between mb-12">
           <h2 className="text-4xl font-extrabold text-on-background tracking-tight">
-            Proximas Saidas
+            Próximas Saídas
           </h2>
           <div className="h-1 w-24 bg-primary rounded-full" />
         </div>
@@ -150,7 +152,7 @@ export default async function PaginaInicial() {
           <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest py-16 text-center shadow-sm">
             <SearchX size={40} className="mb-3 text-on-surface-variant/40" />
             <p className="text-on-surface-variant font-medium">
-              Nenhuma viagem disponivel no momento.
+              Nenhuma viagem disponível no momento.
             </p>
             <p className="mt-1 text-sm text-on-surface-variant/70">
               Volte em breve para conferir novas oportunidades.
@@ -159,31 +161,6 @@ export default async function PaginaInicial() {
         )}
       </section>
 
-      {/* Footer */}
-      <footer className="w-full py-12 bg-background border-t border-outline-variant/30">
-        <div className="flex flex-col md:flex-row justify-between items-center px-8 w-full max-w-7xl mx-auto gap-4">
-          <div className="flex flex-col items-center md:items-start gap-2">
-            <span className="text-xl font-black text-on-background">Viaje Bem</span>
-            <p className="text-on-surface-variant font-medium text-sm">
-              &copy; {new Date().getFullYear()} Viaje Bem. Sua agencia de viagens.
-            </p>
-          </div>
-          <div className="flex gap-8">
-            <a className="text-on-surface-variant font-medium text-lg hover:text-primary transition-colors" href="#">
-              Privacidade
-            </a>
-            <a className="text-on-surface-variant font-medium text-lg hover:text-primary transition-colors" href="#">
-              Termos
-            </a>
-            <a className="text-on-surface-variant font-medium text-lg hover:text-primary transition-colors" href="#">
-              Suporte
-            </a>
-            <a className="text-on-surface-variant font-medium text-lg hover:text-primary transition-colors" href="#">
-              Contato
-            </a>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

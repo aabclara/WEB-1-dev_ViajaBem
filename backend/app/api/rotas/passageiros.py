@@ -11,12 +11,13 @@ from app.core.seguranca import obter_usuario_atual
 from app.core.configuracao import configuracoes
 from app.infra.modelos import Passageiro, ReservaGrupo, Usuario
 from app.schemas.viagem_schemas import PassageiroSchema, AtualizarPassageiroSchema
+from app.core.excecoes import PassageiroNaoEncontradoException, AcessoNegadoException, EdicaoBloqueadaException
+from app.casos_uso.reservas_service import ReservasService
 
 roteador_passageiros = APIRouter(prefix="/passageiros", tags=["Passageiros"])
 
 
-def _dentro_da_trava(data_partida: date) -> bool:
-    return obter_agora().date() >= (data_partida - timedelta(days=configuracoes.DIAS_TRAVA_SEGURO))
+
 
 
 @roteador_passageiros.patch("/{id_passageiro}", response_model=PassageiroSchema)
@@ -29,7 +30,7 @@ async def atualizar_passageiro(
     res = await sessao.execute(select(Passageiro).where(Passageiro.id == id_passageiro))
     passageiro = res.scalar_one_or_none()
     if not passageiro:
-        raise HTTPException(status_code=404, detail="Passageiro não encontrado")
+        raise PassageiroNaoEncontradoException()
 
     res_r = await sessao.execute(
         select(ReservaGrupo).where(ReservaGrupo.id == passageiro.id_reserva)
@@ -37,15 +38,16 @@ async def atualizar_passageiro(
     reserva = res_r.scalar_one()
 
     if usuario.tipo != "ADMIN" and reserva.id_lider != usuario.id:
-        raise HTTPException(status_code=403, detail="Acesso negado")
+        raise AcessoNegadoException()
 
     # Buscar viagem para trava
     from app.infra.modelos import Viagem
     res_v = await sessao.execute(select(Viagem).where(Viagem.id == reserva.id_viagem))
     viagem = res_v.scalar_one()
 
-    if _dentro_da_trava(viagem.data_partida):
-        raise HTTPException(status_code=422, detail="Edição bloqueada: viagem em menos de 7 dias")
+    servico_reservas = ReservasService(sessao)
+    if servico_reservas.dentro_da_trava_seguro(viagem.data_partida):
+        raise EdicaoBloqueadaException("Edição bloqueada: viagem em menos de 7 dias")
 
     if dados.nome is not None:
         passageiro.nome = dados.nome
