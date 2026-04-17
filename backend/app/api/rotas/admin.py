@@ -114,10 +114,17 @@ async def kanban_reservas(
 
     res_r = await sessao.execute(
         select(ReservaGrupo)
-        .options(selectinload(ReservaGrupo.passageiros))
+        .options(selectinload(ReservaGrupo.passageiros), selectinload(ReservaGrupo.lider))
         .where(ReservaGrupo.id_viagem == id_viagem)
     )
-    reservas = res_r.scalars().all()
+    modelos = res_r.scalars().all()
+    reservas = []
+    
+    for m in modelos:
+        entidade = MapeadorReserva.para_dominio(m)
+        if m.lider:
+            entidade.nome_lider = m.lider.nome
+        reservas.append(entidade)
 
     colunas: dict[str, list] = {s.value: [] for s in StatusReserva}
     for r in reservas:

@@ -28,6 +28,15 @@ interface AdminViagem {
   reservas_por_status: Record<string, number>;
 }
 
+interface LiderReserva {
+  id: number;
+  id_viagem: number;
+  titulo_viagem: string;
+  data_partida_viagem: string;
+  qtd_vagas: number;
+  status: string;
+}
+
 const cards = [
   {
     title: "Viagens Ativas",
@@ -52,6 +61,7 @@ const cards = [
 export default function PainelPage() {
   const [usuario, setUsuario] = useState<{ nome: string; tipo: string } | null>(null);
   const [viagens, setViagens] = useState<AdminViagem[]>([]);
+  const [reservas, setReservas] = useState<LiderReserva[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [exibirForm, setExibirForm] = useState(false);
   
@@ -85,6 +95,23 @@ export default function PainelPage() {
     }
   };
 
+  const carregarReservas = async () => {
+    const token = getAuthToken();
+    if (!token) return;
+
+    try {
+      const res = await fetch(`${API_URL}/reservas/`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setReservas(data);
+      }
+    } catch (err) {
+      console.error("Erro ao carregar suas reservas:", err);
+    }
+  };
+
   useEffect(() => {
     const user = getAuthUser();
     if (!user) {
@@ -93,10 +120,16 @@ export default function PainelPage() {
     }
     setUsuario(user);
     
-    if (user.tipo === "ADMIN") {
-      carregarViagens();
-    }
-    setCarregando(false);
+    const fetchData = async () => {
+      if (user.tipo === "ADMIN") {
+        await carregarViagens();
+      } else if (user.tipo === "LIDER") {
+        await carregarReservas();
+      }
+      setCarregando(false);
+    };
+    
+    fetchData();
   }, []);
 
   const handleCriarViagem = async (e: React.FormEvent) => {
@@ -150,8 +183,15 @@ export default function PainelPage() {
   if (!usuario) return null;
 
   const papelAmigavel = usuario.tipo === "ADMIN" ? "Administrador" : "Líder";
-  const resumoAtivas = viagens.filter(v => v.status === "ATIVO").length;
-  const resumoSolicitacoes = viagens.reduce((acc, v) => acc + (v.reservas_por_status?.SOLICITADO || 0), 0);
+  
+  // Resumo para ADMIN
+  const resumoAtivasAdmin = viagens.filter(v => v.status === "ATIVO").length;
+  const resumoSolicitacoesAdmin = viagens.reduce((acc, v) => acc + (v.reservas_por_status?.SOLICITADO || 0), 0);
+
+  // Resumo para LIDER
+  const resumoAtivasLider = Array.from(new Set(reservas.filter(r => r.status !== "CANCELADO").map(r => r.id_viagem))).length;
+  const resumoSolicitacoesLider = reservas.filter(r => r.status === "SOLICITADO").length;
+  const resumoGruposLider = reservas.filter(r => r.status === "CONFIRMADO" || r.status === "BLOQUEADO").length;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-stone-50 px-4 py-8 sm:px-8">
@@ -179,6 +219,16 @@ export default function PainelPage() {
               Nova Viagem
             </button>
           )}
+
+          {usuario.tipo === "LIDER" && (
+             <Link
+               href="/"
+               className="flex items-center justify-center gap-2 bg-viaje-secondary text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-95 transition-all"
+             >
+               <Search size={20} />
+               Nova Reserva
+             </Link>
+          )}
         </div>
 
         {/* Cards Informativos */}
@@ -186,8 +236,12 @@ export default function PainelPage() {
           {cards.map((card) => {
             let value = "--";
             if (usuario.tipo === "ADMIN") {
-              if (card.id === "ativas") value = String(resumoAtivas);
-              if (card.id === "solicitacoes") value = String(resumoSolicitacoes);
+              if (card.id === "ativas") value = String(resumoAtivasAdmin);
+              if (card.id === "solicitacoes") value = String(resumoSolicitacoesAdmin);
+            } else if (usuario.tipo === "LIDER") {
+              if (card.id === "ativas") value = String(resumoAtivasLider);
+              if (card.id === "solicitacoes") value = String(resumoSolicitacoesLider);
+              if (card.id === "grupos") value = String(resumoGruposLider);
             }
             return (
               <div
@@ -344,12 +398,12 @@ export default function PainelPage() {
               <div className="grid grid-cols-1 gap-4">
                 {viagens.map((v) => (
                   <div key={v.id} className="bg-white rounded-2xl border border-stone-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-stone-50 rounded-xl flex items-center justify-center text-primary font-bold">
+                    <Link href={`/painel/kanban/${v.id}`} className="flex items-center gap-4 group/item">
+                      <div className="w-12 h-12 bg-stone-50 rounded-xl flex items-center justify-center text-primary font-bold group-hover/item:bg-primary/10 transition-colors">
                         {v.id}
                       </div>
                       <div>
-                        <h4 className="font-bold text-stone-800 text-lg">{v.titulo}</h4>
+                        <h4 className="font-bold text-stone-800 text-lg group-hover/item:text-primary transition-colors">{v.titulo}</h4>
                         <div className="flex gap-4 mt-1">
                            <span className="text-sm text-stone-500 flex items-center gap-1.5">
                              <CalendarDays size={14} />
@@ -361,7 +415,7 @@ export default function PainelPage() {
                            </span>
                         </div>
                       </div>
-                    </div>
+                    </Link>
                     
                     <div className="flex items-center gap-3">
                        <div className="flex -space-x-2">
@@ -380,7 +434,7 @@ export default function PainelPage() {
                           ))}
                        </div>
                        <Link 
-                         href={`/viagens/${v.id}`}
+                         href={`/painel/kanban/${v.id}`}
                          className="p-2.5 rounded-xl bg-stone-50 text-stone-400 hover:bg-primary/10 hover:text-primary transition-all"
                        >
                          <ChevronRight size={20} />
@@ -393,16 +447,73 @@ export default function PainelPage() {
           </div>
         )}
 
-        {/* Lider Dashboard Placeholder */}
+        {/* Listagem de Reservas (Líder) */}
         {usuario.tipo === "LIDER" && (
-          <div className="rounded-3xl border-2 border-dashed border-stone-200 bg-white p-20 text-center">
-            <Users size={48} className="mx-auto text-stone-200 mb-4" />
-            <h3 className="text-xl font-bold text-stone-800">Suas Viagens aparecerão aqui</h3>
-            <p className="text-stone-400 mt-2">Você ainda não tem grupos ou reservas confirmadas.</p>
-            <Link href="/" className="inline-block mt-8 bg-viaje-secondary text-white px-8 py-3 rounded-2xl font-bold shadow-md">
-              Explorar Destinos
-            </Link>
-          </div>
+           <div className="space-y-6">
+             <div className="flex items-center justify-between">
+               <h2 className="text-xl font-black text-stone-800 flex items-center gap-2">
+                 <Ticket size={22} className="text-secondary" />
+                 Minhas Viagens e Reservas
+               </h2>
+             </div>
+
+             {reservas.length === 0 ? (
+               <div className="rounded-3xl border-2 border-dashed border-stone-200 bg-white p-20 text-center">
+                 <Users size={48} className="mx-auto text-stone-200 mb-4" />
+                 <h3 className="text-xl font-bold text-stone-800">Suas Viagens aparecerão aqui</h3>
+                 <p className="text-stone-400 mt-2">Você ainda não tem grupos ou reservas confirmadas.</p>
+                 <Link href="/" className="inline-block mt-8 bg-viaje-secondary text-white px-8 py-3 rounded-2xl font-bold shadow-md">
+                   Explorar Destinos
+                 </Link>
+               </div>
+             ) : (
+               <div className="grid grid-cols-1 gap-4">
+                 {reservas.map((r) => (
+                   <div key={r.id} className="bg-white rounded-2xl border border-stone-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
+                     <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold
+                          ${r.status === "SOLICITADO" ? "bg-amber-100 text-amber-700" : 
+                            r.status === "CONFIRMADO" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
+                          R{r.id}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-stone-800 text-lg">{r.titulo_viagem || "Viagem Carregando..."}</h4>
+                          <div className="flex gap-4 mt-1">
+                             <span className="text-sm text-stone-500 flex items-center gap-1.5">
+                               <CalendarDays size={14} />
+                               {r.data_partida_viagem ? new Date(r.data_partida_viagem).toLocaleDateString() : "---"}
+                             </span>
+                             <span className="text-sm text-stone-500 flex items-center gap-1.5">
+                               <Users size={14} />
+                               {r.qtd_vagas} passageiros
+                             </span>
+                          </div>
+                        </div>
+                     </div>
+                     
+                     <div className="flex items-center gap-6">
+                        <div className="text-right hidden sm:block">
+                           <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest leading-none mb-1">Status</p>
+                           <span className={`text-sm font-black
+                             ${r.status === "SOLICITADO" ? "text-amber-500" : 
+                               r.status === "CONFIRMADO" ? "text-emerald-500" : 
+                               r.status === "CANCELADO" ? "text-rose-500" : "text-stone-500"}`}>
+                             {r.status}
+                           </span>
+                        </div>
+                        <Link 
+                          href={`/reservas/${r.id}`}
+                          className="flex items-center gap-2 bg-stone-100 text-stone-600 px-5 py-2.5 rounded-xl font-bold hover:bg-viaje-primary/10 hover:text-viaje-primary transition-all"
+                        >
+                          Ver Detalhes
+                          <ChevronRight size={18} />
+                        </Link>
+                     </div>
+                   </div>
+                 ))}
+               </div>
+             )}
+           </div>
         )}
       </div>
     </div>

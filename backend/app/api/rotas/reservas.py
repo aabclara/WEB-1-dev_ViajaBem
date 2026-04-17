@@ -25,11 +25,19 @@ from app.core.excecoes import (
 )
 from app.casos_uso.reservas_service import ReservasService
 
+from app.repositorios.reserva_repositorio import ReservaRepositorio
+
 roteador_reservas = APIRouter(prefix="/reservas", tags=["Reservas"])
 
-
-
-
+@roteador_reservas.get("/", response_model=list[ReservaSchema])
+async def listar_minhas_reservas(
+    usuario: Usuario = Depends(obter_usuario_atual),
+    sessao: AsyncSession = Depends(obter_sessao),
+):
+    repo = ReservaRepositorio(sessao)
+    reservas = await repo.listar_por_lider(usuario.id)
+    print(f"DEBUG: Encontradas {len(reservas)} reservas para o usuário {usuario.id}")
+    return reservas
 
 @roteador_reservas.post("/", response_model=ReservaSchema, status_code=status.HTTP_201_CREATED)
 async def criar_reserva(

@@ -62,6 +62,9 @@ class ReservaSchema(BaseModel):
     status: StatusReserva = Field(..., description="Status atual da reserva", examples=["SOLICITADO"])
     substatus: SubstatusReserva = Field(..., description="Substatus ou pendência da reserva", examples=["AGUARDANDO_CONTATO"])
     admin_responsavel_id: Optional[int] = Field(None, description="ID do admin responsável", examples=[1])
+    titulo_viagem: Optional[str] = Field(None, description="Título da viagem associada")
+    data_partida_viagem: Optional[date] = Field(None, description="Data de partida da viagem associada")
+    nome_lider: Optional[str] = Field(None, description="Nome do líder da reserva")
     passageiros: list[PassageiroSchema] = Field(default=[], description="Lista de passageiros vinculados")
 
     model_config = {"from_attributes": True}

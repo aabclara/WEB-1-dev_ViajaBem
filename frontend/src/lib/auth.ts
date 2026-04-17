@@ -8,6 +8,7 @@ if (typeof window !== "undefined" && API_URL.includes("backend")) {
 
 export interface AuthData {
   access_token: string;
+  id: number;
   nome: string;
   email: string;
   tipo: string;
@@ -17,6 +18,7 @@ export function saveAuthData(data: AuthData) {
   if (typeof window !== "undefined") {
     localStorage.setItem("viaje-bem-token", data.access_token);
     localStorage.setItem("viaje-bem-user", JSON.stringify({
+      id: data.id,
       nome: data.nome,
       email: data.email,
       tipo: data.tipo

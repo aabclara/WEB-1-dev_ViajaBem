@@ -43,6 +43,9 @@ class ReservaGrupo(EntidadeBase):
     admin_responsavel_id: Optional[int] = None
     viagem: Optional[Viagem] = None
     lider: Optional[Usuario] = None
+    titulo_viagem: Optional[str] = None
+    data_partida_viagem: Optional[date] = None
+    nome_lider: Optional[str] = None
     passageiros: List["Passageiro"] = field(default_factory=list)
 
 @dataclass

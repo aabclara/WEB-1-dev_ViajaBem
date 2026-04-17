@@ -31,6 +31,7 @@ class LoginSchema(BaseModel):
 class TokenSchema(BaseModel):
     access_token: str = Field(..., description="Token JWT codificado")
     token_type: str = Field("bearer", description="Tipo do token HTTP")
+    id: int = Field(..., description="ID identificador do usuário")
     nome: str = Field(..., description="Nome do dono do token", examples=["Maria Souza"])
     email: str = Field(..., description="Email verificado", examples=["maria@email.com"])
     tipo: TipoUsuario = Field(..., description="Função ou grupo de segurança")

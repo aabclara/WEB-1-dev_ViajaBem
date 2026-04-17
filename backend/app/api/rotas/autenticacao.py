@@ -79,6 +79,7 @@ async def login(
     token = criar_token_acesso({"sub": str(usuario.id), "email": usuario.email, "tipo": usuario.tipo.value})
     return TokenSchema(
         access_token=token,
+        id=usuario.id,
         nome=usuario.nome,
         email=usuario.email,
         tipo=usuario.tipo,
