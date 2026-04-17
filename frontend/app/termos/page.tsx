@@ -55,8 +55,7 @@ export default function TermosPage() {
               <p className="text-on-surface-variant leading-relaxed">
                 Implementamos protocolos de criptografia de ponta a ponta e auditorias de
                 segurança regulares. Seus dados financeiros nunca são armazenados diretamente
-                em nossos servidores, utilizando gateways de pagamento certificados
-                internacionalmente.
+                em nossos servidores, toda a negociação financeira é feita diretamente com nossos representantes.
               </p>
             </div>
           </div>

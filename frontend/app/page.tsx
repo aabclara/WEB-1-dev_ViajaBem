@@ -48,6 +48,12 @@ function ViagemCard({ viagem }: { viagem: Viagem }) {
         <h3 className="text-xl font-bold mb-2 text-on-background">
           {viagem.titulo}
         </h3>
+        
+        {viagem.descricao_curta && (
+          <p className="text-sm text-viaje-neutral mb-4 line-clamp-2">
+            {viagem.descricao_curta}
+          </p>
+        )}
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-4">

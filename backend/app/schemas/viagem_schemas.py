@@ -12,6 +12,8 @@ class ViagemPublicaSchema(BaseModel):
     data_partida: date = Field(..., description="Data agendada para a partida", examples=["2026-05-15"])
     vagas_totais: int = Field(..., description="Capacidade máxima da viagem", examples=[46])
     status: StatusViagem = Field(..., description="Status atual da viagem", examples=["ATIVO"])
+    descricao_curta: Optional[str] = Field(None, description="Resumo conciso da viagem", examples=["Aproveite um final de semana inesquecível na montanha."])
+    itens_inclusos: Optional[str] = Field(None, description="Itens inclusos no pacote", examples=["Transporte, Seguro Viagem, Guia"])
     vagas_disponiveis: int = Field(..., description="Quantidade de vagas ainda disponíveis", examples=[10])
     ultimas_vagas: bool = Field(..., description="Indica se a viagem atingiu o limiar de últimas vagas", examples=[False])
 
@@ -23,6 +25,8 @@ class CriarViagemSchema(BaseModel):
     descricao_precos: Optional[str] = Field(None, description="Resumo de preços", examples=["R$ 150 (Adultos)"])
     data_partida: date = Field(..., description="Data da partida", examples=["2026-06-20"])
     vagas_totais: int = Field(..., description="Capacidade", examples=[40])
+    descricao_curta: Optional[str] = None
+    itens_inclusos: Optional[str] = None
 
 
 class AtualizarViagemSchema(BaseModel):
@@ -31,6 +35,8 @@ class AtualizarViagemSchema(BaseModel):
     data_partida: Optional[date] = None
     vagas_totais: Optional[int] = None
     status: Optional[StatusViagem] = None
+    descricao_curta: Optional[str] = None
+    itens_inclusos: Optional[str] = None
 
 
 class PassageiroSchema(BaseModel):

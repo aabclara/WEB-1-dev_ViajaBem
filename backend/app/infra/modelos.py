@@ -7,31 +7,10 @@ from sqlalchemy import (
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
+from app.dominio.enums import TipoUsuario, StatusViagem, StatusReserva, SubstatusReserva
+
 class Base(DeclarativeBase):
     pass
-
-
-class TipoUsuario(str, enum.Enum):
-    LIDER = "LIDER"
-    ADMIN = "ADMIN"
-
-
-class StatusViagem(str, enum.Enum):
-    ATIVO = "ATIVO"
-    ESGOTADO = "ESGOTADO"
-
-
-class StatusReserva(str, enum.Enum):
-    SOLICITADO = "SOLICITADO"
-    BLOQUEADO = "BLOQUEADO"
-    CONFIRMADO = "CONFIRMADO"
-    CANCELADO = "CANCELADO"
-
-
-class SubstatusReserva(str, enum.Enum):
-    AGUARDANDO_CONTATO = "AGUARDANDO_CONTATO"
-    EM_ATENDIMENTO = "EM_ATENDIMENTO"
-    AGUARDANDO_PIX = "AGUARDANDO_PIX"
 
 
 class Usuario(Base):
@@ -71,6 +50,8 @@ class Viagem(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     titulo: Mapped[str] = mapped_column(String(255), nullable=False)
+    descricao_curta: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    itens_inclusos: Mapped[str | None] = mapped_column(Text, nullable=True)
     descricao_precos: Mapped[str | None] = mapped_column(Text, nullable=True)
     data_partida: Mapped[date] = mapped_column(Date, nullable=False)
     vagas_totais: Mapped[int] = mapped_column(nullable=False)
