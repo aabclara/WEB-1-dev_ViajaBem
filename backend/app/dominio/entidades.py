@@ -27,6 +27,8 @@ class Viagem(EntidadeBase):
     itens_inclusos: Optional[str] = None
     descricao_precos: Optional[str] = None
     data_partida: Optional[date] = None
+    data_retorno: Optional[date] = None
+    url_capa: Optional[str] = None
     vagas_totais: int = 0
     status: StatusViagem = StatusViagem.ATIVO
     reservas: List["ReservaGrupo"] = field(default_factory=list)

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarCheck, SearchX, Bus } from "lucide-react";
+import { CalendarCheck, SearchX, Bus, CalendarDays } from "lucide-react";
 import type { Viagem } from "@/src/types/viagem";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://backend:8000";
@@ -26,9 +26,17 @@ function ViagemCard({ viagem }: { viagem: Viagem }) {
     <div className="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden group hover:scale-[1.02] transition-all duration-300">
       {/* Image area */}
       <div className="relative aspect-[3/2] overflow-hidden bg-surface-container-high">
-        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 via-secondary/10 to-surface-container-high">
-          <CalendarCheck size={48} className="text-primary/40" />
-        </div>
+        {viagem.url_capa ? (
+          <img 
+            src={viagem.url_capa} 
+            alt={viagem.titulo}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 via-secondary/10 to-surface-container-high">
+            <CalendarCheck size={48} className="text-primary/40" />
+          </div>
+        )}
 
         {/* Badge */}
         {viagem.ultimas_vagas && (
@@ -45,9 +53,15 @@ function ViagemCard({ viagem }: { viagem: Viagem }) {
 
       {/* Content */}
       <div className="p-6">
-        <h3 className="text-xl font-bold mb-2 text-on-background">
+        <h3 className="text-xl font-bold mb-1 text-on-background">
           {viagem.titulo}
         </h3>
+        
+        <div className="flex items-center gap-2 text-stone-500 text-xs font-bold mb-3">
+           <CalendarDays size={14} className="text-primary" />
+           {new Date(viagem.data_partida).toLocaleDateString('pt-BR')} 
+           {viagem.data_retorno && ` a ${new Date(viagem.data_retorno).toLocaleDateString('pt-BR')}`}
+        </div>
         
         {viagem.descricao_curta && (
           <p className="text-sm text-viaje-neutral mb-4 line-clamp-2">
@@ -60,7 +74,7 @@ function ViagemCard({ viagem }: { viagem: Viagem }) {
           {viagem.descricao_precos ? (
             <>
               <span className="text-primary text-2xl font-black">
-                {viagem.descricao_precos}
+                R$ {viagem.descricao_precos}
               </span>
             </>
           ) : (

@@ -70,9 +70,11 @@ export default function PainelPage() {
     titulo: "",
     descricao_precos: "",
     data_partida: "",
+    data_retorno: "",
     vagas_totais: 40,
     descricao_curta: "",
-    itens_inclusos: ""
+    itens_inclusos: "",
+    url_capa: ""
   });
   const [criando, setCriando] = useState(false);
   const [msgSucesso, setMsgSucesso] = useState("");
@@ -155,9 +157,11 @@ export default function PainelPage() {
         titulo: "",
         descricao_precos: "",
         data_partida: "",
+        data_retorno: "",
         vagas_totais: 40,
         descricao_curta: "",
-        itens_inclusos: ""
+        itens_inclusos: "",
+        url_capa: ""
       });
       
       await carregarViagens();
@@ -232,8 +236,10 @@ export default function PainelPage() {
         </div>
 
         {/* Cards Informativos */}
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-12">
-          {cards.map((card) => {
+        <div className={`grid grid-cols-1 gap-6 ${usuario.tipo === "ADMIN" ? "sm:grid-cols-2" : "sm:grid-cols-3"} mb-12`}>
+          {cards
+            .filter(c => usuario.tipo === "LIDER" || c.id !== "grupos")
+            .map((card) => {
             let value = "--";
             if (usuario.tipo === "ADMIN") {
               if (card.id === "ativas") value = String(resumoAtivasAdmin);
@@ -311,14 +317,36 @@ export default function PainelPage() {
                     </div>
                     
                     <div>
+                      <label className="block text-sm font-bold text-stone-700 mb-2">Data de Retorno</label>
+                      <input
+                        type="date"
+                        value={novaViagem.data_retorno}
+                        onChange={e => setNovaViagem({...novaViagem, data_retorno: e.target.value})}
+                        className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                      />
+                    </div>
+
+                    <div>
                       <label className="block text-sm font-bold text-stone-700 mb-2">Vagas Totais</label>
                       <input
                         type="number"
                         required
                         value={novaViagem.vagas_totais}
                         onChange={e => setNovaViagem({...novaViagem, vagas_totais: Number(e.target.value)})}
+                        placeholder="40"
                         className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                       />
+                    </div>
+
+                    <div>
+                       <label className="block text-sm font-bold text-stone-700 mb-2">URL da Foto de Capa</label>
+                       <input
+                         type="url"
+                         value={novaViagem.url_capa}
+                         onChange={e => setNovaViagem({...novaViagem, url_capa: e.target.value})}
+                         placeholder="Ex: https://imagem.com/foto.jpg"
+                         className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                       />
                     </div>
 
                     <div>

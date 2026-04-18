@@ -23,6 +23,7 @@ from app.schemas.viagem_schemas import (
     ReservaSchema, AtualizarReservaAdminSchema, KanbanViagemSchema,
     ResumoWhatsappSchema, PassageiroSchema,
 )
+from app.infra.mapeadores import MapeadorReserva
 from app.core.excecoes import (
     ViagemNaoEncontradaException, ReservaNaoEncontradaException,
     CancelamentoBloqueadoException, VagasInsuficientesException,
@@ -72,6 +73,10 @@ async def criar_viagem(
         titulo=dados.titulo,
         descricao_precos=dados.descricao_precos,
         data_partida=dados.data_partida,
+        data_retorno=dados.data_retorno,
+        url_capa=dados.url_capa,
+        descricao_curta=dados.descricao_curta,
+        itens_inclusos=dados.itens_inclusos,
         vagas_totais=dados.vagas_totais,
         status=StatusViagem.ATIVO,
     )

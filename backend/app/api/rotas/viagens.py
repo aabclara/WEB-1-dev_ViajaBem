@@ -32,7 +32,9 @@ async def listar_viagens(sessao: AsyncSession = Depends(obter_sessao)):
         resposta.append(ViagemPublicaSchema(
             id=v.id, titulo=v.titulo, descricao_precos=v.descricao_precos,
             descricao_curta=v.descricao_curta, itens_inclusos=v.itens_inclusos,
-            data_partida=v.data_partida, vagas_totais=v.vagas_totais, status=v.status,
+            data_partida=v.data_partida, data_retorno=v.data_retorno,
+            url_capa=v.url_capa,
+            vagas_totais=v.vagas_totais, status=v.status,
             vagas_disponiveis=disponiveis, ultimas_vagas=ultimas,
         ))
     return resposta
@@ -50,7 +52,9 @@ async def detalhe_viagem(id_viagem: int, sessao: AsyncSession = Depends(obter_se
     return ViagemPublicaSchema(
         id=viagem.id, titulo=viagem.titulo, descricao_precos=viagem.descricao_precos,
         descricao_curta=viagem.descricao_curta, itens_inclusos=viagem.itens_inclusos,
-        data_partida=viagem.data_partida, vagas_totais=viagem.vagas_totais, status=viagem.status,
+        data_partida=viagem.data_partida, data_retorno=viagem.data_retorno,
+        url_capa=viagem.url_capa,
+        vagas_totais=viagem.vagas_totais, status=viagem.status,
         vagas_disponiveis=disponiveis, ultimas_vagas=ultimas,
     )
 

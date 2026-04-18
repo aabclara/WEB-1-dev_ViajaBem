@@ -54,6 +54,8 @@ class Viagem(Base):
     itens_inclusos: Mapped[str | None] = mapped_column(Text, nullable=True)
     descricao_precos: Mapped[str | None] = mapped_column(Text, nullable=True)
     data_partida: Mapped[date] = mapped_column(Date, nullable=False)
+    data_retorno: Mapped[date | None] = mapped_column(Date, nullable=True)
+    url_capa: Mapped[str | None] = mapped_column(String(500), nullable=True)
     vagas_totais: Mapped[int] = mapped_column(nullable=False)
     status: Mapped[StatusViagem] = mapped_column(
         SAEnum(StatusViagem, name="status_viagem"), nullable=False, default=StatusViagem.ATIVO

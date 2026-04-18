@@ -41,6 +41,8 @@ class MapeadorViagem:
             itens_inclusos=modelo.itens_inclusos,
             descricao_precos=modelo.descricao_precos,
             data_partida=modelo.data_partida,
+            data_retorno=modelo.data_retorno,
+            url_capa=modelo.url_capa,
             vagas_totais=modelo.vagas_totais,
             status=dom.StatusViagem(modelo.status.value),
             criado_em=modelo.criado_em
@@ -55,6 +57,8 @@ class MapeadorViagem:
             itens_inclusos=entidade.itens_inclusos,
             descricao_precos=entidade.descricao_precos,
             data_partida=entidade.data_partida,
+            data_retorno=entidade.data_retorno,
+            url_capa=entidade.url_capa,
             vagas_totais=entidade.vagas_totais,
             status=infra.StatusViagem(entidade.status.value)
         )

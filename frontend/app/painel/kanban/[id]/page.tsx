@@ -149,9 +149,12 @@ export default function KanbanPage() {
              <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-stone-100 text-stone-600 font-bold hover:bg-stone-200 transition-all">
                 Exportar Lista (ANTT)
              </button>
-             <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-viaje-primary text-white font-black shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+             <Link 
+               href={`/painel/kanban/${id}/editar`}
+               className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-viaje-primary text-white font-black shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
+             >
                 Editar Viagem
-             </button>
+             </Link>
           </div>
         </div>
       </div>

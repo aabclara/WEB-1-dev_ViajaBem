@@ -4,8 +4,11 @@ export interface Viagem {
   titulo: string;
   descricao_precos: string | null;
   data_partida: string;
+  data_retorno?: string;
+  url_capa?: string;
   vagas_totais: number;
   status: string;
   vagas_disponiveis: number;
   ultimas_vagas: boolean;
+  descricao_curta?: string;
 }

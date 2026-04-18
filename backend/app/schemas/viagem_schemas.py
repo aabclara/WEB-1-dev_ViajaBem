@@ -14,6 +14,8 @@ class ViagemPublicaSchema(BaseModel):
     status: StatusViagem = Field(..., description="Status atual da viagem", examples=["ATIVO"])
     descricao_curta: Optional[str] = Field(None, description="Resumo conciso da viagem", examples=["Aproveite um final de semana inesquecível na montanha."])
     itens_inclusos: Optional[str] = Field(None, description="Itens inclusos no pacote", examples=["Transporte, Seguro Viagem, Guia"])
+    data_retorno: Optional[date] = Field(None, description="Data prevista para retorno")
+    url_capa: Optional[str] = Field(None, description="URL da imagem de capa da viagem")
     vagas_disponiveis: int = Field(..., description="Quantidade de vagas ainda disponíveis", examples=[10])
     ultimas_vagas: bool = Field(..., description="Indica se a viagem atingiu o limiar de últimas vagas", examples=[False])
 
@@ -24,8 +26,10 @@ class CriarViagemSchema(BaseModel):
     titulo: str = Field(..., description="Título da viagem", examples=["Bate-volta Campos do Jordão"])
     descricao_precos: Optional[str] = Field(None, description="Resumo de preços", examples=["R$ 150 (Adultos)"])
     data_partida: date = Field(..., description="Data da partida", examples=["2026-06-20"])
+    data_retorno: Optional[date] = Field(None, description="Data de retorno")
+    url_capa: Optional[str] = Field(None, description="URL da imagem de capa")
     vagas_totais: int = Field(..., description="Capacidade", examples=[40])
-    descricao_curta: Optional[str] = None
+    descricao_curta: Optional[str] = Field(None, description="Resumo para home", examples=["Um dia inesquecível..."])
     itens_inclusos: Optional[str] = None
 
 
@@ -37,6 +41,8 @@ class AtualizarViagemSchema(BaseModel):
     status: Optional[StatusViagem] = None
     descricao_curta: Optional[str] = None
     itens_inclusos: Optional[str] = None
+    data_retorno: Optional[date] = None
+    url_capa: Optional[str] = None
 
 
 class PassageiroSchema(BaseModel):

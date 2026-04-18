@@ -131,6 +131,17 @@ export default function DetalheViagemPage() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl" />
               
               <div className="relative">
+                {viagem.url_capa && (
+                  <div className="mb-6 -mx-8 -mt-8 h-64 relative overflow-hidden">
+                    <img 
+                      src={viagem.url_capa} 
+                      alt={viagem.titulo}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                  </div>
+                )}
+
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-bold mb-6">
                   <MapPin size={16} />
                   Destino Confirmado
@@ -144,6 +155,7 @@ export default function DetalheViagemPage() {
                   <div className="flex items-center gap-2 text-stone-600 font-medium">
                     <CalendarDays size={20} className="text-primary" />
                     {new Date(viagem.data_partida).toLocaleDateString('pt-BR')}
+                    {viagem.data_retorno && ` a ${new Date(viagem.data_retorno).toLocaleDateString('pt-BR')}`}
                   </div>
                   <div className="flex items-center gap-2 text-stone-600 font-medium">
                     <Users size={20} className="text-secondary" />
@@ -212,7 +224,7 @@ export default function DetalheViagemPage() {
                       Valor por pessoa
                     </label>
                     <div className="text-3xl font-black text-primary">
-                      {viagem.descricao_precos || "R$ ---"}
+                      {viagem.descricao_precos ? `R$ ${viagem.descricao_precos}` : "R$ ---"}
                     </div>
                   </div>
 
