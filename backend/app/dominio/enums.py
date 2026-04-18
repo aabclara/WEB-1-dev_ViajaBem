@@ -12,6 +12,7 @@ class StatusViagem(str, enum.Enum):
 
 class StatusReserva(str, enum.Enum):
     SOLICITADO = "SOLICITADO"
+    EM_CONTATO = "EM_CONTATO"
     BLOQUEADO = "BLOQUEADO"
     CONFIRMADO = "CONFIRMADO"
     CANCELADO = "CANCELADO"

@@ -2,15 +2,15 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  LayoutDashboard, 
-  MapPin, 
-  Users, 
-  CalendarDays, 
-  Loader2, 
-  Plus, 
-  X, 
-  Ticket, 
+import {
+  LayoutDashboard,
+  MapPin,
+  Users,
+  CalendarDays,
+  Loader2,
+  Plus,
+  X,
+  Ticket,
   ChevronRight,
   Search,
   CheckCircle2,
@@ -50,12 +50,6 @@ const cards = [
     icon: Ticket,
     accent: "bg-viaje-secondary/10 text-viaje-secondary",
   },
-  {
-    title: "Grupos",
-    id: "grupos",
-    icon: Users,
-    accent: "bg-viaje-tertiary/10 text-viaje-tertiary",
-  },
 ] as const;
 
 export default function PainelPage() {
@@ -64,7 +58,7 @@ export default function PainelPage() {
   const [reservas, setReservas] = useState<LiderReserva[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [exibirForm, setExibirForm] = useState(false);
-  
+
   // Estados do formulário
   const [novaViagem, setNovaViagem] = useState({
     titulo: "",
@@ -121,7 +115,7 @@ export default function PainelPage() {
       return;
     }
     setUsuario(user);
-    
+
     const fetchData = async () => {
       if (user.tipo === "ADMIN") {
         await carregarViagens();
@@ -130,7 +124,7 @@ export default function PainelPage() {
       }
       setCarregando(false);
     };
-    
+
     fetchData();
   }, []);
 
@@ -163,7 +157,7 @@ export default function PainelPage() {
         itens_inclusos: "",
         url_capa: ""
       });
-      
+
       await carregarViagens();
       setTimeout(() => {
         setExibirForm(false);
@@ -187,7 +181,7 @@ export default function PainelPage() {
   if (!usuario) return null;
 
   const papelAmigavel = usuario.tipo === "ADMIN" ? "Administrador" : "Líder";
-  
+
   // Resumo para ADMIN
   const resumoAtivasAdmin = viagens.filter(v => v.status === "ATIVO").length;
   const resumoSolicitacoesAdmin = viagens.reduce((acc, v) => acc + (v.reservas_por_status?.SOLICITADO || 0), 0);
@@ -225,21 +219,19 @@ export default function PainelPage() {
           )}
 
           {usuario.tipo === "LIDER" && (
-             <Link
-               href="/"
-               className="flex items-center justify-center gap-2 bg-viaje-secondary text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-95 transition-all"
-             >
-               <Search size={20} />
-               Nova Reserva
-             </Link>
+            <Link
+              href="/"
+              className="flex items-center justify-center gap-2 bg-viaje-secondary text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-secondary/20 hover:scale-[1.02] active:scale-95 transition-all"
+            >
+              <Search size={20} />
+              Nova Reserva
+            </Link>
           )}
         </div>
 
         {/* Cards Informativos */}
-        <div className={`grid grid-cols-1 gap-6 ${usuario.tipo === "ADMIN" ? "sm:grid-cols-2" : "sm:grid-cols-3"} mb-12`}>
-          {cards
-            .filter(c => usuario.tipo === "LIDER" || c.id !== "grupos")
-            .map((card) => {
+        <div className={`grid grid-cols-1 gap-6 sm:grid-cols-2 mb-12`}>
+          {cards.map((card) => {
             let value = "--";
             if (usuario.tipo === "ADMIN") {
               if (card.id === "ativas") value = String(resumoAtivasAdmin);
@@ -247,7 +239,6 @@ export default function PainelPage() {
             } else if (usuario.tipo === "LIDER") {
               if (card.id === "ativas") value = String(resumoAtivasLider);
               if (card.id === "solicitacoes") value = String(resumoSolicitacoesLider);
-              if (card.id === "grupos") value = String(resumoGruposLider);
             }
             return (
               <div
@@ -258,7 +249,11 @@ export default function PainelPage() {
                   <card.icon size={24} />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">{card.title}</p>
+                  <p className="text-xs font-bold text-stone-400 uppercase tracking-widest">
+                    {usuario.tipo === "LIDER" && card.id === "ativas" ? "Minhas Viagens Ativas" :
+                      usuario.tipo === "LIDER" && card.id === "solicitacoes" ? "Reservas Pendentes" :
+                        card.title}
+                  </p>
                   <p className="text-3xl font-black text-stone-800">{value}</p>
                 </div>
               </div>
@@ -270,140 +265,140 @@ export default function PainelPage() {
         {usuario.tipo === "ADMIN" && (
           <div className={`overflow-hidden transition-all duration-500 ease-in-out ${exibirForm ? "max-h-[1200px] opacity-100 mb-12" : "max-h-0 opacity-0"}`}>
             <div className="bg-white rounded-3xl border border-stone-200 shadow-sm overflow-hidden">
-               <div className="p-8 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
+              <div className="p-8 border-b border-stone-100 bg-stone-50/50 flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-black text-stone-800">Nova Viagem</h3>
+                  <p className="text-stone-500 text-sm">Preencha os dados da próxima aventura</p>
+                </div>
+                <button onClick={() => setExibirForm(false)} className="p-2 hover:bg-stone-200 rounded-full transition-colors text-stone-400">
+                  <X size={24} />
+                </button>
+              </div>
+
+              <form onSubmit={handleCriarViagem} className="p-8 space-y-6">
+                {msgSucesso && (
+                  <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center gap-3 font-bold">
+                    <CheckCircle2 size={20} /> {msgSucesso}
+                  </div>
+                )}
+                {erroForm && (
+                  <div className="p-4 rounded-xl bg-error/10 border border-error/20 text-error flex items-center gap-3 font-bold">
+                    <AlertCircle size={20} /> {erroForm}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Título da Viagem</label>
+                    <input
+                      type="text"
+                      required
+                      value={novaViagem.titulo}
+                      onChange={e => setNovaViagem({ ...novaViagem, titulo: e.target.value })}
+                      placeholder="Ex: Final de Semana em Campos do Jordão"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
+                  </div>
+
                   <div>
-                    <h3 className="text-xl font-black text-stone-800">Nova Viagem</h3>
-                    <p className="text-stone-500 text-sm">Preencha os dados da próxima aventura</p>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Data de Partida</label>
+                    <input
+                      type="date"
+                      required
+                      value={novaViagem.data_partida}
+                      onChange={e => setNovaViagem({ ...novaViagem, data_partida: e.target.value })}
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
                   </div>
-                  <button onClick={() => setExibirForm(false)} className="p-2 hover:bg-stone-200 rounded-full transition-colors text-stone-400">
-                    <X size={24} />
+
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Data de Retorno</label>
+                    <input
+                      type="date"
+                      value={novaViagem.data_retorno}
+                      onChange={e => setNovaViagem({ ...novaViagem, data_retorno: e.target.value })}
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Vagas Totais</label>
+                    <input
+                      type="number"
+                      required
+                      value={novaViagem.vagas_totais}
+                      onChange={e => setNovaViagem({ ...novaViagem, vagas_totais: Number(e.target.value) })}
+                      placeholder="40"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">URL da Foto de Capa</label>
+                    <input
+                      type="url"
+                      value={novaViagem.url_capa}
+                      onChange={e => setNovaViagem({ ...novaViagem, url_capa: e.target.value })}
+                      placeholder="Ex: https://imagem.com/foto.jpg"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Resumo de Preços</label>
+                    <input
+                      type="text"
+                      required
+                      value={novaViagem.descricao_precos}
+                      onChange={e => setNovaViagem({ ...novaViagem, descricao_precos: e.target.value })}
+                      placeholder="Ex: R$ 350 (Adultos)"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Descrição Curta (para a Home)</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={255}
+                      value={novaViagem.descricao_curta}
+                      onChange={e => setNovaViagem({ ...novaViagem, descricao_curta: e.target.value })}
+                      placeholder="Uma frase marcante sobre a viagem"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-bold text-stone-700 mb-2">Itens Inclusos</label>
+                    <textarea
+                      rows={3}
+                      required
+                      value={novaViagem.itens_inclusos}
+                      onChange={e => setNovaViagem({ ...novaViagem, itens_inclusos: e.target.value })}
+                      placeholder="Ex: Transporte, Guia, Seguro (separe por vírgula)"
+                      className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
+                    ></textarea>
+                  </div>
+                </div>
+
+                <div className="pt-4 flex gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setExibirForm(false)}
+                    className="flex-1 py-4 border border-stone-200 text-stone-500 rounded-2xl font-bold hover:bg-stone-50 transition-colors"
+                  >
+                    Cancelar
                   </button>
-               </div>
-               
-               <form onSubmit={handleCriarViagem} className="p-8 space-y-6">
-                  {msgSucesso && (
-                    <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-100 text-emerald-700 flex items-center gap-3 font-bold">
-                      <CheckCircle2 size={20} /> {msgSucesso}
-                    </div>
-                  )}
-                  {erroForm && (
-                     <div className="p-4 rounded-xl bg-error/10 border border-error/20 text-error flex items-center gap-3 font-bold">
-                       <AlertCircle size={20} /> {erroForm}
-                     </div>
-                  )}
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-bold text-stone-700 mb-2">Título da Viagem</label>
-                      <input
-                        type="text"
-                        required
-                        value={novaViagem.titulo}
-                        onChange={e => setNovaViagem({...novaViagem, titulo: e.target.value})}
-                        placeholder="Ex: Final de Semana em Campos do Jordão"
-                        className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-bold text-stone-700 mb-2">Data de Partida</label>
-                      <input
-                        type="date"
-                        required
-                        value={novaViagem.data_partida}
-                        onChange={e => setNovaViagem({...novaViagem, data_partida: e.target.value})}
-                        className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-bold text-stone-700 mb-2">Data de Retorno</label>
-                      <input
-                        type="date"
-                        value={novaViagem.data_retorno}
-                        onChange={e => setNovaViagem({...novaViagem, data_retorno: e.target.value})}
-                        className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-bold text-stone-700 mb-2">Vagas Totais</label>
-                      <input
-                        type="number"
-                        required
-                        value={novaViagem.vagas_totais}
-                        onChange={e => setNovaViagem({...novaViagem, vagas_totais: Number(e.target.value)})}
-                        placeholder="40"
-                        className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      />
-                    </div>
-
-                    <div>
-                       <label className="block text-sm font-bold text-stone-700 mb-2">URL da Foto de Capa</label>
-                       <input
-                         type="url"
-                         value={novaViagem.url_capa}
-                         onChange={e => setNovaViagem({...novaViagem, url_capa: e.target.value})}
-                         placeholder="Ex: https://imagem.com/foto.jpg"
-                         className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                       />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-bold text-stone-700 mb-2">Resumo de Preços</label>
-                      <input
-                        type="text"
-                        required
-                        value={novaViagem.descricao_precos}
-                        onChange={e => setNovaViagem({...novaViagem, descricao_precos: e.target.value})}
-                        placeholder="Ex: R$ 350 (Adultos)"
-                        className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      />
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-bold text-stone-700 mb-2">Descrição Curta (para a Home)</label>
-                      <input
-                        type="text"
-                        required
-                        maxLength={255}
-                        value={novaViagem.descricao_curta}
-                        onChange={e => setNovaViagem({...novaViagem, descricao_curta: e.target.value})}
-                        placeholder="Uma frase marcante sobre a viagem"
-                        className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      />
-                    </div>
-
-                    <div className="sm:col-span-2">
-                      <label className="block text-sm font-bold text-stone-700 mb-2">Itens Inclusos</label>
-                      <textarea
-                        rows={3}
-                        required
-                        value={novaViagem.itens_inclusos}
-                        onChange={e => setNovaViagem({...novaViagem, itens_inclusos: e.target.value})}
-                        placeholder="Ex: Transporte, Guia, Seguro (separe por vírgula)"
-                        className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
-                      ></textarea>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 flex gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setExibirForm(false)}
-                      className="flex-1 py-4 border border-stone-200 text-stone-500 rounded-2xl font-bold hover:bg-stone-50 transition-colors"
-                    >
-                      Cancelar
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={criando}
-                      className="flex-[2] py-4 bg-viaje-primary text-white rounded-2xl font-black text-lg shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-                    >
-                      {criando ? <Loader2 size={24} className="animate-spin" /> : "Criar Viagem"}
-                    </button>
-                  </div>
-               </form>
+                  <button
+                    type="submit"
+                    disabled={criando}
+                    className="flex-[2] py-4 bg-viaje-primary text-white rounded-2xl font-black text-lg shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {criando ? <Loader2 size={24} className="animate-spin" /> : "Criar Viagem"}
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
@@ -433,40 +428,40 @@ export default function PainelPage() {
                       <div>
                         <h4 className="font-bold text-stone-800 text-lg group-hover/item:text-primary transition-colors">{v.titulo}</h4>
                         <div className="flex gap-4 mt-1">
-                           <span className="text-sm text-stone-500 flex items-center gap-1.5">
-                             <CalendarDays size={14} />
-                             {v.data_partida ? new Date(v.data_partida).toLocaleDateString() : "---"}
-                           </span>
-                           <span className="text-sm text-stone-500 flex items-center gap-1.5">
-                             <Users size={14} />
-                             {v.vagas_totais} vagas totais
-                           </span>
+                          <span className="text-sm text-stone-500 flex items-center gap-1.5">
+                            <CalendarDays size={14} />
+                            {v.data_partida ? new Date(v.data_partida).toLocaleDateString() : "---"}
+                          </span>
+                          <span className="text-sm text-stone-500 flex items-center gap-1.5">
+                            <Users size={14} />
+                            {v.vagas_totais} vagas totais
+                          </span>
                         </div>
                       </div>
                     </Link>
-                    
+
                     <div className="flex items-center gap-3">
-                       <div className="flex -space-x-2">
-                          {Object.entries(v.reservas_por_status || {}).map(([key, val]) => (
-                             val > 0 && (
-                               <div 
-                                 key={key} 
-                                 title={`${val} ${key}`}
-                                 className={`w-10 h-10 rounded-full border-2 border-white flex items-center justify-center text-xs font-black shadow-sm
-                                   ${key === "SOLICITADO" ? "bg-amber-100 text-amber-700" : 
-                                     key === "CONFIRMADO" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-600"}`}
-                               >
-                                 {val}
-                               </div>
-                             )
-                          ))}
-                       </div>
-                       <Link 
-                         href={`/painel/kanban/${v.id}`}
-                         className="p-2.5 rounded-xl bg-stone-50 text-stone-400 hover:bg-primary/10 hover:text-primary transition-all"
-                       >
-                         <ChevronRight size={20} />
-                       </Link>
+                      <div className="flex -space-x-2">
+                        {Object.entries(v.reservas_por_status || {}).map(([key, val]) => (
+                          val > 0 && (
+                            <div
+                              key={key}
+                              title={`${val} ${key}`}
+                              className={`w-10 h-10 rounded-full border-2 border-white flex items-center justify-center text-xs font-black shadow-sm
+                                   ${key === "SOLICITADO" ? "bg-amber-100 text-amber-700" :
+                                  key === "CONFIRMADO" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-600"}`}
+                            >
+                              {val}
+                            </div>
+                          )
+                        ))}
+                      </div>
+                      <Link
+                        href={`/painel/kanban/${v.id}`}
+                        className="p-2.5 rounded-xl bg-stone-50 text-stone-400 hover:bg-primary/10 hover:text-primary transition-all"
+                      >
+                        <ChevronRight size={20} />
+                      </Link>
                     </div>
                   </div>
                 ))}
@@ -477,71 +472,71 @@ export default function PainelPage() {
 
         {/* Listagem de Reservas (Líder) */}
         {usuario.tipo === "LIDER" && (
-           <div className="space-y-6">
-             <div className="flex items-center justify-between">
-               <h2 className="text-xl font-black text-stone-800 flex items-center gap-2">
-                 <Ticket size={22} className="text-secondary" />
-                 Minhas Viagens e Reservas
-               </h2>
-             </div>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-black text-stone-800 flex items-center gap-2">
+                <Ticket size={22} className="text-secondary" />
+                Minhas Viagens e Reservas
+              </h2>
+            </div>
 
-             {reservas.length === 0 ? (
-               <div className="rounded-3xl border-2 border-dashed border-stone-200 bg-white p-20 text-center">
-                 <Users size={48} className="mx-auto text-stone-200 mb-4" />
-                 <h3 className="text-xl font-bold text-stone-800">Suas Viagens aparecerão aqui</h3>
-                 <p className="text-stone-400 mt-2">Você ainda não tem grupos ou reservas confirmadas.</p>
-                 <Link href="/" className="inline-block mt-8 bg-viaje-secondary text-white px-8 py-3 rounded-2xl font-bold shadow-md">
-                   Explorar Destinos
-                 </Link>
-               </div>
-             ) : (
-               <div className="grid grid-cols-1 gap-4">
-                 {reservas.map((r) => (
-                   <div key={r.id} className="bg-white rounded-2xl border border-stone-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
-                     <div className="flex items-center gap-4">
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold
-                          ${r.status === "SOLICITADO" ? "bg-amber-100 text-amber-700" : 
-                            r.status === "CONFIRMADO" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
-                          R{r.id}
+            {reservas.length === 0 ? (
+              <div className="rounded-3xl border-2 border-dashed border-stone-200 bg-white p-20 text-center">
+                <Users size={48} className="mx-auto text-stone-200 mb-4" />
+                <h3 className="text-xl font-bold text-stone-800">Suas Viagens aparecerão aqui</h3>
+                <p className="text-stone-400 mt-2">Você ainda não tem grupos ou reservas confirmadas.</p>
+                <Link href="/" className="inline-block mt-8 bg-viaje-secondary text-white px-8 py-3 rounded-2xl font-bold shadow-md">
+                  Explorar Destinos
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-4">
+                {reservas.map((r) => (
+                  <div key={r.id} className="bg-white rounded-2xl border border-stone-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold
+                          ${r.status === "SOLICITADO" ? "bg-amber-100 text-amber-700" :
+                          r.status === "CONFIRMADO" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
+                        R{r.id}
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-stone-800 text-lg">{r.titulo_viagem || "Viagem Carregando..."}</h4>
+                        <div className="flex gap-4 mt-1">
+                          <span className="text-sm text-stone-500 flex items-center gap-1.5">
+                            <CalendarDays size={14} />
+                            {r.data_partida_viagem ? new Date(r.data_partida_viagem).toLocaleDateString() : "---"}
+                          </span>
+                          <span className="text-sm text-stone-500 flex items-center gap-1.5">
+                            <Users size={14} />
+                            {r.qtd_vagas} passageiros
+                          </span>
                         </div>
-                        <div>
-                          <h4 className="font-bold text-stone-800 text-lg">{r.titulo_viagem || "Viagem Carregando..."}</h4>
-                          <div className="flex gap-4 mt-1">
-                             <span className="text-sm text-stone-500 flex items-center gap-1.5">
-                               <CalendarDays size={14} />
-                               {r.data_partida_viagem ? new Date(r.data_partida_viagem).toLocaleDateString() : "---"}
-                             </span>
-                             <span className="text-sm text-stone-500 flex items-center gap-1.5">
-                               <Users size={14} />
-                               {r.qtd_vagas} passageiros
-                             </span>
-                          </div>
-                        </div>
-                     </div>
-                     
-                     <div className="flex items-center gap-6">
-                        <div className="text-right hidden sm:block">
-                           <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest leading-none mb-1">Status</p>
-                           <span className={`text-sm font-black
-                             ${r.status === "SOLICITADO" ? "text-amber-500" : 
-                               r.status === "CONFIRMADO" ? "text-emerald-500" : 
-                               r.status === "CANCELADO" ? "text-rose-500" : "text-stone-500"}`}>
-                             {r.status}
-                           </span>
-                        </div>
-                        <Link 
-                          href={`/reservas/${r.id}`}
-                          className="flex items-center gap-2 bg-stone-100 text-stone-600 px-5 py-2.5 rounded-xl font-bold hover:bg-viaje-primary/10 hover:text-viaje-primary transition-all"
-                        >
-                          Ver Detalhes
-                          <ChevronRight size={18} />
-                        </Link>
-                     </div>
-                   </div>
-                 ))}
-               </div>
-             )}
-           </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-6">
+                      <div className="text-right hidden sm:block">
+                        <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest leading-none mb-1">Status</p>
+                        <span className={`text-sm font-black
+                             ${r.status === "SOLICITADO" ? "text-amber-500" :
+                            r.status === "CONFIRMADO" ? "text-emerald-500" :
+                              r.status === "CANCELADO" ? "text-rose-500" : "text-stone-500"}`}>
+                          {r.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <Link
+                        href={`/reservas/${r.id}`}
+                        className="flex items-center gap-2 bg-stone-100 text-stone-600 px-5 py-2.5 rounded-xl font-bold hover:bg-viaje-primary/10 hover:text-viaje-primary transition-all"
+                      >
+                        Ver Detalhes
+                        <ChevronRight size={18} />
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

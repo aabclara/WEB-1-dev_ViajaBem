@@ -37,11 +37,12 @@ interface KanbanData {
   colunas: Record<string, Reserva[]>;
 }
 
-const statusConfig: Record<string, { label: string; color: string; icon: any }> = {
-  SOLICITADO: { label: "Solicitado", color: "bg-amber-50 border-amber-200 text-amber-700", icon: Clock },
-  BLOQUEADO: { label: "Bloqueado", color: "bg-stone-50 border-stone-200 text-stone-700", icon: MoreVertical },
-  CONFIRMADO: { label: "Confirmado", color: "bg-emerald-50 border-emerald-200 text-emerald-700", icon: CheckCircle2 },
-  CANCELADO: { label: "Cancelado", color: "bg-rose-50 border-rose-200 text-rose-700", icon: XCircle },
+const statusConfig: Record<string, { label: string; description: string; color: string; bgColor: string; icon: any }> = {
+  SOLICITADO: { label: "Solicitado", description: "Aguardando contato e negociação", color: "bg-amber-100 border-amber-300 text-amber-800", bgColor: "bg-amber-500/5", icon: Clock },
+  EM_CONTATO: { label: "Em Contato", description: "Atendimento iniciado", color: "bg-purple-100 border-purple-300 text-purple-800", bgColor: "bg-purple-500/5", icon: MessageCircle },
+  BLOQUEADO: { label: "Bloqueado", description: "Sinal confirmado", color: "bg-blue-100 border-blue-300 text-blue-800", bgColor: "bg-blue-500/5", icon: MoreVertical },
+  CONFIRMADO: { label: "Confirmado", description: "Valor total pago", color: "bg-emerald-100 border-emerald-300 text-emerald-800", bgColor: "bg-emerald-500/5", icon: CheckCircle2 },
+  CANCELADO: { label: "Cancelado", description: "Reserva descartada", color: "bg-rose-100 border-rose-300 text-rose-800", bgColor: "bg-rose-500/5", icon: XCircle },
 };
 
 export default function KanbanPage() {
@@ -165,25 +166,28 @@ export default function KanbanPage() {
           {Object.entries(statusConfig).map(([statusKey, config]) => {
             const reservasNoStatus = data.colunas[statusKey] || [];
             return (
-              <div key={statusKey} className="flex-1 flex flex-col min-w-[280px]">
+              <div key={statusKey} className={`flex-1 flex flex-col min-w-[280px] ${config.bgColor} rounded-3xl p-4 transition-colors duration-500`}>
                 <div className={`mb-4 p-4 rounded-2xl border flex items-center justify-between ${config.color}`}>
                    <div className="flex items-center gap-3">
                       <config.icon size={20} />
-                      <span className="font-black uppercase tracking-tighter">{config.label}</span>
+                      <div>
+                         <span className="font-black uppercase tracking-tighter block leading-none">{config.label}</span>
+                         <span className="text-[10px] font-bold opacity-60 block mt-0.5">{config.description}</span>
+                      </div>
                    </div>
                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/50 text-xs font-black">
                       {reservasNoStatus.length}
                    </span>
                 </div>
 
-                <div className="flex-1 bg-stone-100/50 rounded-3xl p-3 space-y-3 overflow-y-auto border border-stone-200/50 scrollbar-hide">
+                <div className="flex-1 space-y-3 overflow-y-auto scrollbar-hide">
                    {reservasNoStatus.length === 0 ? (
                      <div className="h-20 flex items-center justify-center border-2 border-dashed border-stone-200 rounded-2xl">
                         <p className="text-xs font-bold text-stone-300">Nenhuma reserva</p>
                      </div>
                    ) : (
                      reservasNoStatus.map((reserva) => (
-                       <div key={reserva.id} className="bg-white p-4 rounded-2xl border border-stone-200 shadow-sm group hover:shadow-md transition-all">
+                       <Link href={`/painel/kanban/${id}/reserva/${reserva.id}`} key={reserva.id} className="block bg-white p-4 rounded-2xl border border-stone-200 shadow-sm group hover:shadow-md transition-all">
                           <div className="flex justify-between items-start mb-3">
                              <div className="flex items-center gap-2">
                                 <span className="text-[10px] font-black bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded">R#{reserva.id}</span>
@@ -202,10 +206,10 @@ export default function KanbanPage() {
                           <h4 className="font-bold text-stone-800 text-sm mb-1 leading-tight">{reserva.nome_lider || `Líder ID #${reserva.id_lider}`}</h4>
                           <p className="text-xs font-semibold text-stone-400 mb-4">R$ {reserva.valor_acordado?.toFixed(2) || "---"}</p>
 
-                          <div className="flex gap-2">
+                           <div className="flex gap-2">
                              {statusKey !== "CONFIRMADO" && (
                                <button 
-                                 onClick={() => handleMudarStatus(reserva.id, "CONFIRMADO")}
+                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMudarStatus(reserva.id, "CONFIRMADO"); }}
                                  className="flex-1 py-2 rounded-xl bg-emerald-50 text-emerald-600 text-[10px] font-black uppercase tracking-tighter hover:bg-emerald-100 transition-colors"
                                >
                                  Confirmar
@@ -213,17 +217,19 @@ export default function KanbanPage() {
                              )}
                              {statusKey !== "CANCELADO" && (
                                <button 
-                                 onClick={() => handleMudarStatus(reserva.id, "CANCELADO")}
+                                 onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleMudarStatus(reserva.id, "CANCELADO"); }}
                                  className="flex-1 py-2 rounded-xl bg-rose-50 text-rose-600 text-[10px] font-black uppercase tracking-tighter hover:bg-rose-100 transition-colors"
                                >
                                  Cancelar
                                </button>
                              )}
-                             <button className="p-2 rounded-xl bg-stone-100 text-stone-400 hover:bg-viaje-primary/10 hover:text-viaje-primary transition-colors">
+                             <button 
+                               onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                               className="p-2 rounded-xl bg-stone-100 text-stone-400 hover:bg-viaje-primary/10 hover:text-viaje-primary transition-colors">
                                 <MessageCircle size={14} />
                              </button>
                           </div>
-                       </div>
+                       </Link>
                      ))
                    )}
                 </div>

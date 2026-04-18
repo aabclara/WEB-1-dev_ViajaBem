@@ -82,14 +82,32 @@ async def obter_reserva(
     sessao: AsyncSession = Depends(obter_sessao),
 ):
     res = await sessao.execute(
-        select(ReservaGrupo).options(selectinload(ReservaGrupo.passageiros)).where(ReservaGrupo.id == id_reserva)
+        select(ReservaGrupo)
+        .options(
+            selectinload(ReservaGrupo.passageiros),
+            selectinload(ReservaGrupo.viagem),
+            selectinload(ReservaGrupo.lider)
+        )
+        .where(ReservaGrupo.id == id_reserva)
     )
     reserva = res.scalar_one_or_none()
     if not reserva:
         raise ReservaNaoEncontradaException()
     if usuario.tipo != "ADMIN" and reserva.id_lider != usuario.id:
         raise AcessoNegadoException()
-    return reserva
+
+    from app.infra.mapeadores import MapeadorReserva, MapeadorPassageiro
+    dominio_reserva = MapeadorReserva.para_dominio(reserva)
+    
+    if reserva.lider:
+        dominio_reserva.nome_lider = reserva.lider.nome
+    if reserva.viagem:
+        dominio_reserva.titulo_viagem = reserva.viagem.titulo
+        dominio_reserva.data_partida_viagem = reserva.viagem.data_partida
+    if reserva.passageiros:
+        dominio_reserva.passageiros = [MapeadorPassageiro.para_dominio(p) for p in reserva.passageiros]
+
+    return dominio_reserva
 
 
 @roteador_reservas.get("/{id_reserva}/resumo", response_model=ResumoFinanceiroSchema)

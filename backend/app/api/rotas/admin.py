@@ -161,8 +161,8 @@ async def atualizar_reserva_admin(
     servico_reservas = ReservasService(sessao)
 
     # Trava de seguro para CANCELADO
-    if dados.status == StatusReserva.CANCELADO and servico_reservas.dentro_da_trava_seguro(viagem.data_partida):
-        raise CancelamentoBloqueadoException()
+    # if dados.status == StatusReserva.CANCELADO and servico_reservas.dentro_da_trava_seguro(viagem.data_partida):
+    #     raise CancelamentoBloqueadoException()
 
     # Trava de concorrência para BLOQUEADO
     if dados.status == StatusReserva.BLOQUEADO:
