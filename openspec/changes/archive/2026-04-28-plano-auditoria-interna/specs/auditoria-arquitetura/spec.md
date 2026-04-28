@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Relatório de Auditoria Arquitetural Backend
-A auditoria deve gerar um checklist ou relatório validando as regras do Clean Architecture no backend.
+A auditoria MUST gerar um checklist ou relatório validando as regras do Clean Architecture no backend.
 
 #### Scenario: Validação de Domínio Rico e IA
 - **WHEN** O auditor inspeciona a camada de domínio (`domain/`)
@@ -12,7 +12,7 @@ A auditoria deve gerar um checklist ou relatório validando as regras do Clean A
 - **THEN** Não deve haver lógica de negócio em controllers ou dependência direta/acoplamento a bibliotecas de repositório (ORM) fora da camada de repositório.
 
 ### Requirement: Relatório de Auditoria Arquitetural Frontend
-A auditoria deve verificar se o Next.js está sendo utilizado como uma SPA estrita.
+A auditoria MUST verificar se o Next.js está sendo utilizado como uma SPA estrita.
 
 #### Scenario: Requisições e Paginação
 - **WHEN** O auditor inspeciona as chamadas de API no frontend e os componentes de lista
