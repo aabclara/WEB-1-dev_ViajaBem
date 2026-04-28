@@ -33,6 +33,14 @@ class Viagem(EntidadeBase):
     status: StatusViagem = StatusViagem.ATIVO
     reservas: List["ReservaGrupo"] = field(default_factory=list)
 
+    def validar_disponibilidade(self, vagas_solicitadas: int) -> None:
+        if self.status == StatusViagem.ESGOTADO:
+            raise ValueError("Viagem esgotada")
+        # Conta as vagas já ocupadas (desconsidera reservas canceladas)
+        vagas_ocupadas = sum(r.qtd_vagas for r in self.reservas if r.status != StatusReserva.CANCELADO)
+        if self.vagas_totais - vagas_ocupadas < vagas_solicitadas:
+            raise ValueError("Vagas insuficientes para esta viagem")
+
 @dataclass
 class ReservaGrupo(EntidadeBase):
     id_viagem: int = 0
@@ -49,6 +57,27 @@ class ReservaGrupo(EntidadeBase):
     data_partida_viagem: Optional[date] = None
     nome_lider: Optional[str] = None
     passageiros: List["Passageiro"] = field(default_factory=list)
+
+    def calcular_resumo_financeiro(self) -> dict:
+        if not self.valor_acordado:
+            raise ValueError("Valor acordado não definido")
+        from decimal import Decimal
+        valor = Decimal(str(self.valor_acordado))
+        sinal = round(valor * Decimal("0.5"), 2)
+        restante = valor - sinal
+        por_pessoa = round(valor / Decimal(str(self.qtd_vagas)), 2)
+        return {
+            "valor_acordado": valor,
+            "sinal": sinal,
+            "restante": restante,
+            "valor_por_pessoa": por_pessoa
+        }
+
+    def calcular_valor_por_pessoa(self) -> Optional[float]:
+        if not self.valor_acordado or not self.qtd_vagas:
+            return None
+        from decimal import Decimal
+        return float(round(Decimal(str(self.valor_acordado)) / Decimal(str(self.qtd_vagas)), 2))
 
 @dataclass
 class Passageiro:

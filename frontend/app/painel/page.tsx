@@ -17,7 +17,8 @@ import {
   Trash2,
   AlertCircle
 } from "lucide-react";
-import { getAuthUser, getAuthToken, API_URL } from "@/src/lib/auth";
+import { getAuthUser, getAuthToken } from "@/src/lib/auth";
+import { apiClient } from "@/src/lib/services/apiClient";
 
 interface AdminViagem {
   id: number;
@@ -58,6 +59,7 @@ export default function PainelPage() {
   const [reservas, setReservas] = useState<LiderReserva[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [exibirForm, setExibirForm] = useState(false);
+  const [paginaAtual, setPaginaAtual] = useState(0);
 
   // Estados do formulário
   const [novaViagem, setNovaViagem] = useState({
@@ -74,35 +76,22 @@ export default function PainelPage() {
   const [msgSucesso, setMsgSucesso] = useState("");
   const [erroForm, setErroForm] = useState("");
 
-  const carregarViagens = async () => {
-    const token = getAuthToken();
-    if (!token) return;
-
+  const carregarViagens = async (page = 0) => {
     try {
-      const res = await fetch(`${API_URL}/admin/viagens/`, {
-        headers: { "Authorization": `Bearer ${token}` }
+      const data = await apiClient.get("/admin/viagens/", {
+        skip: page * 50,
+        limit: 50
       });
-      if (res.ok) {
-        const data = await res.json();
-        setViagens(data);
-      }
+      setViagens(data);
     } catch (err) {
       console.error("Erro ao carregar viagens:", err);
     }
   };
 
   const carregarReservas = async () => {
-    const token = getAuthToken();
-    if (!token) return;
-
     try {
-      const res = await fetch(`${API_URL}/reservas/`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setReservas(data);
-      }
+      const data = await apiClient.get("/reservas/");
+      setReservas(data);
     } catch (err) {
       console.error("Erro ao carregar suas reservas:", err);
     }
@@ -118,7 +107,7 @@ export default function PainelPage() {
 
     const fetchData = async () => {
       if (user.tipo === "ADMIN") {
-        await carregarViagens();
+        await carregarViagens(paginaAtual);
       } else if (user.tipo === "LIDER") {
         await carregarReservas();
       }
@@ -126,25 +115,15 @@ export default function PainelPage() {
     };
 
     fetchData();
-  }, []);
+  }, [paginaAtual]);
 
   const handleCriarViagem = async (e: React.FormEvent) => {
     e.preventDefault();
-    const token = getAuthToken();
     setCriando(true);
     setErroForm("");
 
     try {
-      const res = await fetch(`${API_URL}/admin/viagens/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(novaViagem)
-      });
-
-      if (!res.ok) throw new Error("Falha ao criar viagem");
+      await apiClient.post("/admin/viagens/", novaViagem);
 
       setMsgSucesso("Viagem criada com sucesso!");
       setNovaViagem({
@@ -158,7 +137,7 @@ export default function PainelPage() {
         url_capa: ""
       });
 
-      await carregarViagens();
+      await carregarViagens(paginaAtual);
       setTimeout(() => {
         setExibirForm(false);
         setMsgSucesso("");

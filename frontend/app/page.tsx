@@ -1,21 +1,10 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { CalendarCheck, SearchX, Bus, CalendarDays } from "lucide-react";
+import { CalendarCheck, SearchX, Bus, CalendarDays, Loader2 } from "lucide-react";
 import type { Viagem } from "@/src/types/viagem";
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://backend:8000";
-
-async function fetchViagens(): Promise<Viagem[]> {
-  try {
-    const res = await fetch(`${API_URL}/viagens/`, {
-      cache: "no-store",
-    });
-
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
-    return [];
-  }
-}
+import { apiClient } from "@/src/lib/services/apiClient";
 
 function ViagemCard({ viagem }: { viagem: Viagem }) {
   const ocupacao = viagem.vagas_totais > 0
@@ -112,8 +101,23 @@ function ViagemCard({ viagem }: { viagem: Viagem }) {
   );
 }
 
-export default async function PaginaInicial() {
-  const viagens = await fetchViagens();
+export default function PaginaInicial() {
+  const [viagens, setViagens] = useState<Viagem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadViagens() {
+      try {
+        const data = await apiClient.get("/viagens/");
+        setViagens(data);
+      } catch (err) {
+        console.error("Erro ao carregar viagens", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadViagens();
+  }, []);
 
   return (
     <div className="min-h-screen bg-background text-on-background">
@@ -162,7 +166,11 @@ export default async function PaginaInicial() {
           <div className="h-1 w-24 bg-primary rounded-full" />
         </div>
 
-        {viagens.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <Loader2 className="animate-spin text-primary" size={40} />
+          </div>
+        ) : viagens.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {viagens.map((viagem) => (
               <ViagemCard key={viagem.id} viagem={viagem} />

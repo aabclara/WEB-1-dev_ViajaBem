@@ -26,3 +26,28 @@ class ReservaRepositorio:
                 entidade.data_partida_viagem = m.viagem.data_partida
             entidades.append(entidade)
         return entidades
+
+    async def buscar_por_id(self, id_reserva: int) -> ReservaModel | None:
+        resultado = await self.sessao.execute(
+            select(ReservaModel)
+            .options(
+                selectinload(ReservaModel.passageiros),
+                selectinload(ReservaModel.viagem),
+                selectinload(ReservaModel.lider)
+            )
+            .where(ReservaModel.id == id_reserva)
+        )
+        return resultado.scalar_one_or_none()
+
+    async def salvar(self, reserva: ReservaModel) -> ReservaModel:
+        self.sessao.add(reserva)
+        await self.sessao.flush()
+        return reserva
+
+class ViagemRepositorio:
+    def __init__(self, sessao: AsyncSession):
+        self.sessao = sessao
+
+    async def buscar_por_id(self, id_viagem: int) -> ViagemModel | None:
+        resultado = await self.sessao.execute(select(ViagemModel).where(ViagemModel.id == id_viagem))
+        return resultado.scalar_one_or_none()

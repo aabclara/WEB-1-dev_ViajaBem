@@ -45,34 +45,17 @@ async def criar_reserva(
     usuario: Usuario = Depends(requerer_lider),
     sessao: AsyncSession = Depends(obter_sessao),
 ):
-    res_viagem = await sessao.execute(select(Viagem).where(Viagem.id == dados.id_viagem))
-    viagem = res_viagem.scalar_one_or_none()
-    if not viagem:
-        raise ViagemNaoEncontradaException()
-    if viagem.status == StatusViagem.ESGOTADO:
-        raise ViagemEsgotadaException()
-
-    reserva = ReservaGrupo(
-        id_viagem=dados.id_viagem,
-        id_lider=usuario.id,
-        qtd_vagas=dados.qtd_vagas,
-        status=StatusReserva.SOLICITADO,
-        substatus=SubstatusReserva.AGUARDANDO_CONTATO,
-    )
-    sessao.add(reserva)
-    await sessao.flush()  # Obter id da reserva
-
-    # Criar slots de passageiros automaticamente
-    servico_reservas = ReservasService(sessao)
-    await servico_reservas.criar_slots_passageiros(reserva, usuario.nome)
-
-    await sessao.commit()
-    await sessao.refresh(reserva)
-
-    res = await sessao.execute(
-        select(ReservaGrupo).options(selectinload(ReservaGrupo.passageiros)).where(ReservaGrupo.id == reserva.id)
-    )
-    return res.scalar_one()
+    try:
+        servico_reservas = ReservasService(sessao)
+        reserva_model = await servico_reservas.criar_reserva(
+            id_viagem=dados.id_viagem,
+            id_lider=usuario.id,
+            qtd_vagas=dados.qtd_vagas,
+            nome_lider=usuario.nome
+        )
+        return reserva_model
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @roteador_reservas.get("/{id_reserva}", response_model=ReservaSchema)
@@ -81,31 +64,24 @@ async def obter_reserva(
     usuario: Usuario = Depends(obter_usuario_atual),
     sessao: AsyncSession = Depends(obter_sessao),
 ):
-    res = await sessao.execute(
-        select(ReservaGrupo)
-        .options(
-            selectinload(ReservaGrupo.passageiros),
-            selectinload(ReservaGrupo.viagem),
-            selectinload(ReservaGrupo.lider)
-        )
-        .where(ReservaGrupo.id == id_reserva)
-    )
-    reserva = res.scalar_one_or_none()
-    if not reserva:
+    repo = ReservaRepositorio(sessao)
+    reserva_model = await repo.buscar_por_id(id_reserva)
+    
+    if not reserva_model:
         raise ReservaNaoEncontradaException()
-    if usuario.tipo != "ADMIN" and reserva.id_lider != usuario.id:
+    if usuario.tipo != "ADMIN" and reserva_model.id_lider != usuario.id:
         raise AcessoNegadoException()
 
     from app.infra.mapeadores import MapeadorReserva, MapeadorPassageiro
-    dominio_reserva = MapeadorReserva.para_dominio(reserva)
+    dominio_reserva = MapeadorReserva.para_dominio(reserva_model)
     
-    if reserva.lider:
-        dominio_reserva.nome_lider = reserva.lider.nome
-    if reserva.viagem:
-        dominio_reserva.titulo_viagem = reserva.viagem.titulo
-        dominio_reserva.data_partida_viagem = reserva.viagem.data_partida
-    if reserva.passageiros:
-        dominio_reserva.passageiros = [MapeadorPassageiro.para_dominio(p) for p in reserva.passageiros]
+    if reserva_model.lider:
+        dominio_reserva.nome_lider = reserva_model.lider.nome
+    if reserva_model.viagem:
+        dominio_reserva.titulo_viagem = reserva_model.viagem.titulo
+        dominio_reserva.data_partida_viagem = reserva_model.viagem.data_partida
+    if reserva_model.passageiros:
+        dominio_reserva.passageiros = [MapeadorPassageiro.para_dominio(p) for p in reserva_model.passageiros]
 
     return dominio_reserva
 
@@ -116,20 +92,21 @@ async def resumo_financeiro(
     usuario: Usuario = Depends(obter_usuario_atual),
     sessao: AsyncSession = Depends(obter_sessao),
 ):
-    res = await sessao.execute(select(ReservaGrupo).where(ReservaGrupo.id == id_reserva))
-    reserva = res.scalar_one_or_none()
-    if not reserva:
+    repo = ReservaRepositorio(sessao)
+    reserva_model = await repo.buscar_por_id(id_reserva)
+    
+    if not reserva_model:
         raise ReservaNaoEncontradaException()
-    if usuario.tipo != "ADMIN" and reserva.id_lider != usuario.id:
+    if usuario.tipo != "ADMIN" and reserva_model.id_lider != usuario.id:
         raise AcessoNegadoException()
-    if not reserva.valor_acordado:
-        raise ValorAcordadoNaoDefinidoException()
 
-    valor = Decimal(str(reserva.valor_acordado))
-    sinal = round(valor * Decimal("0.5"), 2)
-    restante = valor - sinal
-    por_pessoa = round(valor / Decimal(str(reserva.qtd_vagas)), 2)
-    return ResumoFinanceiroSchema(valor_acordado=valor, sinal=sinal, restante=restante, valor_por_pessoa=por_pessoa)
+    from app.infra.mapeadores import MapeadorReserva
+    dominio_reserva = MapeadorReserva.para_dominio(reserva_model)
+    try:
+        resumo = dominio_reserva.calcular_resumo_financeiro()
+        return ResumoFinanceiroSchema(**resumo)
+    except ValueError as e:
+        raise ValorAcordadoNaoDefinidoException()
 
 
 @roteador_reservas.get("/{id_reserva}/link-acompanhante", response_model=AcompanhanteSchema)
@@ -137,20 +114,19 @@ async def link_acompanhante(
     id_reserva: int,
     sessao: AsyncSession = Depends(obter_sessao),
 ):
-    res = await sessao.execute(
-        select(ReservaGrupo).options(selectinload(ReservaGrupo.viagem)).where(ReservaGrupo.id == id_reserva)
-    )
-    reserva = res.scalar_one_or_none()
-    if not reserva:
+    repo = ReservaRepositorio(sessao)
+    reserva_model = await repo.buscar_por_id(id_reserva)
+    
+    if not reserva_model:
         raise ReservaNaoEncontradaException()
 
-    por_pessoa = None
-    if reserva.valor_acordado:
-        por_pessoa = round(Decimal(str(reserva.valor_acordado)) / Decimal(str(reserva.qtd_vagas)), 2)
+    from app.infra.mapeadores import MapeadorReserva
+    dominio_reserva = MapeadorReserva.para_dominio(reserva_model)
+    por_pessoa = dominio_reserva.calcular_valor_por_pessoa()
 
     return AcompanhanteSchema(
-        titulo_viagem=reserva.viagem.titulo,
-        data_partida=reserva.viagem.data_partida,
+        titulo_viagem=reserva_model.viagem.titulo if reserva_model.viagem else "",
+        data_partida=reserva_model.viagem.data_partida if reserva_model.viagem else None,
         valor_por_pessoa=por_pessoa,
     )
 
@@ -161,12 +137,12 @@ async def listar_passageiros(
     usuario: Usuario = Depends(obter_usuario_atual),
     sessao: AsyncSession = Depends(obter_sessao),
 ):
-    res_r = await sessao.execute(select(ReservaGrupo).where(ReservaGrupo.id == id_reserva))
-    reserva = res_r.scalar_one_or_none()
-    if not reserva:
+    repo = ReservaRepositorio(sessao)
+    reserva_model = await repo.buscar_por_id(id_reserva)
+    
+    if not reserva_model:
         raise ReservaNaoEncontradaException()
-    if usuario.tipo != "ADMIN" and reserva.id_lider != usuario.id:
+    if usuario.tipo != "ADMIN" and reserva_model.id_lider != usuario.id:
         raise AcessoNegadoException()
 
-    res_p = await sessao.execute(select(Passageiro).where(Passageiro.id_reserva == id_reserva))
-    return res_p.scalars().all()
+    return reserva_model.passageiros

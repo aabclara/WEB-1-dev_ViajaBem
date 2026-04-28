@@ -31,3 +31,41 @@ class ReservasService:
         
         await self.sessao.flush()
         return passageiros
+
+    async def criar_reserva(self, id_viagem: int, id_lider: int, qtd_vagas: int, nome_lider: str) -> ReservaGrupo:
+        from app.repositorios.reserva_repositorio import ViagemRepositorio, ReservaRepositorio
+        from app.infra.mapeadores import MapeadorViagem
+        from app.core.excecoes import ViagemNaoEncontradaException, ViagemEsgotadaException
+        from app.infra.modelos import StatusReserva, SubstatusReserva
+
+        viagem_repo = ViagemRepositorio(self.sessao)
+        viagem_model = await viagem_repo.buscar_por_id(id_viagem)
+        if not viagem_model:
+            raise ViagemNaoEncontradaException()
+
+        # Usando dominio para validacao
+        dominio_viagem = MapeadorViagem.para_dominio(viagem_model)
+        try:
+            dominio_viagem.validar_disponibilidade(qtd_vagas)
+        except ValueError as e:
+            if "esgotada" in str(e).lower():
+                raise ViagemEsgotadaException()
+            raise ValueError(str(e)) # Mapear para http exception no controller
+
+        reserva = ReservaGrupo(
+            id_viagem=id_viagem,
+            id_lider=id_lider,
+            qtd_vagas=qtd_vagas,
+            status=StatusReserva.SOLICITADO,
+            substatus=SubstatusReserva.AGUARDANDO_CONTATO,
+        )
+        self.sessao.add(reserva)
+        await self.sessao.flush()
+
+        await self.criar_slots_passageiros(reserva, nome_lider)
+        await self.sessao.commit()
+        await self.sessao.refresh(reserva)
+        
+        # Reloading to get relations
+        repo = ReservaRepositorio(self.sessao)
+        return await repo.buscar_por_id(reserva.id)

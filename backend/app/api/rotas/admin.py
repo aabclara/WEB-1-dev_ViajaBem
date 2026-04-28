@@ -41,13 +41,15 @@ roteador_admin = APIRouter(prefix="/admin", tags=["Admin"])
 @roteador_admin.get("/viagens/", tags=["Admin — Viagens"])
 async def listar_viagens_admin(
     busca: str | None = Query(None),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=100),
     admin: Usuario = Depends(requerer_admin),
     sessao: AsyncSession = Depends(obter_sessao),
 ):
     query = select(Viagem)
     if busca:
         query = query.where(Viagem.titulo.ilike(f"%{busca}%"))
-    resultado = await sessao.execute(query.order_by(Viagem.data_partida))
+    resultado = await sessao.execute(query.order_by(Viagem.data_partida).offset(skip).limit(limit))
     viagens = resultado.scalars().all()
 
     resposta = []
