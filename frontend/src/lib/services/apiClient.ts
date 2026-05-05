@@ -1,5 +1,6 @@
 import { getAuthToken } from "@/src/lib/auth";
 
+// Cache breaker: v2
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const apiClient = {
@@ -21,6 +22,8 @@ export const apiClient = {
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
+
+    console.log("FETCHING API GET:", url.toString());
 
     const response = await fetch(url.toString(), {
       method: "GET",

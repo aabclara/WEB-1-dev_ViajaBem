@@ -19,6 +19,17 @@ async def listar_viagens(sessao: AsyncSession = Depends(obter_sessao)):
     from app.infra.modelos import Viagem as ViagemModel, StatusViagem
     from app.infra.mapeadores import MapeadorViagem
 
+    from sqlalchemy import update
+    from app.core.tempo import obter_agora
+    hoje = obter_agora().date()
+    await sessao.execute(
+        update(ViagemModel).where(
+            ViagemModel.data_retorno < hoje,
+            ViagemModel.status.not_in([StatusViagem.FINALIZADO, StatusViagem.CANCELADO])
+        ).values(status=StatusViagem.FINALIZADO)
+    )
+    await sessao.commit()
+
     resultado = await sessao.execute(
         select(ViagemModel).where(ViagemModel.status == StatusViagem.ATIVO).order_by(ViagemModel.data_partida)
     )

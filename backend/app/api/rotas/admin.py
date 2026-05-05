@@ -46,6 +46,17 @@ async def listar_viagens_admin(
     admin: Usuario = Depends(requerer_admin),
     sessao: AsyncSession = Depends(obter_sessao),
 ):
+    # Arquivamento dinâmico
+    from sqlalchemy import update
+    hoje = obter_agora().date()
+    await sessao.execute(
+        update(Viagem).where(
+            Viagem.data_retorno < hoje,
+            Viagem.status.not_in([StatusViagem.FINALIZADO, StatusViagem.CANCELADO])
+        ).values(status=StatusViagem.FINALIZADO)
+    )
+    await sessao.commit()
+
     query = select(Viagem)
     if busca:
         query = query.where(Viagem.titulo.ilike(f"%{busca}%"))

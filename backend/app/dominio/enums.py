@@ -8,6 +8,8 @@ class TipoUsuario(str, enum.Enum):
 class StatusViagem(str, enum.Enum):
     ATIVO = "ATIVO"
     ESGOTADO = "ESGOTADO"
+    FINALIZADO = "FINALIZADO"
+    CANCELADO = "CANCELADO"
 
 
 class StatusReserva(str, enum.Enum):

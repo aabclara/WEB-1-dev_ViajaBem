@@ -256,6 +256,7 @@ export default function EditarViagemPage() {
                        >
                           <option value="ATIVO">Ativo</option>
                           <option value="ESGOTADO">Esgotado</option>
+                          <option value="FINALIZADO">Finalizada</option>
                           <option value="CANCELADO">Cancelado</option>
                        </select>
                     </div>
