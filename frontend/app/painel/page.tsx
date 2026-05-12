@@ -416,6 +416,16 @@ export default function PainelPage() {
                             {v.vagas_totais} vagas totais
                           </span>
                         </div>
+                        <div className="mt-2">
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${
+                            v.status === 'ATIVO' ? 'bg-emerald-100 text-emerald-700' :
+                            v.status === 'FINALIZADO' ? 'bg-stone-200 text-stone-600' :
+                            v.status === 'ESGOTADO' ? 'bg-amber-100 text-amber-700' :
+                            'bg-rose-100 text-rose-700'
+                          }`}>
+                            {v.status === 'FINALIZADO' ? 'Finalizada' : v.status}
+                          </span>
+                        </div>
                       </div>
                     </Link>
 

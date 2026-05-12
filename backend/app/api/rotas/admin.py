@@ -60,7 +60,14 @@ async def listar_viagens_admin(
     query = select(Viagem)
     if busca:
         query = query.where(Viagem.titulo.ilike(f"%{busca}%"))
-    resultado = await sessao.execute(query.order_by(Viagem.data_partida).offset(skip).limit(limit))
+        
+    from sqlalchemy import case
+    ordem_status = case(
+        (Viagem.status.in_([StatusViagem.FINALIZADO, StatusViagem.CANCELADO]), 2),
+        else_=1
+    )
+    
+    resultado = await sessao.execute(query.order_by(ordem_status, Viagem.data_partida).offset(skip).limit(limit))
     viagens = resultado.scalars().all()
 
     resposta = []
