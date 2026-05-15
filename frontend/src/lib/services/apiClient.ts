@@ -60,5 +60,55 @@ export const apiClient = {
     }
 
     return response.json();
+  },
+
+  patch: async (endpoint: string, body: any) => {
+    const url = `${API_URL}${endpoint}`;
+    const token = getAuthToken();
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+    
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, {
+      method: "PATCH",
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || `API PATCH Error: ${response.statusText}`);
+    }
+
+    return response.json();
+  },
+
+  put: async (endpoint: string, body: any) => {
+    const url = `${API_URL}${endpoint}`;
+    const token = getAuthToken();
+    const headers: HeadersInit = {
+      "Content-Type": "application/json",
+    };
+    
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(url, {
+      method: "PUT",
+      headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.detail || `API PUT Error: ${response.statusText}`);
+    }
+
+    return response.json();
   }
 };

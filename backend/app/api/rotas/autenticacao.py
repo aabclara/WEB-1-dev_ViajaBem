@@ -81,6 +81,7 @@ async def login(
         access_token=token,
         id=usuario.id,
         nome=usuario.nome,
+        apelido=usuario.apelido,
         email=usuario.email,
         tipo=usuario.tipo,
     )
@@ -149,3 +150,26 @@ async def redefinir_senha(
     token_obj.usado = True
     await sessao.commit()
     return {"mensagem": "Senha redefinida com sucesso"}
+
+
+from app.core.seguranca import obter_usuario_atual
+from app.schemas.usuario_schemas import AtualizarUsuarioSchema, UsuarioPerfilSchema
+from app.repositorios.usuario_repositorio import UsuarioRepositorio
+from app.casos_uso.usuarios_service import UsuariosService
+
+@roteador_auth.get("/me", response_model=UsuarioPerfilSchema, tags=["Perfil"])
+async def obter_perfil(usuario: Usuario = Depends(obter_usuario_atual)):
+    return usuario
+
+
+@roteador_auth.patch("/me", response_model=UsuarioPerfilSchema, tags=["Perfil"])
+async def atualizar_perfil(
+    dados: AtualizarUsuarioSchema,
+    usuario: Usuario = Depends(obter_usuario_atual),
+    sessao: AsyncSession = Depends(obter_sessao),
+):
+    repositorio = UsuarioRepositorio(sessao)
+    service = UsuariosService(repositorio)
+    
+    usuario_atualizado = await service.atualizar_perfil(usuario, dados)
+    return usuario_atualizado

@@ -10,11 +10,19 @@ class ReservaRepositorio:
         self.sessao = sessao
 
     async def listar_por_lider(self, id_lider: int) -> list[ReservaGrupo]:
+        from sqlalchemy import case
         resultado = await self.sessao.execute(
             select(ReservaModel)
+            .join(ReservaModel.viagem)
             .options(selectinload(ReservaModel.viagem))
             .where(ReservaModel.id_lider == id_lider)
-            .order_by(ReservaModel.criado_em.desc())
+            .order_by(
+                case(
+                    (ViagemModel.status.in_(["ATIVO", "ESGOTADO"]), 1),
+                    else_=2
+                ),
+                ViagemModel.data_partida.asc()
+            )
         )
         modelos = resultado.scalars().all()
         entidades = []

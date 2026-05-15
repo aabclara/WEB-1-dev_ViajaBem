@@ -33,6 +33,7 @@ class TokenSchema(BaseModel):
     token_type: str = Field("bearer", description="Tipo do token HTTP")
     id: int = Field(..., description="ID identificador do usuário")
     nome: str = Field(..., description="Nome do dono do token", examples=["Maria Souza"])
+    apelido: Optional[str] = Field(None, description="Apelido do usuário")
     email: str = Field(..., description="Email verificado", examples=["maria@email.com"])
     tipo: TipoUsuario = Field(..., description="Função ou grupo de segurança")
 
@@ -54,3 +55,23 @@ class UsuarioPublicoSchema(BaseModel):
     tipo: TipoUsuario = Field(..., description="Papel do usuário")
 
     model_config = {"from_attributes": True}
+
+
+class UsuarioPerfilSchema(BaseModel):
+    id: int
+    email: str
+    nome: str
+    apelido: Optional[str]
+    cpf: str
+    telefone: str
+    data_nascimento: date
+    tipo: TipoUsuario
+
+    model_config = {"from_attributes": True}
+
+
+class AtualizarUsuarioSchema(BaseModel):
+    nome: Optional[str] = Field(None, description="Nome completo")
+    apelido: Optional[str] = Field(None, description="Apelido")
+    telefone: Optional[str] = Field(None, description="Telefone com DDD")
+    senha: Optional[str] = Field(None, description="Nova senha")

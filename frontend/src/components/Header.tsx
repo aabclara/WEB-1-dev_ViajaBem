@@ -17,10 +17,14 @@ import { getAuthUser, logout } from "@/src/lib/auth";
 
 export function Header() {
   const pathname = usePathname();
-  const [usuario, setUsuario] = useState<{ nome: string } | null>(null);
+  const [usuario, setUsuario] = useState<{ nome: string; apelido?: string } | null>(null);
 
   useEffect(() => {
-    setUsuario(getAuthUser());
+    const carregarUsuario = () => setUsuario(getAuthUser());
+    carregarUsuario();
+    
+    window.addEventListener("storage", carregarUsuario);
+    return () => window.removeEventListener("storage", carregarUsuario);
   }, []);
 
   return (
@@ -71,12 +75,12 @@ export function Header() {
                     <LayoutDashboard size={16} />
                     <span className="hidden xs:inline">Painel</span>
                   </Link>
-                  <div className="flex items-center gap-2 text-on-background font-bold border-l border-stone-200 pl-4 h-6">
-                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+                  <Link href="/perfil" className="flex items-center gap-2 text-on-background font-bold border-l border-stone-200 pl-4 h-6 hover:text-primary transition-colors cursor-pointer group">
+                    <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                       <User size={18} />
                     </div>
-                    <span className="hidden sm:inline">{usuario.nome.split(" ")[0]}</span>
-                  </div>
+                    <span className="hidden sm:inline">{usuario.apelido || usuario.nome.split(" ")[0]}</span>
+                  </Link>
                 </div>
                 <button
                   onClick={logout}

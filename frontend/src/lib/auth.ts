@@ -10,6 +10,7 @@ export interface AuthData {
   access_token: string;
   id: number;
   nome: string;
+  apelido?: string;
   email: string;
   tipo: string;
 }
@@ -20,6 +21,7 @@ export function saveAuthData(data: AuthData) {
     localStorage.setItem("viaje-bem-user", JSON.stringify({
       id: data.id,
       nome: data.nome,
+      apelido: data.apelido,
       email: data.email,
       tipo: data.tipo
     }));
