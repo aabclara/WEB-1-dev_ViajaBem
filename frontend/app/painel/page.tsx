@@ -484,7 +484,8 @@ export default function PainelPage() {
                   <div key={r.id} className="bg-white rounded-2xl border border-stone-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
                     <div className="flex items-center gap-4">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold
-                          ${r.status === "SOLICITADO" ? "bg-amber-100 text-amber-700" :
+                          ${(r.data_partida_viagem && new Date(r.data_partida_viagem) < new Date()) ? "bg-stone-100 text-stone-500" :
+                            r.status === "SOLICITADO" ? "bg-amber-100 text-amber-700" :
                           r.status === "CONFIRMADO" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
                         R{r.id}
                       </div>
@@ -507,10 +508,11 @@ export default function PainelPage() {
                       <div className="text-right hidden sm:block">
                         <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest leading-none mb-1">Status</p>
                         <span className={`text-sm font-black
-                             ${r.status === "SOLICITADO" ? "text-amber-500" :
-                            r.status === "CONFIRMADO" ? "text-emerald-500" :
-                              r.status === "CANCELADO" ? "text-rose-500" : "text-stone-500"}`}>
-                          {r.status.replace('_', ' ')}
+                             ${(r.data_partida_viagem && new Date(r.data_partida_viagem) < new Date()) ? "text-stone-500" :
+                               r.status === "SOLICITADO" ? "text-amber-500" :
+                               r.status === "CONFIRMADO" ? "text-emerald-500" :
+                               r.status === "CANCELADO" ? "text-rose-500" : "text-stone-500"}`}>
+                          {(r.data_partida_viagem && new Date(r.data_partida_viagem) < new Date()) ? "FINALIZADA" : r.status.replace('_', ' ')}
                         </span>
                       </div>
                       <Link
