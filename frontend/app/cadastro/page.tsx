@@ -1,76 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { UserPlus, Mail, Lock, User, Phone, CreditCard, Calendar, Loader2, Eye, EyeOff } from "lucide-react";
-import { API_URL, saveAuthData } from "@/src/lib/auth";
+import { useCadastro } from "@/src/presentation/hooks/useCadastro";
 
 export default function CadastroPage() {
-  const [formData, setFormData] = useState({
-    nome: "",
-    email: "",
-    senha: "",
-    cpf: "",
-    telefone: "",
-    data_nascimento: "",
-  });
-  const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [erro, setErro] = useState("");
-  const [carregando, setCarregando] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErro("");
-    setCarregando(true);
-
-    try {
-      // 1. Criar a conta
-      const resCadastro = await fetch(`${API_URL}/auth/cadastro`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          tipo: "LIDER",
-        }),
-      });
-
-      const dataCadastro = await resCadastro.json();
-
-      if (!resCadastro.ok) {
-        throw new Error(dataCadastro.detail || "Erro ao realizar cadastro");
-      }
-
-      // 2. Login automático se o cadastro deu certo
-      const loginParams = new URLSearchParams();
-      loginParams.append("username", formData.email);
-      loginParams.append("password", formData.senha);
-
-      const resLogin = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: loginParams,
-      });
-
-      if (!resLogin.ok) {
-        // Se falhar o login automático, manda pro manual
-        window.location.href = "/login?msg=cadastro_ok";
-        return;
-      }
-
-      const dataLogin = await resLogin.json();
-      saveAuthData(dataLogin);
-      
-      // 3. Sucesso e Redirecionamento direto
-      window.location.href = "/painel";
-      
-    } catch (err: any) {
-      setErro(err.message);
-      setCarregando(false);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
-  };
+  const { formData, handleChange, mostrarSenha, setMostrarSenha, erro, carregando, handleSubmit } = useCadastro();
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-stone-50 py-12 px-4">

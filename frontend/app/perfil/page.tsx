@@ -1,110 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, CheckCircle2, AlertCircle, Save, User, Lock, Mail, CreditCard, CalendarDays, Phone } from "lucide-react";
-import { apiClient } from "@/src/lib/services/apiClient";
-import { getAuthUser } from "@/src/lib/auth";
+import { usePerfil } from "@/src/presentation/hooks/usePerfil";
 
 export default function PerfilPage() {
-  const router = useRouter();
-  const [carregando, setCarregando] = useState(true);
-  const [salvando, setSalvando] = useState(false);
-  const [msgSucesso, setMsgSucesso] = useState("");
-  const [erro, setErro] = useState("");
-
-  const [form, setForm] = useState({
-    nome: "",
-    apelido: "",
-    email: "",
-    cpf: "",
-    telefone: "",
-    data_nascimento: "",
-    tipo: "",
-    senha: "",
-  });
-
-  useEffect(() => {
-    const user = getAuthUser();
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
-    const carregarPerfil = async () => {
-      try {
-        const data = await apiClient.get("/auth/me");
-        setForm({
-          nome: data.nome || "",
-          apelido: data.apelido || "",
-          email: data.email || "",
-          cpf: data.cpf || "",
-          telefone: data.telefone || "",
-          data_nascimento: data.data_nascimento || "",
-          tipo: data.tipo || "",
-          senha: "",
-        });
-      } catch (err: any) {
-        setErro("Não foi possível carregar o perfil.");
-      } finally {
-        setCarregando(false);
-      }
-    };
-
-    carregarPerfil();
-  }, [router]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSalvando(true);
-    setErro("");
-    setMsgSucesso("");
-
-    try {
-      const payload: any = {
-        nome: form.nome,
-        apelido: form.apelido,
-        telefone: form.telefone,
-      };
-      if (form.senha.trim()) {
-        payload.senha = form.senha;
-      }
-
-      const res = await apiClient.patch("/auth/me", payload);
-      setMsgSucesso("Perfil atualizado com sucesso!");
-      
-      // Update local storage auth user name if it changed
-      const currentUser = JSON.parse(localStorage.getItem("viaje-bem-user") || "{}");
-      let mudouHeader = false;
-      
-      if (currentUser.nome !== form.nome) {
-        currentUser.nome = form.nome;
-        mudouHeader = true;
-      }
-      if (currentUser.apelido !== form.apelido) {
-        currentUser.apelido = form.apelido;
-        mudouHeader = true;
-      }
-      
-      if (mudouHeader) {
-        localStorage.setItem("viaje-bem-user", JSON.stringify(currentUser));
-      }
-      
-      setForm((prev) => ({ ...prev, senha: "" }));
-      
-      if (mudouHeader) {
-        window.location.reload();
-      } else {
-        setTimeout(() => {
-          setMsgSucesso("");
-        }, 3000);
-      }
-    } catch (err: any) {
-      setErro(err.message || "Erro ao salvar alterações");
-    } finally {
-      setSalvando(false);
-    }
-  };
+  const {
+    form, setForm,
+    carregando,
+    salvando,
+    msgSucesso,
+    erro,
+    handleSubmit,
+    router
+  } = usePerfil();
 
   if (carregando) {
     return (

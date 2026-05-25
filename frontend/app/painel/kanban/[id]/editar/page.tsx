@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { 
   ArrowLeft, 
@@ -11,98 +10,11 @@ import {
   Save,
   Trash2
 } from "lucide-react";
-import { getAuthToken, API_URL, getAuthUser } from "@/src/lib/auth";
+import { useEditarViagem } from "@/src/presentation/hooks/useEditarViagem";
 
 export default function EditarViagemPage() {
   const { id } = useParams();
-  const router = useRouter();
-  const [carregando, setCarregando] = useState(true);
-  const [salvando, setSalvando] = useState(false);
-  const [msgSucesso, setMsgSucesso] = useState("");
-  const [erro, setErro] = useState("");
-
-  const [form, setForm] = useState({
-    titulo: "",
-    descricao_precos: "",
-    data_partida: "",
-    data_retorno: "",
-    vagas_totais: 0,
-    descricao_curta: "",
-    itens_inclusos: "",
-    status: "ATIVO",
-    url_capa: ""
-  });
-
-  useEffect(() => {
-    const user = getAuthUser();
-    if (!user || user.tipo !== "ADMIN") {
-      router.push("/painel");
-      return;
-    }
-
-    const carregarViagem = async () => {
-      const token = getAuthToken();
-      try {
-        const res = await fetch(`${API_URL}/viagens/${id}`, {
-          headers: { "Authorization": `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setForm({
-            titulo: data.titulo,
-            descricao_precos: data.descricao_precos || "",
-            data_partida: data.data_partida,
-            vagas_totais: data.vagas_totais,
-            descricao_curta: data.descricao_curta || "",
-            itens_inclusos: data.itens_inclusos || "",
-            status: data.status,
-            data_retorno: data.data_retorno || "",
-            url_capa: data.url_capa || ""
-          });
-        } else {
-          throw new Error("Falha ao carregar dados da viagem");
-        }
-      } catch (err: any) {
-        setErro(err.message);
-      } finally {
-        setCarregando(false);
-      }
-    };
-
-    carregarViagem();
-  }, [id]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSalvando(true);
-    setErro("");
-    const token = getAuthToken();
-
-    try {
-      const res = await fetch(`${API_URL}/admin/viagens/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify(form)
-      });
-
-      if (res.ok) {
-        setMsgSucesso("Alterações salvas com sucesso!");
-        setTimeout(() => {
-          router.push(`/painel/kanban/${id}`);
-        }, 1500);
-      } else {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Erro ao salvar alterações");
-      }
-    } catch (err: any) {
-      setErro(err.message);
-    } finally {
-      setSalvando(false);
-    }
-  };
+  const { form, setForm, carregando, salvando, msgSucesso, erro, handleSubmit, router } = useEditarViagem(id as string);
 
   if (carregando) {
     return (

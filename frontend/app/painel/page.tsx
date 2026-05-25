@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -15,10 +14,10 @@ import {
   Search,
   CheckCircle2,
   Trash2,
-  AlertCircle
+  AlertCircle,
+  Calendar
 } from "lucide-react";
-import { getAuthUser, getAuthToken } from "@/src/lib/auth";
-import { apiClient } from "@/src/lib/services/apiClient";
+import { usePainelAdmin } from "@/src/presentation/hooks/usePainelAdmin";
 
 interface AdminViagem {
   id: number;
@@ -38,116 +37,17 @@ interface LiderReserva {
   status: string;
 }
 
+
 const cards = [
-  {
-    title: "Viagens Ativas",
-    id: "ativas",
-    icon: MapPin,
-    accent: "bg-viaje-primary/10 text-viaje-primary",
-  },
-  {
-    title: "Solicitações",
-    id: "solicitacoes",
-    icon: Ticket,
-    accent: "bg-viaje-secondary/10 text-viaje-secondary",
-  },
+  { title: "Viagens Ativas", id: "ativas", icon: MapPin, accent: "bg-viaje-primary/10 text-viaje-primary" },
+  { title: "Solicitações", id: "solicitacoes", icon: Ticket, accent: "bg-viaje-secondary/10 text-viaje-secondary" },
 ] as const;
 
 export default function PainelPage() {
-  const [usuario, setUsuario] = useState<{ nome: string; tipo: string } | null>(null);
-  const [viagens, setViagens] = useState<AdminViagem[]>([]);
-  const [reservas, setReservas] = useState<LiderReserva[]>([]);
-  const [carregando, setCarregando] = useState(true);
-  const [exibirForm, setExibirForm] = useState(false);
-  const [paginaAtual, setPaginaAtual] = useState(0);
-
-  // Estados do formulário
-  const [novaViagem, setNovaViagem] = useState({
-    titulo: "",
-    descricao_precos: "",
-    data_partida: "",
-    data_retorno: "",
-    vagas_totais: 40,
-    descricao_curta: "",
-    itens_inclusos: "",
-    url_capa: ""
-  });
-  const [criando, setCriando] = useState(false);
-  const [msgSucesso, setMsgSucesso] = useState("");
-  const [erroForm, setErroForm] = useState("");
-
-  const carregarViagens = async (page = 0) => {
-    try {
-      const data = await apiClient.get("/admin/viagens/", {
-        skip: page * 50,
-        limit: 50
-      });
-      setViagens(data);
-    } catch (err) {
-      console.error("Erro ao carregar viagens:", err);
-    }
-  };
-
-  const carregarReservas = async () => {
-    try {
-      const data = await apiClient.get("/reservas/");
-      setReservas(data);
-    } catch (err) {
-      console.error("Erro ao carregar suas reservas:", err);
-    }
-  };
-
-  useEffect(() => {
-    const user = getAuthUser();
-    if (!user) {
-      window.location.href = "/login";
-      return;
-    }
-    setUsuario(user);
-
-    const fetchData = async () => {
-      if (user.tipo === "ADMIN") {
-        await carregarViagens(paginaAtual);
-      } else if (user.tipo === "LIDER") {
-        await carregarReservas();
-      }
-      setCarregando(false);
-    };
-
-    fetchData();
-  }, [paginaAtual]);
-
-  const handleCriarViagem = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setCriando(true);
-    setErroForm("");
-
-    try {
-      await apiClient.post("/admin/viagens/", novaViagem);
-
-      setMsgSucesso("Viagem criada com sucesso!");
-      setNovaViagem({
-        titulo: "",
-        descricao_precos: "",
-        data_partida: "",
-        data_retorno: "",
-        vagas_totais: 40,
-        descricao_curta: "",
-        itens_inclusos: "",
-        url_capa: ""
-      });
-
-      await carregarViagens(paginaAtual);
-      setTimeout(() => {
-        setExibirForm(false);
-        setMsgSucesso("");
-      }, 2000);
-    } catch (err: any) {
-      setErroForm(err.message);
-    } finally {
-      setCriando(false);
-    }
-  };
+  const {
+    usuario, viagensAdmin, reservas, carregando, exibirForm, setExibirForm,
+    paginaAtual, setPaginaAtual, novaViagem, setNovaViagem, criando, msgSucesso, erroForm, handleCriarViagem,
+  } = usePainelAdmin();
 
   if (carregando) {
     return (
@@ -159,16 +59,17 @@ export default function PainelPage() {
 
   if (!usuario) return null;
 
-  const papelAmigavel = usuario.tipo === "ADMIN" ? "Administrador" : "Líder";
+  const papelAmigavel = usuario.ehAdmin ? "Administrador" : "Líder";
 
-  // Resumo para ADMIN
-  const resumoAtivasAdmin = viagens.filter(v => v.status === "ATIVO").length;
-  const resumoSolicitacoesAdmin = viagens.reduce((acc, v) => acc + (v.reservas_por_status?.SOLICITADO || 0), 0);
+  // Resumo para ADMIN (usa viagensAdmin — raw API response)
+  const resumoAtivasAdmin = viagensAdmin.filter(v => v.status === "ATIVO").length;
+  const resumoSolicitacoesAdmin = viagensAdmin.reduce((acc, v) => acc + (v.reservas_por_status?.SOLICITADO || 0), 0);
 
-  // Resumo para LIDER
-  const resumoAtivasLider = Array.from(new Set(reservas.filter(r => r.status !== "CANCELADO").map(r => r.id_viagem))).length;
+  // Resumo para LIDER (usa Reserva entities)
+  const resumoAtivasLider = Array.from(new Set(reservas.filter(r => r.status !== "CANCELADO").map(r => r.idViagem))).length;
   const resumoSolicitacoesLider = reservas.filter(r => r.status === "SOLICITADO").length;
   const resumoGruposLider = reservas.filter(r => r.status === "CONFIRMADO" || r.status === "BLOQUEADO").length;
+
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-stone-50 px-4 py-8 sm:px-8">
@@ -181,13 +82,13 @@ export default function PainelPage() {
             </div>
             <div>
               <h1 className="text-2xl font-black text-stone-800 tracking-tight">
-                Olá, {papelAmigavel} {usuario.nome.split(" ")[0]}!
+                Olá, {papelAmigavel} {usuario.nomeExibicao}!
               </h1>
               <p className="text-stone-500 font-medium">Bora organizar as próximas aventuras?</p>
             </div>
           </div>
 
-          {usuario.tipo === "ADMIN" && (
+          {usuario.ehAdmin && (
             <button
               onClick={() => setExibirForm(true)}
               className="flex items-center justify-center gap-2 bg-viaje-primary text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all"
@@ -284,8 +185,8 @@ export default function PainelPage() {
                     <input
                       type="date"
                       required
-                      value={novaViagem.data_partida}
-                      onChange={e => setNovaViagem({ ...novaViagem, data_partida: e.target.value })}
+                      value={novaViagem.dataPartida}
+                      onChange={e => setNovaViagem({...novaViagem, dataPartida: e.target.value})}
                       className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                     />
                   </div>
@@ -294,8 +195,8 @@ export default function PainelPage() {
                     <label className="block text-sm font-bold text-stone-700 mb-2">Data de Retorno</label>
                     <input
                       type="date"
-                      value={novaViagem.data_retorno}
-                      onChange={e => setNovaViagem({ ...novaViagem, data_retorno: e.target.value })}
+                      value={novaViagem.dataRetorno}
+                      onChange={e => setNovaViagem({...novaViagem, dataRetorno: e.target.value})}
                       className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                     />
                   </div>
@@ -305,8 +206,8 @@ export default function PainelPage() {
                     <input
                       type="number"
                       required
-                      value={novaViagem.vagas_totais}
-                      onChange={e => setNovaViagem({ ...novaViagem, vagas_totais: Number(e.target.value) })}
+                      value={novaViagem.vagasTotais}
+                      onChange={e => setNovaViagem({...novaViagem, vagasTotais: Number(e.target.value)})}
                       placeholder="40"
                       className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                     />
@@ -316,8 +217,8 @@ export default function PainelPage() {
                     <label className="block text-sm font-bold text-stone-700 mb-2">URL da Foto de Capa</label>
                     <input
                       type="url"
-                      value={novaViagem.url_capa}
-                      onChange={e => setNovaViagem({ ...novaViagem, url_capa: e.target.value })}
+                      value={novaViagem.urlCapa}
+                      onChange={e => setNovaViagem({...novaViagem, urlCapa: e.target.value})}
                       placeholder="Ex: https://imagem.com/foto.jpg"
                       className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                     />
@@ -328,8 +229,8 @@ export default function PainelPage() {
                     <input
                       type="text"
                       required
-                      value={novaViagem.descricao_precos}
-                      onChange={e => setNovaViagem({ ...novaViagem, descricao_precos: e.target.value })}
+                      value={novaViagem.descricaoPrecos}
+                      onChange={e => setNovaViagem({...novaViagem, descricaoPrecos: e.target.value})}
                       placeholder="Ex: R$ 350 (Adultos)"
                       className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                     />
@@ -341,8 +242,8 @@ export default function PainelPage() {
                       type="text"
                       required
                       maxLength={255}
-                      value={novaViagem.descricao_curta}
-                      onChange={e => setNovaViagem({ ...novaViagem, descricao_curta: e.target.value })}
+                      value={novaViagem.descricaoCurta}
+                      onChange={e => setNovaViagem({...novaViagem, descricaoCurta: e.target.value})}
                       placeholder="Uma frase marcante sobre a viagem"
                       className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                     />
@@ -353,8 +254,8 @@ export default function PainelPage() {
                     <textarea
                       rows={3}
                       required
-                      value={novaViagem.itens_inclusos}
-                      onChange={e => setNovaViagem({ ...novaViagem, itens_inclusos: e.target.value })}
+                      value={novaViagem.itensInclusos}
+                      onChange={e => setNovaViagem({...novaViagem, itensInclusos: e.target.value})}
                       placeholder="Ex: Transporte, Guia, Seguro (separe por vírgula)"
                       className="w-full rounded-xl border border-stone-200 bg-stone-50 p-3 text-stone-800 focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none resize-none"
                     ></textarea>
@@ -392,13 +293,13 @@ export default function PainelPage() {
               </h2>
             </div>
 
-            {viagens.length === 0 ? (
+            {viagensAdmin.length === 0 ? (
               <div className="rounded-3xl border-2 border-dashed border-stone-200 bg-white p-20 text-center">
                 <p className="text-stone-400 font-medium">Nenhuma viagem encontrada. Comece criando uma!</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-4">
-                {viagens.map((v) => (
+                {viagensAdmin.map((v) => (
                   <div key={v.id} className="bg-white rounded-2xl border border-stone-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
                     <Link href={`/painel/kanban/${v.id}`} className="flex items-center gap-4 group/item">
                       <div className="w-12 h-12 bg-stone-50 rounded-xl flex items-center justify-center text-primary font-bold group-hover/item:bg-primary/10 transition-colors">
@@ -484,21 +385,20 @@ export default function PainelPage() {
                   <div key={r.id} className="bg-white rounded-2xl border border-stone-200 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:shadow-md transition-shadow">
                     <div className="flex items-center gap-4">
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold
-                          ${(r.data_partida_viagem && new Date(r.data_partida_viagem) < new Date()) ? "bg-stone-100 text-stone-500" :
+                          ${(r.dataPartidaViagem && new Date(r.dataPartidaViagem) < new Date()) ? "bg-stone-100 text-stone-500" :
                             r.status === "SOLICITADO" ? "bg-amber-100 text-amber-700" :
                           r.status === "CONFIRMADO" ? "bg-emerald-100 text-emerald-700" : "bg-stone-100 text-stone-500"}`}>
                         R{r.id}
                       </div>
                       <div>
-                        <h4 className="font-bold text-stone-800 text-lg">{r.titulo_viagem || "Viagem Carregando..."}</h4>
+                           <h4 className="font-bold text-stone-800 text-sm mb-3 leading-tight">{r.tituloViagem || `Reserva #${r.id}`}</h4>
                         <div className="flex gap-4 mt-1">
                           <span className="text-sm text-stone-500 flex items-center gap-1.5">
-                            <CalendarDays size={14} />
-                            {r.data_partida_viagem ? new Date(r.data_partida_viagem).toLocaleDateString() : "---"}
+                            <Calendar size={12} /> Partida: {r.dataPartidaViagem ? new Date(r.dataPartidaViagem).toLocaleDateString('pt-BR') : 'TBA'}
                           </span>
                           <span className="text-sm text-stone-500 flex items-center gap-1.5">
                             <Users size={14} />
-                            {r.qtd_vagas} passageiros
+                              <span>{r.qtdVagas} {r.qtdVagas === 1 ? 'vaga' : 'vagas'}</span>
                           </span>
                         </div>
                       </div>
@@ -508,11 +408,11 @@ export default function PainelPage() {
                       <div className="text-right hidden sm:block">
                         <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest leading-none mb-1">Status</p>
                         <span className={`text-sm font-black
-                             ${(r.data_partida_viagem && new Date(r.data_partida_viagem) < new Date()) ? "text-stone-500" :
+                             ${(r.dataPartidaViagem && new Date(r.dataPartidaViagem) < new Date()) ? "text-stone-500" :
                                r.status === "SOLICITADO" ? "text-amber-500" :
                                r.status === "CONFIRMADO" ? "text-emerald-500" :
                                r.status === "CANCELADO" ? "text-rose-500" : "text-stone-500"}`}>
-                          {(r.data_partida_viagem && new Date(r.data_partida_viagem) < new Date()) ? "FINALIZADA" : r.status.replace('_', ' ')}
+                          {(r.dataPartidaViagem && new Date(r.dataPartidaViagem) < new Date()) ? "FINALIZADA" : r.status.replace('_', ' ')}
                         </span>
                       </div>
                       <Link

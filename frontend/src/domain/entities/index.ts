@@ -1,0 +1,6 @@
+export { Viagem } from './Viagem'
+export type { ViagemProps } from './Viagem'
+export { Reserva } from './Reserva'
+export type { ReservaProps } from './Reserva'
+export { Usuario } from './Usuario'
+export type { UsuarioProps, TipoUsuario } from './Usuario'

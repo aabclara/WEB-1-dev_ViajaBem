@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { 
   ArrowLeft, 
@@ -12,7 +11,7 @@ import {
   XCircle,
   MessageCircle
 } from "lucide-react";
-import { getAuthToken, API_URL } from "@/src/lib/auth";
+import { useDetalheReservaAdmin } from "@/src/presentation/hooks/useDetalheReservaAdmin";
 
 const statusConfig: Record<string, { label: string; bg: string; text: string; icon: any }> = {
   SOLICITADO: { label: "AGUARDANDO CONTATO", bg: "bg-amber-100", text: "text-amber-800", icon: Calendar },
@@ -24,74 +23,7 @@ const statusConfig: Record<string, { label: string; bg: string; text: string; ic
 
 export default function ReservaDetalhesPage() {
   const { id: idViagem, idReserva } = useParams();
-  const router = useRouter();
-  
-  const [reserva, setReserva] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [atualizando, setAtualizando] = useState(false);
-
-  useEffect(() => {
-    carregarReserva();
-  }, [idReserva]);
-
-  const carregarReserva = async () => {
-    try {
-      const response = await fetch(`${API_URL}/reservas/${idReserva}`, {
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setReserva(data);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleCobrarWhatsApp = async () => {
-    try {
-      const response = await fetch(`${API_URL}/admin/reservas/${idReserva}/resumo-whatsapp`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` }
-      });
-      const data = await response.json();
-      if (response.ok && data.texto) {
-        const numeroLider = "5511999999999"; // Fictício ou buscar do perfil real
-        const textoEncoded = encodeURIComponent(data.texto);
-        window.open(`https://wa.me/${numeroLider}?text=${textoEncoded}`, '_blank');
-      }
-    } catch (error) {
-      console.error(error);
-      alert("Defina o valor acordado antes de gerar o resumo.");
-    }
-  };
-
-  const mudarStatus = async (novoStatus: string) => {
-    setAtualizando(true);
-    try {
-      const resp = await fetch(`${API_URL}/admin/reservas/${idReserva}`, {
-        method: "PATCH",
-        headers: { 
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getAuthToken()}` 
-        },
-        body: JSON.stringify({ status: novoStatus })
-      });
-      if (resp.ok) {
-        carregarReserva(); // Recarregar dados
-      } else {
-        const err = await resp.json();
-        alert(err.detail || "Erro ao mudar status");
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setAtualizando(false);
-    }
-  };
+  const { reserva, loading, atualizando, handleCobrarWhatsApp, mudarStatus } = useDetalheReservaAdmin(idReserva as string);
 
   if (loading) {
     return <div className="min-h-screen bg-[#FDF9EC] flex items-center justify-center p-4">Carregando...</div>;

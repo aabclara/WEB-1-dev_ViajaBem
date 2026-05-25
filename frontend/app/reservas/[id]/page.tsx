@@ -12,7 +12,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from "lucide-react";
-import { getAuthToken, API_URL } from "@/src/lib/auth";
+import { useReservaDetalhe } from "@/src/presentation/hooks/useReservaDetalhe";
 
 const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
   SOLICITADO: { label: "AGUARDANDO CONTATO", bg: "bg-amber-100", text: "text-amber-800" },
@@ -25,8 +25,7 @@ const statusConfig: Record<string, { label: string; bg: string; text: string }> 
 export default function LiderReservaDetalhesPage() {
   const { id } = useParams();
   
-  const [reserva, setReserva] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const { reserva, isLoading, erro, atualizarPassageiro } = useReservaDetalhe(Number(id));
   
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formNome, setFormNome] = useState("");
@@ -34,28 +33,6 @@ export default function LiderReservaDetalhesPage() {
   const [salvando, setSalvando] = useState(false);
   const [msgSucesso, setMsgSucesso] = useState("");
   const [erroForm, setErroForm] = useState("");
-
-  useEffect(() => {
-    carregarReserva();
-  }, [id]);
-
-  const carregarReserva = async () => {
-    try {
-      const response = await fetch(`${API_URL}/reservas/${id}`, {
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`
-        }
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setReserva(data);
-      }
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const abrirForm = (passageiroId: number, nome: string = "", documento: string = "") => {
     setEditingId(passageiroId);
@@ -71,39 +48,25 @@ export default function LiderReservaDetalhesPage() {
     setErroForm("");
     
     try {
-      const response = await fetch(`${API_URL}/passageiros/${passageiroId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${getAuthToken()}`
-        },
-        body: JSON.stringify({ nome: formNome, documento: formDocumento })
-      });
-      
-      if (response.ok) {
-        setMsgSucesso("Dados salvos com sucesso!");
-        await carregarReserva();
-        setTimeout(() => setEditingId(null), 1500);
-      } else {
-        const errorData = await response.json();
-        setErroForm(errorData.detail || "Erro ao salvar os dados.");
-      }
-    } catch (error) {
-      setErroForm("Erro de rede. Tente novamente.");
+      await atualizarPassageiro(passageiroId, { nome: formNome, documento: formDocumento });
+      setMsgSucesso("Dados salvos com sucesso!");
+      setTimeout(() => setEditingId(null), 1500);
+    } catch (error: any) {
+      setErroForm(error.message || "Erro de rede. Tente novamente.");
     } finally {
       setSalvando(false);
     }
   };
 
-  if (loading) {
-    return <div className="min-h-screen bg-[#FDF9EC] flex items-center justify-center p-4">Carregando...</div>;
+  if (isLoading) {
+    return <div className="min-h-screen bg-[#FDF9EC] flex items-center justify-center p-4"><Loader2 size={40} className="animate-spin text-amber-500" /></div>;
   }
 
-  if (!reserva) {
-    return <div className="min-h-screen bg-[#FDF9EC] flex items-center justify-center p-4">Reserva não encontrada.</div>;
+  if (erro || !reserva) {
+    return <div className="min-h-screen bg-[#FDF9EC] flex items-center justify-center p-4">{erro || "Reserva não encontrada."}</div>;
   }
 
-  const confirmados = reserva.passageiros?.filter((p: any) => p.nome && p.documento) || [];
+  const confirmados = (reserva as any).passageiros?.filter((p: any) => p.nome && p.documento) || [];
   const currentStatusConfig = statusConfig[reserva.status] || statusConfig.SOLICITADO;
 
   return (
@@ -123,7 +86,7 @@ export default function LiderReservaDetalhesPage() {
           <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-6">
             <div>
               <h1 className="text-2xl font-black text-stone-800 leading-tight mb-2">
-                {reserva.titulo_viagem || "Viagem Desconhecida"}
+                {reserva.tituloViagem || "Viagem Desconhecida"}
               </h1>
               <p className="text-lg font-medium text-stone-600">
                 Reserva <span className="font-bold text-stone-800">#R{reserva.id}</span>
@@ -143,7 +106,7 @@ export default function LiderReservaDetalhesPage() {
           <div className="flex gap-8 text-stone-400 font-medium">
             <div className="flex items-center gap-2">
               <Calendar size={18} />
-              <span>{reserva.data_partida_viagem ? new Date(reserva.data_partida_viagem).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric'}) : "Em breve"}</span>
+              <span>{reserva.dataPartidaViagem ? new Date(reserva.dataPartidaViagem).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric'}) : "Em breve"}</span>
             </div>
             <div className="w-1.5 h-1.5 rounded-full bg-stone-300 self-center" />
             <div className="flex items-center gap-2">
@@ -157,11 +120,11 @@ export default function LiderReservaDetalhesPage() {
         <div>
           <div className="flex justify-between items-center mb-4 px-2">
             <h2 className="text-xl font-bold text-stone-800">Passageiros no Combo</h2>
-            <span className="text-sm font-semibold text-stone-500 bg-[#F4F7F8] px-3 py-1 rounded-lg">Combo de {reserva.qtd_vagas}</span>
+            <span className="text-sm font-semibold text-stone-500 bg-[#F4F7F8] px-3 py-1 rounded-lg">Vagas: {reserva.qtdVagas} reservadas</span>
           </div>
 
           <div className="space-y-4">
-            {reserva.passageiros.map((p: any, idx: number) => {
+            {((reserva as any).passageiros || []).map((p: any, idx: number) => {
               const isFilled = p.nome && p.documento;
               const isEditing = editingId === p.id;
               

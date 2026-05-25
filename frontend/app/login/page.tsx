@@ -1,49 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { LogIn, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
-import { API_URL, saveAuthData } from "@/src/lib/auth";
+import { useLogin } from "@/src/presentation/hooks/useLogin";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [mostrarSenha, setMostrarSenha] = useState(false);
-  const [erro, setErro] = useState("");
-  const [carregando, setCarregando] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErro("");
-    setCarregando(true);
-
-    try {
-      // FastAPI OAuth2 espera Form Data (username/password)
-      const formData = new URLSearchParams();
-      formData.append("username", email);
-      formData.append("password", senha);
-
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData,
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.detail || "Falha ao entrar");
-      }
-
-      saveAuthData(data);
-      window.location.href = "/painel";
-    } catch (err: any) {
-      setErro(err.message);
-    } finally {
-      setCarregando(false);
-    }
-  };
+  const { email, setEmail, senha, setSenha, mostrarSenha, setMostrarSenha, erro, carregando, handleSubmit } = useLogin();
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-stone-50 px-4">
@@ -53,9 +14,7 @@ export default function LoginPage() {
             <LogIn size={24} />
           </div>
           <h1 className="text-2xl font-bold text-stone-800">Login</h1>
-          <p className="mt-1 text-sm text-viaje-neutral">
-            Entre na sua conta para continuar
-          </p>
+          <p className="mt-1 text-sm text-viaje-neutral">Entre na sua conta para continuar</p>
         </div>
 
         {erro && (
@@ -66,9 +25,7 @@ export default function LoginPage() {
 
         <form className="space-y-5" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">
-              E-mail
-            </label>
+            <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">E-mail</label>
             <div className="relative">
               <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-viaje-neutral" />
               <input
@@ -84,9 +41,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label htmlFor="senha" className="block text-sm font-medium text-stone-700 mb-1.5">
-              Senha
-            </label>
+            <label htmlFor="senha" className="block text-sm font-medium text-stone-700 mb-1.5">Senha</label>
             <div className="relative">
               <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-viaje-neutral" />
               <input
@@ -114,25 +69,15 @@ export default function LoginPage() {
             disabled={carregando}
             className="w-full rounded-full bg-viaje-primary py-2.5 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2"
           >
-            {carregando ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                Entrando...
-              </>
-            ) : (
-              "Entrar"
-            )}
+            {carregando ? <><Loader2 size={18} className="animate-spin" /> Entrando...</> : "Entrar"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-viaje-neutral">
           Ainda nao tem conta?{" "}
-          <a href="/cadastro" className="font-medium text-viaje-primary hover:underline">
-            Cadastre-se
-          </a>
+          <a href="/cadastro" className="font-medium text-viaje-primary hover:underline">Cadastre-se</a>
         </p>
       </div>
     </div>
   );
 }
-

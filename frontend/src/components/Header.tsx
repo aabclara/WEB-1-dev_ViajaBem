@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Bus } from "lucide-react";
 import { clsx } from "clsx";
+import { User, LogOut, LayoutDashboard } from "lucide-react";
+import { useAuthUser } from "@/src/presentation/hooks/useAuthUser";
 
 const navItems = [
   { href: "/", label: "Destinos" },
@@ -11,21 +13,9 @@ const navItems = [
   { href: "/sobre", label: "Sobre" },
 ] as const;
 
-import { useState, useEffect } from "react";
-import { User, LogOut, LayoutDashboard } from "lucide-react";
-import { getAuthUser, logout } from "@/src/lib/auth";
-
 export function Header() {
   const pathname = usePathname();
-  const [usuario, setUsuario] = useState<{ nome: string; apelido?: string } | null>(null);
-
-  useEffect(() => {
-    const carregarUsuario = () => setUsuario(getAuthUser());
-    carregarUsuario();
-    
-    window.addEventListener("storage", carregarUsuario);
-    return () => window.removeEventListener("storage", carregarUsuario);
-  }, []);
+  const { usuario, logout } = useAuthUser();
 
   return (
     <header className="fixed top-0 w-full z-50 bg-background/90 backdrop-blur-md">

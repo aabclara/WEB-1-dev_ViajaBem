@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import Link from "next/link";
 import { 
   ArrowLeft, 
@@ -16,26 +15,7 @@ import {
   AlertCircle,
   MoreVertical
 } from "lucide-react";
-import { getAuthToken, API_URL, getAuthUser } from "@/src/lib/auth";
-
-interface Reserva {
-  id: number;
-  id_viagem: number;
-  id_lider: number;
-  nome_lider?: string;
-  qtd_vagas: number;
-  status: string;
-  substatus: string;
-  valor_acordado?: number;
-  titulo_viagem?: string;
-  passageiros: any[];
-}
-
-interface KanbanData {
-  id_viagem: number;
-  titulo: string;
-  colunas: Record<string, Reserva[]>;
-}
+import { useKanban } from "@/src/presentation/hooks/useKanban";
 
 const statusConfig: Record<string, { label: string; description: string; color: string; bgColor: string; icon: any }> = {
   SOLICITADO: { label: "Solicitado", description: "Aguardando contato e negociação", color: "bg-amber-100 border-amber-300 text-amber-800", bgColor: "bg-amber-500/5", icon: Clock },
@@ -47,59 +27,7 @@ const statusConfig: Record<string, { label: string; description: string; color: 
 
 export default function KanbanPage() {
   const { id } = useParams();
-  const router = useRouter();
-  const [data, setData] = useState<KanbanData | null>(null);
-  const [carregando, setCarregando] = useState(true);
-  const [erro, setErro] = useState("");
-
-  const carregarDados = async () => {
-    const token = getAuthToken();
-    if (!token) return;
-
-    try {
-      const res = await fetch(`${API_URL}/admin/viagens/${id}/reservas`, {
-        headers: { "Authorization": `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const json = await res.json();
-        setData(json);
-      } else {
-        throw new Error("Falha ao carregar dados do Kanban");
-      }
-    } catch (err: any) {
-      setErro(err.message);
-    } finally {
-      setCarregando(false);
-    }
-  };
-
-  useEffect(() => {
-    const user = getAuthUser();
-    if (!user || user.tipo !== "ADMIN") {
-      router.push("/painel");
-      return;
-    }
-    carregarDados();
-  }, [id]);
-
-  const handleMudarStatus = async (idReserva: number, novoStatus: string) => {
-    const token = getAuthToken();
-    try {
-      const res = await fetch(`${API_URL}/admin/reservas/${idReserva}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
-        },
-        body: JSON.stringify({ status: novoStatus })
-      });
-      if (res.ok) {
-        await carregarDados();
-      }
-    } catch (err) {
-      console.error("Erro ao mudar status:", err);
-    }
-  };
+  const { data, carregando, erro, handleMudarStatus, router } = useKanban(id as string);
 
   if (carregando) {
     return (
