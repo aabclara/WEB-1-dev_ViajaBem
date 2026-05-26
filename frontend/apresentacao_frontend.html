@@ -4,70 +4,73 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ViajeBem Frontend — Apresentação Técnica</title>
+  <title>ViajeBem — Apresentação Frontend</title>
+  <meta name="description" content="Apresentação interativa sobre a arquitetura Frontend do projeto ViajeBem">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap"
     rel="stylesheet">
   <style>
     /* ================================================================
-       DESIGN TOKENS — extraídos do tailwind.config.ts do ViajeBem
+       DESIGN TOKENS — Extraídos do ViajeBem (tailwind.config.ts)
+       Tema LIGHT — Fiel ao layout real do site
        ================================================================ */
     :root {
-      /* Core Palette */
-      --primary: #ffa914;
-      --primary-container: #ffa915;
-      --on-primary: #ffffff;
-      --secondary: #0DBDC2;
-      --on-secondary: #ffffff;
-      --secondary-container: #fecc8d;
-      --tertiary: #53ed72;
-      --tertiary-container: #00cbff;
-      --error: #ba1a1a;
-      --on-error: #ffffff;
-      --error-container: #ffdad6;
+      /* Core */
+      --primary: #FFA914;
+      --primary-hover: #E69500;
+      --on-primary: #FFFFFF;
+      --inverse-primary: #FFB958;
 
-      /* Surfaces */
+      --secondary: #0DBDC2;
+      --on-secondary: #FFFFFF;
+      --secondary-container: #FECC8D;
+
+      --tertiary: #53ED72;
+      --tertiary-container: #00CBFF;
+
+      --error: #BA1A1A;
+      --on-error: #FFFFFF;
+
+      /* Surfaces — Light theme */
       --background: #F7F2E8;
       --on-background: #1F1F1F;
       --surface: #F7F2E8;
       --on-surface: #1F1F1F;
       --on-surface-variant: #534433;
-      --surface-variant: #efe0d1;
-      --surface-dim: #e7d8c9;
-      --surface-container: #fbebdc;
-      --surface-container-high: #f5e6d7;
+      --surface-variant: #EFE0D1;
+      --surface-dim: #E7D8C9;
+      --surface-container: #FBEBDC;
+      --surface-container-low: #FFF1E5;
+      --surface-container-high: #F5E6D7;
+      --surface-container-highest: #EFE0D1;
+      --surface-container-lowest: #FFFFFF;
 
       /* Outlines */
       --outline: #857461;
-      --outline-variant: #d8c3ad;
-
-      /* Inverse (Dark Mode base) */
-      --inverse-surface: #231c0f;
-      --inverse-on-surface: #feeedf;
-      --inverse-primary: #ffb958;
+      --outline-variant: #D8C3AD;
 
       /* Legacy */
       --viaje-primary: #FFA914;
       --viaje-secondary: #97703A;
-      --viaje-tertiary: #00CBFF;
       --viaje-neutral: #817569;
 
-      /* === Dark Presentation Theme === */
-      --slide-bg: #0f0d0a;
-      --slide-bg-elevated: #1a1610;
-      --sidebar-bg: #141110;
-      --sidebar-active: rgba(255, 169, 20, 0.12);
-      --sidebar-border: rgba(255, 169, 20, 0.15);
-      --text-primary: #feeedf;
-      --text-secondary: #d8c3ad;
-      --text-muted: #857461;
-      --code-bg: #0d0b08;
-      --code-border: rgba(255, 169, 20, 0.2);
-      --card-bg: rgba(26, 22, 16, 0.7);
-      --card-border: rgba(255, 169, 20, 0.1);
-      --glow: rgba(255, 169, 20, 0.06);
+      /* Layout */
+      --sidebar-width: 272px;
+      --nav-height: 64px;
+
+      /* Border radius — match site */
+      --radius: 1rem;
+      /* 16px */
+      --radius-lg: 2rem;
+      --radius-xl: 0.75rem;
+      /* 12px — rounded-xl from site buttons */
+
+      /* Transitions */
+      --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+      --duration-normal: 300ms;
+      --duration-fast: 200ms;
     }
 
     /* ================================================================
@@ -76,9 +79,9 @@
     *,
     *::before,
     *::after {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
 
     html {
@@ -90,214 +93,1085 @@
 
     body {
       font-family: 'Montserrat', sans-serif;
-      background: var(--slide-bg);
-      color: var(--text-primary);
+      background: var(--background);
+      color: var(--on-background);
       overflow: hidden;
       height: 100vh;
       width: 100vw;
+    }
+
+    ::selection {
+      background: var(--primary);
+      color: var(--on-primary);
     }
 
     /* ================================================================
-       LAYOUT — Sidebar + Main
+       LAYOUT SHELL
        ================================================================ */
-    .app {
+    .presentation-shell {
       display: flex;
       height: 100vh;
       width: 100vw;
-    }
-
-    /* --- Sidebar --- */
-    .sidebar {
-      width: 280px;
-      min-width: 280px;
-      background: var(--sidebar-bg);
-      border-right: 1px solid var(--sidebar-border);
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      z-index: 10;
-      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .sidebar-header {
-      padding: 28px 24px 20px;
-      border-bottom: 1px solid var(--sidebar-border);
-    }
-
-    .sidebar-logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 6px;
-    }
-
-    .sidebar-logo-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      font-size: 18px;
-      color: var(--on-primary);
-      flex-shrink: 0;
-      box-shadow: 0 0 20px rgba(255, 169, 20, 0.25);
-    }
-
-    .sidebar-logo-text {
-      font-size: 16px;
-      font-weight: 700;
-      color: var(--text-primary);
-      letter-spacing: -0.02em;
-    }
-
-    .sidebar-logo-sub {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 500;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-
-    .sidebar-nav {
-      flex: 1;
-      padding: 16px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .sidebar-item {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 12px 16px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
-      position: relative;
       overflow: hidden;
     }
 
-    .sidebar-item::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
+    /* ================================================================
+       SIDEBAR — Light theme (matches site's bg-background/90 style)
+       ================================================================ */
+    .sidebar {
+      width: var(--sidebar-width);
+      min-width: var(--sidebar-width);
+      height: 100vh;
+      background: rgba(247, 242, 232, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(216, 195, 173, 0.4);
+      position: relative;
+      z-index: 10;
+    }
+
+    /* Sidebar — Brand (matches Header logo style) */
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 20px 22px;
+      height: 80px;
+      border-bottom: 1px solid rgba(216, 195, 173, 0.3);
+    }
+
+    .brand-bus-icon {
+      width: 28px;
+      height: 28px;
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 1.4rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: var(--on-background);
+    }
+
+    /* Sidebar — Nav */
+    .sidebar-nav {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 12px;
+    }
+
+    .sidebar-nav::-webkit-scrollbar {
       width: 3px;
-      background: var(--primary);
-      border-radius: 0 3px 3px 0;
-      opacity: 0;
-      transition: opacity 0.2s ease;
     }
 
-    .sidebar-item:hover {
+    .sidebar-nav::-webkit-scrollbar-thumb {
+      background: rgba(133, 116, 97, 0.15);
+      border-radius: 10px;
+    }
+
+    .nav-section-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--viaje-neutral);
+      padding: 8px 12px 6px;
+      margin-bottom: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      margin: 2px 0;
+      border-radius: var(--radius-xl);
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-smooth);
+      border: 1px solid transparent;
+      position: relative;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .nav-item:hover:not(.disabled) {
       background: rgba(255, 169, 20, 0.06);
+      border-color: rgba(255, 169, 20, 0.10);
     }
 
-    .sidebar-item.active {
-      background: var(--sidebar-active);
-      border-color: var(--sidebar-border);
+    .nav-item.active {
+      background: rgba(255, 169, 20, 0.10);
+      border-color: rgba(255, 169, 20, 0.18);
     }
 
-    .sidebar-item.active::before {
-      opacity: 1;
+    .nav-item.disabled {
+      cursor: default;
+      opacity: 0.4;
     }
 
-    .sidebar-number {
+    .nav-number {
       width: 28px;
       height: 28px;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 0.68rem;
       font-weight: 700;
-      background: rgba(255, 169, 20, 0.08);
-      color: var(--text-muted);
       flex-shrink: 0;
-      transition: all 0.2s ease;
+      transition: all var(--duration-fast) var(--ease-smooth);
+      background: var(--surface-variant);
+      color: var(--viaje-neutral);
+      border: 1px solid var(--outline-variant);
     }
 
-    .sidebar-item.active .sidebar-number {
+    .nav-item.active .nav-number {
       background: var(--primary);
       color: var(--on-primary);
-      box-shadow: 0 0 12px rgba(255, 169, 20, 0.3);
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px rgba(255, 169, 20, 0.3);
     }
 
-    .sidebar-label {
-      font-size: 13px;
+    .nav-label {
+      font-size: 0.78rem;
       font-weight: 500;
-      color: var(--text-secondary);
-      line-height: 1.3;
-      transition: color 0.2s ease;
+      color: var(--on-surface-variant);
+      line-height: 1.35;
+      transition: color var(--duration-fast) var(--ease-smooth);
     }
 
-    .sidebar-item.active .sidebar-label {
-      color: var(--text-primary);
-      font-weight: 600;
+    .nav-item.active .nav-label {
+      color: var(--on-background);
+      font-weight: 700;
     }
 
+    .nav-item:not(.disabled):hover .nav-label {
+      color: var(--primary);
+    }
+
+    /* Sidebar — Footer */
     .sidebar-footer {
-      padding: 16px 24px 24px;
-      border-top: 1px solid var(--sidebar-border);
+      padding: 16px 20px;
+      border-top: 1px solid rgba(216, 195, 173, 0.3);
     }
 
-    .sidebar-footer-text {
-      font-size: 11px;
-      color: var(--text-muted);
+    .slide-counter {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--viaje-neutral);
       text-align: center;
-      line-height: 1.5;
     }
 
-    /* --- Main Area --- */
-    .main {
+    .slide-counter strong {
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 3px;
+      background: var(--surface-variant);
+      border-radius: 10px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      border-radius: 10px;
+      transition: width 0.5s var(--ease-smooth);
+    }
+
+    /* ================================================================
+       MAIN STAGE — Light background (site's bg-background)
+       ================================================================ */
+    .main-stage {
       flex: 1;
       display: flex;
       flex-direction: column;
+      height: 100vh;
       overflow: hidden;
+      background: var(--background);
       position: relative;
     }
 
-    .main::before {
+    /* Subtle radial glow — same as site's gradient cards */
+    .main-stage::before {
       content: '';
       position: absolute;
-      top: -40%;
-      right: -20%;
-      width: 600px;
-      height: 600px;
-      background: radial-gradient(circle, var(--glow) 0%, transparent 70%);
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 80% 20%, rgba(255, 169, 20, 0.05) 0%, transparent 55%),
+        radial-gradient(ellipse at 20% 80%, rgba(13, 189, 194, 0.03) 0%, transparent 55%);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* --- Slide Container --- */
+    /* ================================================================
+       SLIDE VIEWPORT
+       ================================================================ */
     .slide-viewport {
       flex: 1;
-      overflow-y: auto;
-      overflow-x: hidden;
-      padding: 40px 56px;
       position: relative;
+      overflow: hidden;
       z-index: 1;
     }
 
     .slide {
-      display: none;
-      animation: slideIn 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-      max-width: 1100px;
-      margin: 0 auto;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 48px 64px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(50px);
+      transition: all 0.45s var(--ease-smooth);
+      will-change: opacity, transform;
+    }
+
+    .slide>* {
+      margin: auto;
     }
 
     .slide.active {
-      display: block;
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(0);
     }
 
-    @keyframes slideIn {
+    .slide.exit-left {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateX(-50px);
+    }
+
+    /* ================================================================
+       SLIDE 1 — Cover
+       ================================================================ */
+    .cover-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      max-width: 780px;
+      width: 100%;
+    }
+
+    /* Bus icon — matches site header Bus icon */
+    .cover-bus-icon {
+      width: 52px;
+      height: 52px;
+      color: var(--primary);
+      margin-bottom: 12px;
+      animation: fadeInDown 0.7s var(--ease-smooth) 0.15s both;
+    }
+
+    /* Title — matches site's "text-4xl font-black tracking-tighter" */
+    .cover-title {
+      font-size: 4.2rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1.05;
+      color: var(--on-background);
+      margin-bottom: 8px;
+      animation: fadeInUp 0.7s var(--ease-smooth) 0.25s both;
+    }
+
+    .cover-title .accent {
+      color: var(--primary);
+    }
+
+    /* Divider line — matches site's "h-1 w-24 bg-primary rounded-full" */
+    .cover-divider {
+      width: 96px;
+      height: 4px;
+      border-radius: 9999px;
+      background: var(--primary);
+      margin: 20px auto 28px;
+      animation: scaleInX 0.5s var(--ease-smooth) 0.5s both;
+    }
+
+    /* Subtitle — matches site's "text-base font-medium text-on-surface-variant" */
+    .cover-subtitle {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--on-surface-variant);
+      line-height: 1.6;
+      max-width: 620px;
+      margin-bottom: 44px;
+      animation: fadeInUp 0.7s var(--ease-smooth) 0.45s both;
+    }
+
+    .cover-subtitle strong {
+      color: var(--on-background);
+      font-weight: 800;
+    }
+
+    /* Info cards — matches site's card style: bg-white rounded-xl shadow-md */
+    .cover-info-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+      animation: fadeInUp 0.7s var(--ease-smooth) 0.65s both;
+    }
+
+    .cover-info-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 22px;
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .cover-info-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .info-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .info-icon.icon-primary {
+      background: rgba(255, 169, 20, 0.15);
+      color: var(--primary);
+    }
+
+    .info-icon.icon-secondary {
+      background: rgba(13, 189, 194, 0.12);
+      color: var(--secondary);
+    }
+
+    .info-icon.icon-viaje {
+      background: rgba(151, 112, 58, 0.10);
+      color: var(--viaje-secondary);
+    }
+
+    .info-text {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+    }
+
+    .info-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--viaje-neutral);
+      margin-bottom: 2px;
+    }
+
+    .info-value {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--on-background);
+      line-height: 1.25;
+    }
+
+    /* ================================================================
+       SLIDE 2 — O Sistema ViajeBem
+       ================================================================ */
+    .slide-content {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      max-width: 960px;
+      gap: 28px;
+    }
+
+    .slide-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 4px;
+    }
+
+    .slide-header-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .slide-header-icon.bg-primary {
+      background: rgba(255, 169, 20, 0.12);
+      color: var(--primary);
+    }
+
+    .slide-header-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .slide-title {
+      font-size: 2rem;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: var(--on-background);
+      line-height: 1.15;
+    }
+
+    .slide-title-divider {
+      width: 64px;
+      height: 4px;
+      border-radius: 9999px;
+      background: var(--primary);
+    }
+
+    /* Topic cards — matches site ViagemCard: bg-white rounded-xl shadow-md */
+    .topic-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .topic-card {
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+      padding: 22px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .topic-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .topic-card.full-width {
+      grid-column: 1 / -1;
+    }
+
+    .topic-card-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .topic-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .topic-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .topic-icon.t-primary {
+      background: rgba(255, 169, 20, 0.12);
+      color: var(--primary);
+    }
+
+    .topic-icon.t-secondary {
+      background: rgba(13, 189, 194, 0.10);
+      color: var(--secondary);
+    }
+
+    .topic-icon.t-viaje {
+      background: rgba(151, 112, 58, 0.10);
+      color: var(--viaje-secondary);
+    }
+
+    .topic-card-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: var(--on-background);
+      line-height: 1.25;
+    }
+
+    .topic-card-text {
+      font-size: 0.84rem;
+      font-weight: 500;
+      color: var(--on-surface-variant);
+      line-height: 1.6;
+    }
+
+    /* Feature list inside card */
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    .feature-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .feature-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .feature-icon svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .feature-icon.f-primary {
+      background: rgba(255, 169, 20, 0.10);
+      color: var(--primary);
+    }
+
+    .feature-icon.f-secondary {
+      background: rgba(13, 189, 194, 0.08);
+      color: var(--secondary);
+    }
+
+    .feature-icon.f-viaje {
+      background: rgba(151, 112, 58, 0.08);
+      color: var(--viaje-secondary);
+    }
+
+    .feature-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .feature-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--on-background);
+    }
+
+    .feature-desc {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--viaje-neutral);
+      line-height: 1.5;
+    }
+
+    @media (max-width: 768px) {
+      .topic-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ================================================================
+       SLIDE 3 — Evolução e Escolhas Tecnológicas
+       ================================================================ */
+    .two-col-layout {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr;
+      gap: 24px;
+      width: 100%;
+    }
+
+    .col-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .col-panel-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--viaje-neutral);
+      padding-bottom: 4px;
+    }
+
+    /* Stack tech items */
+    .stack-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .stack-item:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .stack-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.1rem;
+    }
+
+    .stack-icon svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .stack-icon.si-primary {
+      background: rgba(255, 169, 20, 0.12);
+      color: var(--primary);
+    }
+
+    .stack-icon.si-secondary {
+      background: rgba(13, 189, 194, 0.10);
+      color: var(--secondary);
+    }
+
+    .stack-icon.si-viaje {
+      background: rgba(151, 112, 58, 0.10);
+      color: var(--viaje-secondary);
+    }
+
+    .stack-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .stack-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--on-background);
+    }
+
+    .stack-version {
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--viaje-neutral);
+    }
+
+    /* Decision cards */
+    .decision-card {
+      padding: 18px 20px;
+      background: var(--surface-container-lowest);
+      border-radius: var(--radius-xl);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .decision-card:hover {
+      transform: scale(1.01);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Highlighted card — Paradigma Open Code */
+    .decision-card.highlight {
+      background: linear-gradient(135deg, rgba(255, 169, 20, 0.06) 0%, rgba(13, 189, 194, 0.04) 100%);
+      border: 2px solid var(--primary);
+      box-shadow: 0 2px 12px rgba(255, 169, 20, 0.12), 0 1px 4px rgba(0, 0, 0, 0.04);
+    }
+
+    .decision-card.highlight:hover {
+      box-shadow: 0 6px 24px rgba(255, 169, 20, 0.18);
+    }
+
+    .decision-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .decision-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .decision-icon svg {
+      width: 17px;
+      height: 17px;
+    }
+
+    .decision-icon.di-primary {
+      background: rgba(255, 169, 20, 0.12);
+      color: var(--primary);
+    }
+
+    .decision-icon.di-secondary {
+      background: rgba(13, 189, 194, 0.10);
+      color: var(--secondary);
+    }
+
+    .decision-icon.di-viaje {
+      background: rgba(151, 112, 58, 0.10);
+      color: var(--viaje-secondary);
+    }
+
+    .decision-card-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--on-background);
+    }
+
+    .decision-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      background: var(--primary);
+      color: var(--on-primary);
+      font-size: 0.58rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .decision-card-text {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--on-surface-variant);
+      line-height: 1.6;
+    }
+
+    @media (max-width: 900px) {
+      .two-col-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ================================================================
+       SLIDE 3 — Code Evidence Section
+       ================================================================ */
+    .evidence-section {
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .evidence-label {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--viaje-neutral);
+    }
+
+    .code-cards-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .code-cards-grid.stacked {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    .code-cards-grid.stacked .code-card-body pre {
+      font-size: 1.25rem;
+      line-height: 1.6;
+    }
+
+    .code-cards-grid.stacked .code-card-title {
+      font-size: 0.95rem;
+    }
+
+    .code-cards-grid.stacked .code-card-path {
+      font-size: 0.8rem;
+    }
+
+    .code-card {
+      background: #1a1a2e;
+      border-radius: var(--radius-xl);
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 1px 4px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-direction: column;
+      transition: all var(--duration-fast) var(--ease-smooth);
+    }
+
+    .code-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+    }
+
+    .code-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: #16162a;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .code-card-title {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .code-card-path {
+      font-size: 0.58rem;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.35);
+      font-family: 'Courier New', Consolas, monospace;
+    }
+
+    .code-card-body {
+      padding: 14px 16px;
+      overflow-x: auto;
+    }
+
+    .code-card-body pre {
+      margin: 0;
+      font-family: 'Courier New', Consolas, 'Liberation Mono', monospace;
+      font-size: 0.78rem;
+      line-height: 1.65;
+      color: #e0e0e0;
+      white-space: pre;
+      tab-size: 2;
+    }
+
+    /* Syntax highlighting */
+    .syn-key {
+      color: #c792ea;
+    }
+
+    /* keywords / property names */
+    .syn-str {
+      color: #c3e88d;
+    }
+
+    /* strings */
+    .syn-num {
+      color: #f78c6c;
+    }
+
+    /* numbers */
+    .syn-type {
+      color: #ffcb6b;
+    }
+
+    /* types / interfaces */
+    .syn-fn {
+      color: #82aaff;
+    }
+
+    /* functions / methods */
+    .syn-cmt {
+      color: #546e7a;
+      font-style: italic;
+    }
+
+    /* comments */
+    .syn-tag {
+      color: #f07178;
+    }
+
+    /* JSX tags */
+    .syn-attr {
+      color: #ffcb6b;
+    }
+
+    /* attributes */
+    .syn-punc {
+      color: #89ddff;
+    }
+
+    /* punctuation / operators */
+    .syn-imp {
+      color: #c792ea;
+    }
+
+    /* import/export */
+
+    @media (max-width: 1100px) {
+      .code-cards-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ================================================================
+       PLACEHOLDER SLIDES (4–8)
+       ================================================================ */
+    .placeholder-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      opacity: 0.45;
+    }
+
+    .placeholder-icon {
+      width: 72px;
+      height: 72px;
+      border-radius: var(--radius-xl);
+      background: var(--surface-container-lowest);
+      border: 2px dashed var(--outline-variant);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: var(--outline);
+    }
+
+    .placeholder-title {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: var(--on-surface-variant);
+      margin-bottom: 8px;
+    }
+
+    .placeholder-text {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--viaje-neutral);
+    }
+
+    /* ================================================================
+       NAVIGATION BAR — Bottom (matches Footer border-t style)
+       ================================================================ */
+    .nav-bar {
+      height: var(--nav-height);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      background: var(--background);
+      border-top: 1px solid rgba(216, 195, 173, 0.3);
+      z-index: 5;
+    }
+
+    .nav-hint {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--viaje-neutral);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 24px;
+      padding: 0 6px;
+      border-radius: 6px;
+      background: var(--surface-container-lowest);
+      border: 1px solid var(--outline-variant);
+      font-size: 0.65rem;
+      font-weight: 700;
+      font-family: 'Montserrat', sans-serif;
+      color: var(--on-surface-variant);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 10px;
+    }
+
+    /* Buttons match site's button style: rounded-xl, font-bold, h-14 (adapted smaller) */
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 24px;
+      border-radius: var(--radius-xl);
+      border: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all var(--duration-fast) var(--ease-smooth);
+      user-select: none;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    }
+
+    .nav-btn:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    /* "Anterior" — outline style */
+    .nav-btn.btn-prev {
+      background: var(--surface-container-lowest);
+      color: var(--on-surface-variant);
+      border: 1px solid var(--outline-variant);
+    }
+
+    .nav-btn.btn-prev:hover:not(:disabled) {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(255, 169, 20, 0.04);
+    }
+
+    /* "Próximo" — primary filled (matches site's bg-primary) */
+    .nav-btn.btn-next {
+      background: var(--primary);
+      color: var(--on-primary);
+    }
+
+    .nav-btn.btn-next:hover:not(:disabled) {
+      background: var(--primary-hover);
+      box-shadow: 0 4px 14px rgba(255, 169, 20, 0.3);
+    }
+
+    .nav-btn .arrow {
+      font-size: 1.05rem;
+      line-height: 1;
+    }
+
+    /* ================================================================
+       ANIMATIONS
+       ================================================================ */
+    @keyframes fadeInUp {
       from {
         opacity: 0;
         transform: translateY(20px);
@@ -309,601 +1183,10 @@
       }
     }
 
-    /* --- Footer Nav --- */
-    .footer-nav {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 56px;
-      border-top: 1px solid var(--sidebar-border);
-      background: var(--sidebar-bg);
-      position: relative;
-      z-index: 2;
-    }
-
-    .footer-nav-progress {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .progress-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: rgba(255, 169, 20, 0.15);
-      transition: all 0.3s ease;
-    }
-
-    .progress-dot.active {
-      background: var(--primary);
-      box-shadow: 0 0 8px rgba(255, 169, 20, 0.4);
-    }
-
-    .progress-dot.visited {
-      background: rgba(255, 169, 20, 0.4);
-    }
-
-    .nav-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 24px;
-      border-radius: 12px;
-      border: 1px solid var(--sidebar-border);
-      background: var(--slide-bg-elevated);
-      color: var(--text-secondary);
-      font-family: 'Montserrat', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      letter-spacing: 0.02em;
-    }
-
-    .nav-btn:hover:not(:disabled) {
-      background: var(--sidebar-active);
-      color: var(--primary);
-      border-color: var(--primary);
-      box-shadow: 0 0 16px rgba(255, 169, 20, 0.12);
-    }
-
-    .nav-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    .nav-btn svg {
-      width: 16px;
-      height: 16px;
-      stroke: currentColor;
-      stroke-width: 2;
-      fill: none;
-    }
-
-    .nav-btn-next {
-      background: linear-gradient(135deg, rgba(255, 169, 20, 0.15), rgba(255, 169, 20, 0.05));
-      border-color: rgba(255, 169, 20, 0.3);
-      color: var(--primary);
-    }
-
-    .nav-btn-next:hover:not(:disabled) {
-      background: linear-gradient(135deg, rgba(255, 169, 20, 0.25), rgba(255, 169, 20, 0.1));
-    }
-
-    /* ================================================================
-       SLIDE TYPOGRAPHY
-       ================================================================ */
-    .slide-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 14px;
-      border-radius: 100px;
-      background: rgba(255, 169, 20, 0.1);
-      border: 1px solid rgba(255, 169, 20, 0.2);
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 20px;
-    }
-
-    .slide h1 {
-      font-size: 38px;
-      font-weight: 800;
-      color: var(--text-primary);
-      line-height: 1.15;
-      letter-spacing: -0.03em;
-      margin-bottom: 12px;
-    }
-
-    .slide h1 .highlight {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-
-    .slide h2 {
-      font-size: 26px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 8px;
-      letter-spacing: -0.02em;
-    }
-
-    .slide-subtitle {
-      font-size: 17px;
-      color: var(--text-secondary);
-      font-weight: 400;
-      line-height: 1.5;
-      margin-bottom: 36px;
-    }
-
-    .slide-divider {
-      width: 60px;
-      height: 3px;
-      background: linear-gradient(90deg, var(--primary), var(--secondary));
-      border-radius: 3px;
-      margin-bottom: 36px;
-    }
-
-    /* ================================================================
-       CARDS & GRID
-       ================================================================ */
-    .tech-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
-      margin-top: 32px;
-    }
-
-    .tech-card {
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 28px;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .tech-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--primary), transparent);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    .tech-card:hover {
-      border-color: rgba(255, 169, 20, 0.25);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
-
-    .tech-card:hover::before {
-      opacity: 1;
-    }
-
-    .tech-card-icon {
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      margin-bottom: 16px;
-      font-weight: 700;
-    }
-
-    .tech-card-icon.core {
-      background: rgba(255, 169, 20, 0.12);
-      color: var(--primary);
-    }
-
-    .tech-card-icon.style {
-      background: rgba(13, 189, 194, 0.12);
-      color: var(--secondary);
-    }
-
-    .tech-card-icon.quality {
-      background: rgba(83, 237, 114, 0.12);
-      color: var(--tertiary);
-    }
-
-    .tech-card-icon.components {
-      background: rgba(0, 203, 255, 0.12);
-      color: var(--tertiary-container);
-    }
-
-    .tech-card-title {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-    }
-
-    .tech-card-value {
-      font-size: 15px;
-      color: var(--text-secondary);
-      line-height: 1.5;
-      font-weight: 400;
-    }
-
-    .tech-card-value strong {
-      color: var(--text-primary);
-      font-weight: 600;
-    }
-
-    /* ================================================================
-       TOPIC LIST
-       ================================================================ */
-    .topic-section {
-      margin-bottom: 32px;
-    }
-
-    .topic-section h3 {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text-primary);
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .topic-section h3 .icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 8px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      flex-shrink: 0;
-    }
-
-    .topic-section h3 .icon.gold {
-      background: rgba(255, 169, 20, 0.12);
-    }
-
-    .topic-section h3 .icon.teal {
-      background: rgba(13, 189, 194, 0.12);
-    }
-
-    .topic-section h3 .icon.green {
-      background: rgba(83, 237, 114, 0.12);
-    }
-
-    .topic-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .topic-item {
-      display: flex;
-      gap: 14px;
-      align-items: flex-start;
-      padding: 16px 20px;
-      background: var(--card-bg);
-      border: 1px solid var(--card-border);
-      border-radius: 12px;
-      transition: border-color 0.2s ease;
-    }
-
-    .topic-item:hover {
-      border-color: rgba(255, 169, 20, 0.2);
-    }
-
-    .topic-bullet {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--primary);
-      flex-shrink: 0;
-      margin-top: 7px;
-      box-shadow: 0 0 8px rgba(255, 169, 20, 0.3);
-    }
-
-    .topic-bullet.teal {
-      background: var(--secondary);
-      box-shadow: 0 0 8px rgba(13, 189, 194, 0.3);
-    }
-
-    .topic-bullet.green {
-      background: var(--tertiary);
-      box-shadow: 0 0 8px rgba(83, 237, 114, 0.3);
-    }
-
-    .topic-text {
-      flex: 1;
-    }
-
-    .topic-text strong {
-      color: var(--text-primary);
-      font-weight: 600;
-    }
-
-    .topic-text {
-      font-size: 14.5px;
-      line-height: 1.6;
-      color: var(--text-secondary);
-    }
-
-    .topic-text code {
-      font-family: 'JetBrains Mono', monospace;
-      background: rgba(255, 169, 20, 0.08);
-      color: var(--primary);
-      padding: 2px 7px;
-      border-radius: 5px;
-      font-size: 13px;
-      font-weight: 500;
-    }
-
-    /* ================================================================
-       CODE BLOCKS — Alta visibilidade para projeção
-       ================================================================ */
-    .code-showcase {
-      margin-top: 28px;
-    }
-
-    .code-showcase-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
-
-    .code-showcase-header .label {
-      font-size: 12px;
-      font-weight: 700;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-    }
-
-    .code-showcase-header .filepath {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-muted);
-      background: rgba(255, 169, 20, 0.06);
-      padding: 4px 10px;
-      border-radius: 6px;
-    }
-
-    .code-block {
-      background: var(--code-bg);
-      border: 1px solid var(--code-border);
-      border-radius: 16px;
-      padding: 28px 32px;
-      overflow-x: auto;
-      position: relative;
-    }
-
-    .code-block::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--primary), transparent);
-      opacity: 0.3;
-    }
-
-    .code-block pre {
-      margin: 0;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 17px;
-      line-height: 1.7;
-      color: var(--text-primary);
-      white-space: pre;
-      tab-size: 2;
-      font-weight: 500;
-      letter-spacing: 0.01em;
-    }
-
-    /* Syntax Highlighting — CSS-only via spans */
-    .kw {
-      color: #c792ea;
-      font-weight: 600;
-    }
-
-    /* keywords: export, class, const, if, return, new, get, throw, async, await */
-    .tp {
-      color: #ffcb6b;
-    }
-
-    /* types: string, number, boolean, Email, Viagem, Promise */
-    .fn {
-      color: #82aaff;
-    }
-
-    /* functions/methods: create, includes, trim, toLowerCase, execute */
-    .st {
-      color: #c3e88d;
-    }
-
-    /* strings */
-    .cm {
-      color: #546e7a;
-      font-style: italic;
-    }
-
-    /* comments */
-    .op {
-      color: #89ddff;
-    }
-
-    /* operators: =, =>, ===, !==, ||, && */
-    .nr {
-      color: #f78c6c;
-    }
-
-    /* numbers */
-    .pr {
-      color: #f07178;
-    }
-
-    /* properties */
-    .dc {
-      color: #ffcb6b;
-      font-style: italic;
-    }
-
-    /* decorators / interfaces */
-    .im {
-      color: #89ddff;
-      font-weight: 600;
-    }
-
-    /* import/from */
-
-    /* ================================================================
-       COVER SLIDE SPECIAL
-       ================================================================ */
-    .cover-hero {
-      text-align: center;
-      padding: 32px 0 24px;
-    }
-
-    .cover-logo {
-      width: 80px;
-      height: 80px;
-      border-radius: 24px;
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 32px;
-      font-weight: 900;
-      color: var(--on-primary);
-      margin-bottom: 28px;
-      box-shadow: 0 0 40px rgba(255, 169, 20, 0.3), 0 0 80px rgba(255, 169, 20, 0.1);
-    }
-
-    .cover-hero h1 {
-      font-size: 44px;
-      margin-bottom: 8px;
-    }
-
-    .cover-hero .slide-subtitle {
-      font-size: 19px;
-      margin-bottom: 8px;
-    }
-
-    .cover-date {
-      font-size: 13px;
-      color: var(--text-muted);
-      font-weight: 500;
-      margin-bottom: 40px;
-    }
-
-    /* ================================================================
-       RESPONSIVE
-       ================================================================ */
-    .sidebar-toggle {
-      display: none;
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 100;
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      background: var(--sidebar-bg);
-      border: 1px solid var(--sidebar-border);
-      color: var(--primary);
-      cursor: pointer;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .sidebar-toggle svg {
-      width: 20px;
-      height: 20px;
-      stroke: currentColor;
-      stroke-width: 2;
-      fill: none;
-    }
-
-    .sidebar-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
-      z-index: 5;
-    }
-
-    @media (max-width: 900px) {
-      .sidebar-toggle {
-        display: flex;
-      }
-
-      .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        transform: translateX(-100%);
-        z-index: 50;
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);
-      }
-
-      .sidebar.open {
-        transform: translateX(0);
-      }
-
-      .sidebar-overlay.open {
-        display: block;
-      }
-
-      .slide-viewport {
-        padding: 24px 20px;
-        padding-top: 72px;
-      }
-
-      .footer-nav {
-        padding: 12px 20px;
-      }
-
-      .cover-hero h1 {
-        font-size: 28px;
-      }
-
-      .slide h1 {
-        font-size: 26px;
-      }
-
-      .tech-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .code-block pre {
-        font-size: 13px;
-      }
-    }
-
-    /* ================================================================
-       ANIMATIONS
-       ================================================================ */
-    @keyframes fadeUp {
+    @keyframes fadeInDown {
       from {
         opacity: 0;
-        transform: translateY(12px);
+        transform: translateY(-14px);
       }
 
       to {
@@ -912,83 +1195,49 @@
       }
     }
 
-    .anim-delay-1 {
-      animation: fadeUp 0.5s 0.1s both;
+    @keyframes scaleInX {
+      from {
+        transform: scaleX(0);
+      }
+
+      to {
+        transform: scaleX(1);
+      }
     }
 
-    .anim-delay-2 {
-      animation: fadeUp 0.5s 0.2s both;
+    /* ================================================================
+       RESPONSIVE
+       ================================================================ */
+    @media (max-width: 1024px) {
+      :root {
+        --sidebar-width: 240px;
+      }
+
+      .cover-title {
+        font-size: 3.2rem;
+      }
+
+      .slide {
+        padding: 32px 40px;
+      }
     }
 
-    .anim-delay-3 {
-      animation: fadeUp 0.5s 0.3s both;
-    }
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
 
-    .anim-delay-4 {
-      animation: fadeUp 0.5s 0.4s both;
-    }
+      .cover-title {
+        font-size: 2.6rem;
+      }
 
-    /* Keyboard hint */
-    .kbd-hint {
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .kbd {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2px 8px;
-      border-radius: 6px;
-      background: rgba(255, 169, 20, 0.08);
-      border: 1px solid rgba(255, 169, 20, 0.15);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: rgba(255, 169, 20, 0.15);
-      border-radius: 3px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 169, 20, 0.3);
-    }
-
-    /* Two-column layout for topics + code */
-    .content-split {
-      display: flex;
-      gap: 32px;
-      align-items: flex-start;
-    }
-
-    .content-split .topics-col {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .content-split .code-col {
-      flex: 1.15;
-      min-width: 0;
-    }
-
-    @media (max-width: 1100px) {
-      .content-split {
+      .cover-info-row {
         flex-direction: column;
+        align-items: center;
+      }
+
+      .slide {
+        padding: 24px 20px;
       }
     }
   </style>
@@ -996,535 +1245,1342 @@
 
 <body>
 
-  <!-- Sidebar Toggle (Mobile) -->
-  <button class="sidebar-toggle" id="sidebarToggle" aria-label="Abrir menu">
-    <svg viewBox="0 0 24 24">
-      <line x1="3" y1="6" x2="21" y2="6" />
-      <line x1="3" y1="12" x2="21" y2="12" />
-      <line x1="3" y1="18" x2="21" y2="18" />
-    </svg>
-  </button>
+  <div class="presentation-shell">
 
-  <!-- Sidebar Overlay (Mobile) -->
-  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <!-- ============================================================
+         SIDEBAR — Light theme
+         ============================================================ -->
+    <aside class="sidebar">
 
-  <div class="app">
-    <!-- ================================================================
-       SIDEBAR
-       ================================================================ -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-logo">
-          <div class="sidebar-logo-icon">VB</div>
-          <div>
-            <div class="sidebar-logo-text">ViajeBem</div>
-            <div class="sidebar-logo-sub">Projeto de Lab. de Programação Web</div>
-          </div>
+      <!-- Brand — Matches Header: Bus icon + "Viaje Bem" -->
+      <div class="sidebar-brand">
+        <svg class="brand-bus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 6v6" />
+          <path d="M15 6v6" />
+          <path d="M2 12h19.6" />
+          <path
+            d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" />
+          <circle cx="7" cy="18" r="2" />
+          <path d="M9 18h5" />
+          <circle cx="16" cy="18" r="2" />
+        </svg>
+        <div style="display: flex; flex-direction: column;">
+          <span class="brand-title">Viaje Bem</span>
+          <span style="font-size: 0.58rem; font-weight: 700; color: #817569; opacity: 0.65; letter-spacing: 0.05em; margin-top: 2px;">LAB. PROG. WEB — 2026.1</span>
         </div>
       </div>
-      <nav class="sidebar-nav" id="sidebarNav">
-        <div class="sidebar-item active" data-slide="0" onclick="goToSlide(0)">
-          <div class="sidebar-number">01</div>
-          <div class="sidebar-label">Introdução</div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Sumário</div>
+
+        <div class="nav-item" data-slide="0" onclick="goToSlide(0)">
+          <div class="nav-number">01</div>
+          <div class="nav-label">Capa</div>
         </div>
-        <div class="sidebar-item" data-slide="1" onclick="goToSlide(1)">
-          <div class="sidebar-number">02</div>
-          <div class="sidebar-label">Camada de Domínio</div>
+
+        <div class="nav-item" data-slide="1" onclick="goToSlide(1)">
+          <div class="nav-number">02</div>
+          <div class="nav-label">O Sistema ViajeBem</div>
         </div>
-        <div class="sidebar-item" data-slide="2" onclick="goToSlide(2)">
-          <div class="sidebar-number">03</div>
-          <div class="sidebar-label">Camada de Aplicação</div>
+
+        <div class="nav-item" data-slide="2" onclick="goToSlide(2)">
+          <div class="nav-number">03</div>
+          <div class="nav-label">Evolução Tecnológica</div>
         </div>
-        <div class="sidebar-item" data-slide="3" onclick="goToSlide(3)">
-          <div class="sidebar-number">04</div>
-          <div class="sidebar-label">Camada de Infraestrutura</div>
+
+        <div class="nav-item" data-slide="3" onclick="goToSlide(3)">
+          <div class="nav-number">04</div>
+          <div class="nav-label">Camada de Domínio</div>
         </div>
-        <div class="sidebar-item" data-slide="4" onclick="goToSlide(4)">
-          <div class="sidebar-number">05</div>
-          <div class="sidebar-label">Camada de Apresentação</div>
+
+        <div class="nav-item" data-slide="4" onclick="goToSlide(4)">
+          <div class="nav-number">05</div>
+          <div class="nav-label">Camada de Aplicação</div>
         </div>
-        <div class="sidebar-item" data-slide="5" onclick="goToSlide(5)">
-          <div class="sidebar-number">06</div>
-          <div class="sidebar-label">Estratégia de Testes</div>
+
+        <div class="nav-item" data-slide="5" onclick="goToSlide(5)">
+          <div class="nav-number">06</div>
+          <div class="nav-label">Camada de Infraestrutura</div>
+        </div>
+
+        <div class="nav-item" data-slide="6" onclick="goToSlide(6)">
+          <div class="nav-number">07</div>
+          <div class="nav-label">Testes de Interface</div>
+        </div>
+
+        <div class="nav-item active" data-slide="7" onclick="goToSlide(7)">
+          <div class="nav-number">08</div>
+          <div class="nav-label">Conclusão & Próximos Passos</div>
         </div>
       </nav>
+
+      <!-- Footer -->
       <div class="sidebar-footer">
-        <div class="sidebar-footer-text">
-          Arquitetura Limpa &amp; DDD<br>
-          Next.js 15 · React 19 · TypeScript
+        <div class="slide-counter">
+          Slide <strong id="currentSlideNum">1</strong> de <strong>8</strong>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width: 12.5%"></div>
         </div>
       </div>
+
     </aside>
 
-    <!-- ================================================================
-       MAIN CONTENT
-       ================================================================ -->
-    <div class="main">
+    <!-- ============================================================
+         MAIN STAGE — Light background
+         ============================================================ -->
+    <div class="main-stage">
+
       <div class="slide-viewport">
 
-        <!-- ============================================================
-           SLIDE 1 — CAPA & VISÃO EXECUTIVA
-           ============================================================ -->
-        <section class="slide active" id="slide-0">
-          <div class="cover-hero">
-            <div class="cover-logo anim-delay-1">VB</div>
-            <h1 class="anim-delay-2">ViajeBem Frontend<br><span class="highlight">Arquitetura Limpa &amp; DDD</span>
+        <!-- SLIDE 1 — Capa -->
+        <div class="slide active" id="slide-0">
+          <div class="cover-content">
+
+            <!-- Bus icon — same as site header -->
+            <svg class="cover-bus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M8 6v6" />
+              <path d="M15 6v6" />
+              <path d="M2 12h19.6" />
+              <path
+                d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" />
+              <circle cx="7" cy="18" r="2" />
+              <path d="M9 18h5" />
+              <circle cx="16" cy="18" r="2" />
+            </svg>
+
+            <h1 class="cover-title">
+              Viaje <span class="accent">Bem</span>
             </h1>
-            <p class="slide-subtitle anim-delay-3">Apresentação Técnica — Lab. Prog. web </p>
-            <p class="cover-date anim-delay-3">Maio 2026</p>
+
+            <div class="cover-divider"></div>
+
+            <p class="cover-subtitle">
+              <strong>Desenvolvimento Frontend:</strong> Arquitetura Limpa, DDD e Testes de Interface
+            </p>
+
+            <div class="cover-info-row">
+              <div class="cover-info-card">
+                <div class="info-icon icon-primary">📚</div>
+                <div class="info-text">
+                  <span class="info-label">Disciplina</span>
+                  <span class="info-value">Programação Web / Dev. Frontend</span>
+                </div>
+              </div>
+
+              <div class="cover-info-card">
+                <div class="info-icon icon-secondary">👨‍🏫</div>
+                <div class="info-text">
+                  <span class="info-label">Professor</span>
+                  <span class="info-value">Prof. Lázaro</span>
+                </div>
+              </div>
+
+              <div class="cover-info-card">
+                <div class="info-icon icon-viaje">📅</div>
+                <div class="info-text">
+                  <span class="info-label">Semestre</span>
+                  <span class="info-value">2026.1</span>
+                </div>
+              </div>
+            </div>
+
           </div>
+        </div>
 
-          <div class="tech-grid anim-delay-4">
-            <div class="tech-card">
-              <div class="tech-card-icon core">⚡</div>
-              <div class="tech-card-title">Core</div>
-              <div class="tech-card-value">
-                <strong>Next.js 15.1.3</strong> (App Router)<br>
-                + <strong>React 19.0.0</strong>
+        <!-- SLIDE 2 — O Sistema ViajeBem -->
+        <div class="slide" id="slide-1">
+          <div class="slide-content">
+
+            <!-- Header -->
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M8 6v6" />
+                  <path d="M15 6v6" />
+                  <path d="M2 12h19.6" />
+                  <path
+                    d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3" />
+                  <circle cx="7" cy="18" r="2" />
+                  <path d="M9 18h5" />
+                  <circle cx="16" cy="18" r="2" />
+                </svg>
+              </div>
+              <h2 class="slide-title">O Sistema ViajeBem</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <!-- Topic Cards -->
+            <div class="topic-row">
+
+              <!-- Card: O que é -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <!-- Lucide: Globe -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
+                      <path d="M2 12h20" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">O que é o Projeto</span>
+                </div>
+                <p class="topic-card-text">
+                  Uma plataforma <strong>moderna e intuitiva</strong> de agendamento de viagens e gestão centralizada de
+                  reservas, construída com tecnologias de ponta.
+                </p>
+              </div>
+
+              <!-- Card: O problema -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <!-- Lucide: Zap -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path
+                        d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">O Problema</span>
+                </div>
+                <p class="topic-card-text">
+                  Elimina a <strong>fricção e a complexidade manual</strong> no processo de reserva, permitindo que o
+                  usuário encontre viagens com rapidez e segurança.
+                </p>
+              </div>
+
+            </div>
+
+            <!-- Card: Recursos Principais (full width) -->
+            <div class="topic-row">
+              <div class="topic-card full-width">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-viaje">
+                    <!-- Lucide: Layers -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path
+                        d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                      <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                      <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Recursos Principais</span>
+                </div>
+
+                <div class="feature-list">
+                  <!-- Feature 1 -->
+                  <div class="feature-item">
+                    <div class="feature-icon f-primary">
+                      <!-- Lucide: Activity -->
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                          d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2" />
+                      </svg>
+                    </div>
+                    <div class="feature-info">
+                      <span class="feature-name">Gestão de Vagas em Tempo Real</span>
+                      <span class="feature-desc">Cálculo dinâmico de disponibilidade para evitar overbooking.</span>
+                    </div>
+                  </div>
+
+                  <!-- Feature 2 -->
+                  <div class="feature-item">
+                    <div class="feature-icon f-secondary">
+                      <!-- Lucide: ShieldCheck -->
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                          d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+                        <path d="m9 12 2 2 4-4" />
+                      </svg>
+                    </div>
+                    <div class="feature-info">
+                      <span class="feature-name">Consistência de Regras</span>
+                      <span class="feature-desc">Automação de políticas de cancelamento e prazos de partida.</span>
+                    </div>
+                  </div>
+
+                  <!-- Feature 3 -->
+                  <div class="feature-item">
+                    <div class="feature-icon f-viaje">
+                      <!-- Lucide: Users -->
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                        <circle cx="9" cy="7" r="4" />
+                        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                      </svg>
+                    </div>
+                    <div class="feature-info">
+                      <span class="feature-name">Controle de Acesso (RBAC)</span>
+                      <span class="feature-desc">Distinção clara entre Cliente (busca e reserva) e Administrador/Líder
+                        (gestão de frota e usuários).</span>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
-            <div class="tech-card">
-              <div class="tech-card-icon style">🎨</div>
-              <div class="tech-card-title">Estilização</div>
-              <div class="tech-card-value">
-                <strong>Tailwind CSS v3.4.17</strong><br>
-                + <strong>Lucide Icons</strong>
-              </div>
-            </div>
-            <div class="tech-card">
-              <div class="tech-card-icon quality">✓</div>
-              <div class="tech-card-title">Qualidade</div>
-              <div class="tech-card-value">
-                <strong>Vitest</strong> + <strong>React Testing Library</strong><br>
-                + <strong>JSDOM</strong>
-              </div>
-            </div>
-            <div class="tech-card">
-              <div class="tech-card-icon components">◇</div>
-              <div class="tech-card-title">Componentização</div>
-              <div class="tech-card-value">
-                <strong>Shadcn/ui</strong> (Open Code)<br>
-                + <strong>clsx</strong> / <strong>tailwind-merge</strong>
-              </div>
-            </div>
+
           </div>
-        </section>
+        </div>
 
-        <!-- ============================================================
-           SLIDE 2 — CAMADA DE DOMÍNIO
-           ============================================================ -->
-        <section class="slide" id="slide-1">
-          <div class="slide-badge">Slide 02</div>
-          <h1>Camada de <span class="highlight">Domínio</span></h1>
-          <p class="slide-subtitle">O Coração Incorruptível — Regras puras, zero acoplamento a frameworks</p>
-          <div class="slide-divider"></div>
+        <!-- SLIDE 3 — Evolução e Escolhas Tecnológicas -->
+        <div class="slide" id="slide-2">
+          <div class="slide-content">
 
-          <ul class="topic-list" style="margin-bottom: 28px;">
-            <li class="topic-item">
-              <div class="topic-bullet"></div>
-              <div class="topic-text">
-                <strong>Regras de Negócio Puras:</strong> As entidades <code>Viagem</code> (cálculos de
-                <code>percentualOcupacao</code> e <code>ultimasVagas</code>), <code>Reserva</code>
-                (<code>estaFinalizada</code>) e <code>Usuario</code> (<code>ehAdmin</code>) protegem as regras de forma
-                cega, com acoplamento zero a frameworks ou rede.
+            <!-- Header -->
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <!-- Lucide: Code2 -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="m18 16 4-4-4-4" />
+                  <path d="m6 8-4 4 4 4" />
+                  <path d="m14.5 4-5 16" />
+                </svg>
               </div>
-            </li>
-            <li class="topic-item">
-              <div class="topic-bullet teal"></div>
-              <div class="topic-text">
-                <strong>Combate à Obsessão por Primitivos:</strong> Value Objects com construtor <code>private</code> e
-                fábricas estáticas garantem o princípio do <strong>Fail-Fast</strong> (validação precoce).
-              </div>
-            </li>
-            <li class="topic-item">
-              <div class="topic-bullet green"></div>
-              <div class="topic-text">
-                <strong>Falha Semântica:</strong> Uso de erros customizados (<code>EmailInvalidoError</code>) para
-                captura específica em vez de erros genéricos.
-              </div>
-            </li>
-          </ul>
-
-          <div class="code-showcase">
-            <div class="code-showcase-header">
-              <span class="label">Código Real</span>
-              <span class="filepath">src/domain/value-objects/Email.ts</span>
+              <h2 class="slide-title">Evolução e Escolhas Tecnológicas</h2>
             </div>
-            <div class="code-block">
-              <pre><span class="im">import</span> { <span class="tp">EmailInvalidoError</span> } <span class="im">from</span> <span class="st">'../errors/EmailInvalidoError'</span>
+            <div class="slide-title-divider"></div>
 
-<span class="kw">export class</span> <span class="tp">Email</span> {
-  <span class="kw">private</span> <span class="fn">constructor</span>(<span class="kw">public readonly</span> <span class="pr">value</span>: <span class="tp">string</span>) {}
+            <!-- Two-column layout -->
+            <div class="two-col-layout">
 
-  <span class="kw">static</span> <span class="fn">create</span>(<span class="pr">raw</span>: <span class="tp">string</span>): <span class="tp">Email</span> {
-    <span class="kw">if</span> (!<span class="pr">raw</span> <span class="op">||</span> !<span class="pr">raw</span>.<span class="fn">includes</span>(<span class="st">'@'</span>) <span class="op">||</span> <span class="pr">raw</span>.<span class="fn">trim</span>() <span class="op">!==</span> <span class="pr">raw</span> <span class="op">||</span> <span class="pr">raw</span>.<span class="pr">length</span> <span class="op">&lt;</span> <span class="nr">3</span>) {
-      <span class="kw">throw new</span> <span class="tp">EmailInvalidoError</span>(<span class="pr">raw</span>)
-    }
-    <span class="kw">return new</span> <span class="tp">Email</span>(<span class="pr">raw</span>.<span class="fn">toLowerCase</span>().<span class="fn">trim</span>())
-  }
+              <!-- LEFT COLUMN — Stack -->
+              <div class="col-panel">
+                <div class="col-panel-label">Stack Identificada</div>
 
-  <span class="fn">toString</span>(): <span class="tp">string</span> {
-    <span class="kw">return</span> <span class="kw">this</span>.<span class="pr">value</span>
-  }
-}</pre>
+                <!-- Next.js -->
+                <div class="stack-item">
+                  <div class="stack-icon si-primary">
+                    <!-- Lucide: Layers -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path
+                        d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z" />
+                      <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65" />
+                      <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65" />
+                    </svg>
+                  </div>
+                  <div class="stack-info">
+                    <span class="stack-name">Next.js 15.1.3 (App Router)</span>
+                    <span class="stack-version">React 19.0.0</span>
+                  </div>
+                </div>
+
+                <!-- Tailwind -->
+                <div class="stack-item">
+                  <div class="stack-icon si-secondary">
+                    <!-- Lucide: Palette -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" />
+                      <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" />
+                      <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" />
+                      <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" />
+                      <path
+                        d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z" />
+                    </svg>
+                  </div>
+                  <div class="stack-info">
+                    <span class="stack-name">Tailwind CSS v3.4.17</span>
+                    <span class="stack-version">Estilização Base</span>
+                  </div>
+                </div>
+
+                <!-- Vitest -->
+                <div class="stack-item">
+                  <div class="stack-icon si-viaje">
+                    <!-- Lucide: FlaskConical -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path
+                        d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
+                      <path d="M8.5 2h7" />
+                      <path d="M7 16.5h10" />
+                    </svg>
+                  </div>
+                  <div class="stack-info">
+                    <span class="stack-name">Vitest + Testing Library</span>
+                    <span class="stack-version">Ambiente de Testes</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- RIGHT COLUMN — Decisões de Engenharia -->
+              <div class="col-panel">
+                <div class="col-panel-label">Decisões de Engenharia</div>
+
+                <!-- Decision 1 -->
+                <div class="decision-card">
+                  <div class="decision-card-header">
+                    <div class="decision-icon di-primary">
+                      <!-- Lucide: ShieldCheck -->
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path
+                          d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+                        <path d="m9 12 2 2 4-4" />
+                      </svg>
+                    </div>
+                    <span class="decision-card-title">Preservação do Tailwind v3</span>
+                  </div>
+                  <p class="decision-card-text">
+                    Optamos por manter a <strong>versão 3 estável</strong> para garantir a integridade do design system
+                    já construído, evitando as quebras de retrocompatibilidade da v4.
+                  </p>
+                </div>
+
+                <!-- Decision 2 — HIGHLIGHT -->
+                <div class="decision-card highlight">
+                  <div class="decision-card-header">
+                    <div class="decision-icon di-secondary">
+                      <!-- Lucide: Unplug -->
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="m19 5 3-3" />
+                        <path d="m2 22 3-3" />
+                        <path d="M6.3 20.3a2.4 2.4 0 0 0 3.4 0L12 18l-6-6-2.3 2.3a2.4 2.4 0 0 0 0 3.4Z" />
+                        <path d="M7.5 13.5 10 11" />
+                        <path d="M10.5 16.5 13 14" />
+                        <path d="m12 6 6 6 2.3-2.3a2.4 2.4 0 0 0 0-3.4l-2.6-2.6a2.4 2.4 0 0 0-3.4 0Z" />
+                      </svg>
+                    </div>
+                    <span class="decision-card-title">Paradigma Open Code</span>
+                    <span class="decision-badge">Shadcn/ui</span>
+                  </div>
+                  <p class="decision-card-text">
+                    Em vez da CLI automatizada do Shadcn, adotamos a <strong>filosofia pura do ecossistema</strong>.
+                    Injetamos o código-fonte dos primitivos (<strong>Button</strong> e <strong>Input</strong>)
+                    diretamente em <code>src/components/ui/</code>.
+                  </p>
+                </div>
+
+                <!-- Decision 3 -->
+                <div class="decision-card">
+                  <div class="decision-card-header">
+                    <div class="decision-icon di-viaje">
+                      <!-- Lucide: Package -->
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="m7.5 4.27 9 5.15" />
+                        <path
+                          d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                        <path d="m3.3 7 8.7 5 8.7-5" />
+                        <path d="M12 22V12" />
+                      </svg>
+                    </div>
+                    <span class="decision-card-title">Independência Arquitetural</span>
+                  </div>
+                  <p class="decision-card-text">
+                    Controle <strong>total</strong> sobre o código visual — eliminando caixas-pretas no
+                    <code>node_modules</code> e mantendo a interface flexível e compatível com nossos testes
+                    comportamentais.
+                  </p>
+                </div>
+              </div>
+
             </div>
+
+            <!-- Evidence Section -->
+            <div class="evidence-section">
+              <div class="evidence-label">Evidência no Código Fonte</div>
+
+              <div class="code-cards-grid">
+
+                <!-- Card 1: package.json — Next.js / React -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Next.js / React</span>
+                    <span class="code-card-path">package.json, L14–20</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code><span class="syn-key">"dependencies"</span><span class="syn-punc">: {</span>
+  <span class="syn-key">"clsx"</span><span class="syn-punc">:</span>         <span class="syn-str">"^2.1.1"</span><span class="syn-punc">,</span>
+  <span class="syn-key">"lucide-react"</span><span class="syn-punc">:</span> <span class="syn-str">"^0.469.0"</span><span class="syn-punc">,</span>
+  <span class="syn-key">"next"</span><span class="syn-punc">:</span>         <span class="syn-str">"15.1.3"</span><span class="syn-punc">,</span>
+  <span class="syn-key">"react"</span><span class="syn-punc">:</span>        <span class="syn-str">"^19.0.0"</span><span class="syn-punc">,</span>
+  <span class="syn-key">"react-dom"</span><span class="syn-punc">:</span>    <span class="syn-str">"^19.0.0"</span><span class="syn-punc">,</span>
+  <span class="syn-key">"tailwind-merge"</span><span class="syn-punc">:</span> <span class="syn-str">"^2.6.0"</span>
+<span class="syn-punc">}</span></code></pre>
+                  </div>
+                </div>
+
+                <!-- Card 2: package.json — Tailwind v3 -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Tailwind CSS v3</span>
+                    <span class="code-card-path">package.json, L22–36</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code><span class="syn-key">"devDependencies"</span><span class="syn-punc">: {</span>
+  <span class="syn-key">"@testing-library/jest-dom"</span><span class="syn-punc">:</span> <span class="syn-str">"^6.9.1"</span><span class="syn-punc">,</span>
+  <span class="syn-key">"@testing-library/react"</span><span class="syn-punc">:</span>    <span class="syn-str">"^16.3.2"</span><span class="syn-punc">,</span>
+  <span class="syn-key">"@vitejs/plugin-react"</span><span class="syn-punc">:</span>      <span class="syn-str">"^6.0.2"</span><span class="syn-punc">,</span>
+  <span class="syn-key">"tailwindcss"</span><span class="syn-punc">:</span> <span class="syn-str">"^3.4.17"</span><span class="syn-punc">,</span>
+  <span class="syn-key">"vitest"</span><span class="syn-punc">:</span>      <span class="syn-str">"^4.1.7"</span>
+<span class="syn-punc">}</span></code></pre>
+                  </div>
+                </div>
+
+                <!-- Card 3: button.tsx — Open Code / Shadcn -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Open Code — Shadcn/ui</span>
+                    <span class="code-card-path">src/components/ui/button.tsx, L1–23</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code><span class="syn-imp">import</span> <span class="syn-punc">*</span> <span class="syn-imp">as</span> <span class="syn-type">React</span> <span class="syn-imp">from</span> <span class="syn-str">"react"</span>
+<span class="syn-imp">import</span> <span class="syn-punc">{</span> <span class="syn-fn">cn</span> <span class="syn-punc">}</span> <span class="syn-imp">from</span> <span class="syn-str">"@/src/lib/utils"</span>
+
+<span class="syn-imp">export</span> <span class="syn-imp">interface</span> <span class="syn-type">ButtonProps</span>
+  <span class="syn-imp">extends</span> <span class="syn-type">React.ButtonHTMLAttributes</span><span class="syn-punc">&lt;</span>
+    <span class="syn-type">HTMLButtonElement</span>
+  <span class="syn-punc">&gt;</span> <span class="syn-punc">{}</span>
+
+<span class="syn-imp">const</span> <span class="syn-fn">Button</span> <span class="syn-punc">=</span> <span class="syn-type">React</span>.<span class="syn-fn">forwardRef</span><span class="syn-punc">&lt;</span>
+  <span class="syn-type">HTMLButtonElement</span>, <span class="syn-type">ButtonProps</span>
+<span class="syn-punc">&gt;((</span><span class="syn-punc">{</span> <span class="syn-attr">className</span>, ...<span class="syn-attr">props</span> <span class="syn-punc">},</span> <span class="syn-attr">ref</span><span class="syn-punc">)</span> <span class="syn-punc">=&gt; {</span>
+  <span class="syn-imp">return</span> <span class="syn-punc">(</span>
+    <span class="syn-punc">&lt;</span><span class="syn-tag">button</span>
+      <span class="syn-attr">className</span><span class="syn-punc">={</span><span class="syn-fn">cn</span><span class="syn-punc">(</span><span class="syn-str">"..."</span>, <span class="syn-attr">className</span><span class="syn-punc">)}</span>
+      <span class="syn-attr">ref</span><span class="syn-punc">={</span><span class="syn-attr">ref</span><span class="syn-punc">}</span> <span class="syn-punc">{...</span><span class="syn-attr">props</span><span class="syn-punc">}</span>
+    <span class="syn-punc">/&gt;)</span>
+  <span class="syn-punc">}</span>
+<span class="syn-punc">)</span>
+<span class="syn-fn">Button</span>.<span class="syn-attr">displayName</span> <span class="syn-punc">=</span> <span class="syn-str">"Button"</span>
+<span class="syn-imp">export</span> <span class="syn-punc">{</span> <span class="syn-fn">Button</span> <span class="syn-punc">}</span></code></pre>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
           </div>
-        </section>
+        </div>
 
-        <!-- ============================================================
-           SLIDE 3 — CAMADA DE APLICAÇÃO
-           ============================================================ -->
-        <section class="slide" id="slide-2">
-          <div class="slide-badge">Slide 03</div>
-          <h1>Camada de <span class="highlight">Aplicação</span></h1>
-          <p class="slide-subtitle">Os Casos de Uso — Orquestração cega de tecnologias</p>
-          <div class="slide-divider"></div>
+        <!-- SLIDE 4 — Camada de Domínio -->
+        <div class="slide" id="slide-3">
+          <div class="slide-content">
 
-          <ul class="topic-list" style="margin-bottom: 28px;">
-            <li class="topic-item">
-              <div class="topic-bullet"></div>
-              <div class="topic-text">
-                <strong>Orquestração Cega de Tecnologias:</strong> Os Casos de Uso executam fluxos puros. Eles não sabem
-                se a API é REST, GraphQL ou se o banco é SQL/NoSQL.
+            <!-- Header -->
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <!-- Lucide: Shield -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path
+                    d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z" />
+                </svg>
               </div>
-            </li>
-            <li class="topic-item">
-              <div class="topic-bullet teal"></div>
-              <div class="topic-text">
-                <strong>Inversão de Dependência (SOLID):</strong> O construtor recebe estritamente as
-                <strong>INTERFACES</strong> dos repositórios definidas no domínio (<code>IReservaRepository</code>,
-                <code>IViagemRepository</code>), nunca as classes concretas da infraestrutura.
+              <h2 class="slide-title">Camada de Domínio: O Coração do Negócio</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <!-- Topic Cards (2 rows of 2) -->
+            <div class="topic-row">
+              <!-- O que é -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">O que é</span>
+                </div>
+                <p class="topic-card-text">
+                  O <strong>núcleo estável e central</strong> do sistema, puramente focado em regras de negócio, sem
+                  qualquer dependência de frameworks, bibliotecas de UI ou rede.
+                </p>
               </div>
-            </li>
-          </ul>
 
-          <div class="code-showcase">
-            <div class="code-showcase-header">
-              <span class="label">Código Real</span>
-              <span class="filepath">src/application/use-cases/CriarReservaUseCase.ts</span>
+              <!-- O que está incluso -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path
+                        d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                      <line x1="12" y1="22.08" x2="12" y2="12" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">O que está incluso</span>
+                </div>
+                <p class="topic-card-text">
+                  <strong>Entidades ricas</strong> (Viagem, Reserva) com comportamentos calculados; <strong>Value
+                    Objects</strong> (Email, StatusReserva); e <strong>Erros Customizados</strong> para falhas
+                  semânticas.
+                </p>
+              </div>
+
+              <!-- Onde está localizado -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-viaje">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Onde está localizado</span>
+                </div>
+                <p class="topic-card-text">
+                  Localizado em <code>frontend/src/domain/</code>. Arquivos organizados nas pastas
+                  <code>entities/</code>, <code>value-objects/</code> e <code>errors/</code>.
+                </p>
+              </div>
+
+              <!-- De que forma / Justificativa -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="m2 22 1-1h3l9-9" />
+                      <path d="M3 21v-3l9-9" />
+                      <path
+                        d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">De que forma / Justificativa</span>
+                </div>
+                <p class="topic-card-text">
+                  Implementado com <strong>TypeScript Puro e Acoplamento Zero</strong>. Garante que regras vitais de
+                  negócio sejam imunes a mudanças em ferramentas externas.
+                </p>
+              </div>
             </div>
-            <div class="code-block">
-              <pre><span class="im">import</span> { <span class="tp">Reserva</span> } <span class="im">from</span> <span class="st">'../../domain/entities/Reserva'</span>
-<span class="im">import</span> { <span class="tp">IReservaRepository</span>, <span class="tp">CriarReservaDTO</span> } <span class="im">from</span> <span class="st">'../../domain/repositories/IReservaRepository'</span>
-<span class="im">import</span> { <span class="tp">IViagemRepository</span> } <span class="im">from</span> <span class="st">'../../domain/repositories/IViagemRepository'</span>
-<span class="im">import</span> { <span class="tp">ReservaNaoAutorizadaError</span> } <span class="im">from</span> <span class="st">'../../domain/errors/ReservaNaoAutorizadaError'</span>
 
-<span class="kw">export class</span> <span class="tp">CriarReservaUseCase</span> {
-  <span class="fn">constructor</span>(
-    <span class="kw">private readonly</span> <span class="pr">reservaRepository</span>: <span class="dc">IReservaRepository</span>,
-    <span class="kw">private readonly</span> <span class="pr">viagemRepository</span>: <span class="dc">IViagemRepository</span>,
-  ) {}
+            <!-- Evidence Section -->
+            <div class="evidence-section">
+              <div class="evidence-label">Evidência no Código Fonte</div>
 
-  <span class="kw">async</span> <span class="fn">execute</span>(<span class="pr">dados</span>: <span class="tp">CriarReservaDTO</span>): <span class="tp">Promise</span>&lt;<span class="tp">Reserva</span>&gt; {
-    <span class="kw">const</span> <span class="pr">viagem</span> <span class="op">=</span> <span class="kw">await</span> <span class="kw">this</span>.<span class="pr">viagemRepository</span>.<span class="fn">buscarPorId</span>(<span class="pr">dados</span>.<span class="pr">idViagem</span>)
+              <div class="code-cards-grid stacked">
 
-    <span class="kw">if</span> (<span class="pr">viagem</span>.<span class="pr">estaEsgotada</span>) {
-      <span class="kw">throw new</span> <span class="tp">ReservaNaoAutorizadaError</span>(<span class="st">'a viagem está esgotada'</span>)
-    }
+                <!-- Card 1: Email.ts -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Value Object</span>
+                    <span class="code-card-path">domain/value-objects/Email.ts</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code><span class="syn-key">static</span> <span class="syn-fn">create</span><span class="syn-punc">(</span><span class="syn-attr">raw</span><span class="syn-punc">:</span> <span class="syn-type">string</span><span class="syn-punc">):</span> <span class="syn-type">Email</span> <span class="syn-punc">{</span>
+  <span class="syn-key">if</span> <span class="syn-punc">(!</span><span class="syn-attr">raw</span> <span class="syn-punc">||</span> <span class="syn-punc">!</span><span class="syn-attr">raw</span><span class="syn-punc">.</span><span class="syn-fn">includes</span><span class="syn-punc">(</span><span class="syn-str">'@'</span><span class="syn-punc">)</span> <span class="syn-punc">||</span> <span class="syn-attr">raw</span><span class="syn-punc">.</span><span class="syn-fn">trim</span><span class="syn-punc">()</span> <span class="syn-punc">!==</span> <span class="syn-attr">raw</span> <span class="syn-punc">||</span> <span class="syn-attr">raw</span><span class="syn-punc">.</span><span class="syn-attr">length</span> <span class="syn-punc">&lt;</span> <span class="syn-num">3</span><span class="syn-punc">) {</span>
+    <span class="syn-key">throw</span> <span class="syn-key">new</span> <span class="syn-type">EmailInvalidoError</span><span class="syn-punc">(</span><span class="syn-attr">raw</span><span class="syn-punc">)</span>
+  <span class="syn-punc">}</span>
+  <span class="syn-key">return</span> <span class="syn-key">new</span> <span class="syn-type">Email</span><span class="syn-punc">(</span><span class="syn-attr">raw</span><span class="syn-punc">.</span><span class="syn-fn">toLowerCase</span><span class="syn-punc">().</span><span class="syn-fn">trim</span><span class="syn-punc">())</span>
+<span class="syn-punc">}</span></code></pre>
+                  </div>
+                </div>
 
-    <span class="kw">if</span> (<span class="pr">dados</span>.<span class="pr">qtdVagas</span> <span class="op">&gt;</span> <span class="pr">viagem</span>.<span class="pr">vagasDisponiveis</span>) {
-      <span class="kw">throw new</span> <span class="tp">ReservaNaoAutorizadaError</span>(
-        <span class="st">`quantidade solicitada (${<span class="pr">dados</span>.<span class="pr">qtdVagas</span>}) supera vagas disponíveis (${<span class="pr">viagem</span>.<span class="pr">vagasDisponiveis</span>})`</span>
-      )
-    }
+                <!-- Card 2: EmailInvalidoError.ts -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Erro Customizado</span>
+                    <span class="code-card-path">domain/errors/EmailInvalidoError.ts</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code><span class="syn-key">export</span> <span class="syn-key">class</span> <span class="syn-type">EmailInvalidoError</span> <span class="syn-key">extends</span> <span class="syn-type">Error</span> <span class="syn-punc">{</span>
+  <span class="syn-fn">constructor</span><span class="syn-punc">(</span><span class="syn-attr">email</span><span class="syn-punc">:</span> <span class="syn-type">string</span><span class="syn-punc">) {</span>
+    <span class="syn-key">super</span><span class="syn-punc">(</span><span class="syn-str">`Email inválido: "<span class="syn-punc">${</span><span class="syn-attr">email</span><span class="syn-punc">}</span>". Um endereço válido deve conter "@".`</span><span class="syn-punc">)</span>
+    <span class="syn-key">this</span><span class="syn-punc">.</span><span class="syn-attr">name</span> <span class="syn-punc">=</span> <span class="syn-str">'EmailInvalidoError'</span>
+  <span class="syn-punc">}</span>
+<span class="syn-punc">}</span></code></pre>
+                  </div>
+                </div>
 
-    <span class="kw">return</span> <span class="kw">this</span>.<span class="pr">reservaRepository</span>.<span class="fn">criar</span>(<span class="pr">dados</span>)
-  }
-}</pre>
+                <!-- Card 3: Viagem.ts -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Entidade Rica</span>
+                    <span class="code-card-path">domain/entities/Viagem.ts</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code><span class="syn-key">get</span> <span class="syn-fn">percentualOcupacao</span><span class="syn-punc">():</span> <span class="syn-type">number</span> <span class="syn-punc">{</span>
+  <span class="syn-key">if</span> <span class="syn-punc">(</span><span class="syn-key">this</span><span class="syn-punc">.</span><span class="syn-attr">vagasTotais</span> <span class="syn-punc">===</span> <span class="syn-num">0</span><span class="syn-punc">)</span> <span class="syn-key">return</span> <span class="syn-num">0</span>
+  <span class="syn-key">const</span> <span class="syn-attr">ocupadas</span> <span class="syn-punc">=</span> <span class="syn-key">this</span><span class="syn-punc">.</span><span class="syn-attr">vagasTotais</span> <span class="syn-punc">-</span> <span class="syn-key">this</span><span class="syn-punc">.</span><span class="syn-attr">vagasDisponiveis</span>
+  <span class="syn-key">return</span> <span class="syn-type">Math</span><span class="syn-punc">.</span><span class="syn-fn">round</span><span class="syn-punc">((</span><span class="syn-attr">ocupadas</span> <span class="syn-punc">/</span> <span class="syn-key">this</span><span class="syn-punc">.</span><span class="syn-attr">vagasTotais</span><span class="syn-punc">)</span> <span class="syn-punc">*</span> <span class="syn-num">100</span><span class="syn-punc">)</span>
+<span class="syn-punc">}</span></code></pre>
+                  </div>
+                </div>
+
+              </div>
             </div>
+
           </div>
-        </section>
+        </div>
 
-        <!-- ============================================================
-           SLIDE 4 — CAMADA DE INFRAESTRUTURA
-           ============================================================ -->
-        <section class="slide" id="slide-3">
-          <div class="slide-badge">Slide 04</div>
-          <h1>Camada de <span class="highlight">Infraestrutura</span></h1>
-          <p class="slide-subtitle">A Fiação do Sistema — Wiring e encapsulamento de dependências</p>
-          <div class="slide-divider"></div>
+        <!-- SLIDE 5 — Camada de Aplicação (Casos de Uso) -->
+        <div class="slide" id="slide-4">
+          <div class="slide-content">
 
-          <ul class="topic-list" style="margin-bottom: 28px;">
-            <li class="topic-item">
-              <div class="topic-bullet"></div>
-              <div class="topic-text">
-                <strong>Design Sustentável:</strong> Uso do <code>FetchHttpClient</code> encapsulando o
-                <code>fetch</code> nativo do navegador, eliminando dependências externas pesadas (como o Axios).
+            <!-- Header -->
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <!-- Lucide: Gears / Settings -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path
+                    d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
               </div>
-            </li>
-            <li class="topic-item">
-              <div class="topic-bullet teal"></div>
-              <div class="topic-text">
-                <strong>Container de DI (Wiring):</strong> O arquivo <code>container.ts</code> centraliza todas as
-                instanciações de baixo para cima, garantindo o ciclo de vida <strong>Singleton</strong> das dependências
-                e blindando a UI.
+              <h2 class="slide-title">Camada de Aplicação: Intenções e Orquestração</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <!-- Topic Cards (2 rows of 2) -->
+            <div class="topic-row">
+              <!-- O que é -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <!-- Lucide: Compass -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">O que é</span>
+                </div>
+                <p class="topic-card-text">
+                  A camada responsável por implementar os fluxos de software que satisfazem as intenções do usuário
+                  (<strong>Casos de Uso</strong>), orquestrando as entidades do domínio.
+                </p>
               </div>
-            </li>
-          </ul>
 
-          <div class="code-showcase">
-            <div class="code-showcase-header">
-              <span class="label">Código Real</span>
-              <span class="filepath">src/infrastructure/di/container.ts</span>
+              <!-- O que está incluso -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <!-- Lucide: Layers -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                      <polyline points="2 17 12 22 22 17" />
+                      <polyline points="2 12 12 17 22 12" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">O que está incluso</span>
+                </div>
+                <p class="topic-card-text">
+                  Classes de Use Cases como <code>LoginUseCase</code> e <code>CriarReservaUseCase</code>, que coordenam
+                  a lógica entre a entrada de dados, regras de negócio e persistência.
+                </p>
+              </div>
+
+              <!-- Onde está localizado -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-viaje">
+                    <!-- Lucide: Folder -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Onde está localizado</span>
+                </div>
+                <p class="topic-card-text">
+                  Localizado em <code>frontend/src/application/use-cases/</code>.
+                </p>
+              </div>
+
+              <!-- De que forma / Justificativa -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <!-- Lucide: HelpCircle -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                      <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">De que forma / Justificativa</span>
+                </div>
+                <p class="topic-card-text">
+                  Implementado via <strong>Inversão de Dependência (SOLID)</strong>. Os casos de uso são
+                  "tecnologicamente cegos", recebendo apenas interfaces no construtor. Não sabem detalhes de rede ou
+                  persistência externa, facilitando testes e portabilidade.
+                </p>
+              </div>
             </div>
-            <div class="code-block">
-              <pre><span class="cm">/**
- * Container de Injeção de Dependência — único ponto de wiring da aplicação.
- * Os hooks de presentation importam apenas as instâncias exportadas aqui.
- */</span>
-<span class="im">import</span> { <span class="tp">FetchHttpClient</span> } <span class="im">from</span> <span class="st">'../http/FetchHttpClient'</span>
-<span class="im">import</span> { <span class="tp">LocalStorageTokenStorage</span> } <span class="im">from</span> <span class="st">'../storage/LocalStorageTokenStorage'</span>
-<span class="im">import</span> { <span class="tp">ViagemHttpRepository</span> } <span class="im">from</span> <span class="st">'../repositories/ViagemHttpRepository'</span>
-<span class="im">import</span> { <span class="tp">ReservaHttpRepository</span> } <span class="im">from</span> <span class="st">'../repositories/ReservaHttpRepository'</span>
-<span class="im">import</span> { <span class="tp">CriarReservaUseCase</span> } <span class="im">from</span> <span class="st">'../../application/use-cases/CriarReservaUseCase'</span>
 
-<span class="cm">// --- Infraestrutura base ---</span>
-<span class="kw">export const</span> <span class="pr">tokenStorage</span> <span class="op">=</span> <span class="kw">new</span> <span class="tp">LocalStorageTokenStorage</span>()
-<span class="kw">export const</span> <span class="pr">httpClient</span> <span class="op">=</span> <span class="kw">new</span> <span class="tp">FetchHttpClient</span>()
+            <!-- Evidence Section -->
+            <div class="evidence-section">
+              <div class="evidence-label">Evidência no Código Fonte</div>
 
-<span class="cm">// --- Repositórios concretos ---</span>
-<span class="kw">export const</span> <span class="pr">viagemRepository</span> <span class="op">=</span> <span class="kw">new</span> <span class="tp">ViagemHttpRepository</span>(<span class="pr">httpClient</span>, <span class="pr">tokenStorage</span>)
-<span class="kw">export const</span> <span class="pr">reservaRepository</span> <span class="op">=</span> <span class="kw">new</span> <span class="tp">ReservaHttpRepository</span>(<span class="pr">httpClient</span>, <span class="pr">tokenStorage</span>)
+              <div class="code-cards-grid stacked">
 
-<span class="cm">// --- Casos de Uso ---</span>
-<span class="kw">export const</span> <span class="pr">criarReservaUseCase</span> <span class="op">=</span> <span class="kw">new</span> <span class="tp">CriarReservaUseCase</span>(<span class="pr">reservaRepository</span>, <span class="pr">viagemRepository</span>)</pre>
+                <!-- Card 1: Injeção de Dependência (LoginUseCase Constructor) -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Injeção de Dependência via Interfaces</span>
+                    <span class="code-card-path">application/use-cases/LoginUseCase.ts</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code><span class="syn-key">export</span> <span class="syn-key">class</span> <span class="syn-type">LoginUseCase</span> <span class="syn-punc">{</span>
+  <span class="syn-fn">constructor</span><span class="syn-punc">(</span>
+    <span class="syn-key">private</span> <span class="syn-key">readonly</span> <span class="syn-attr">authRepository</span><span class="syn-punc">:</span> <span class="syn-type"><span style="font-weight: 800; text-decoration: underline;">I</span>AuthRepository</span><span class="syn-punc">,</span>
+    <span class="syn-key">private</span> <span class="syn-key">readonly</span> <span class="syn-attr">tokenStorage</span><span class="syn-punc">:</span> <span class="syn-type"><span style="font-weight: 800; text-decoration: underline;">I</span>TokenStorage</span><span class="syn-punc">,</span>
+  <span class="syn-punc">) {}</span></code></pre>
+                  </div>
+                </div>
+
+                <!-- Card 2: Método Execute (LoginUseCase execute) -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Orquestração do Fluxo de Login</span>
+                    <span class="code-card-path">application/use-cases/LoginUseCase.ts</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code>  <span class="syn-key">async</span> <span class="syn-fn">execute</span><span class="syn-punc">(</span><span class="syn-attr">credenciais</span><span class="syn-punc">:</span> <span class="syn-type">LoginDTO</span><span class="syn-punc">):</span> <span class="syn-type">Promise</span><span class="syn-punc">&lt;</span><span class="syn-type">AuthResponseDTO</span><span class="syn-punc">&gt; {</span>
+    <span class="syn-key">try</span> <span class="syn-punc">{</span>
+      <span class="syn-key">const</span> <span class="syn-attr">response</span> <span class="syn-punc">=</span> <span class="syn-key">await</span> <span class="syn-key">this</span><span class="syn-punc">.</span><span class="syn-attr">authRepository</span><span class="syn-punc">.</span><span class="syn-fn">login</span><span class="syn-punc">(</span><span class="syn-attr">credenciais</span><span class="syn-punc">)</span>
+      <span class="syn-key">this</span><span class="syn-punc">.</span><span class="syn-attr">tokenStorage</span><span class="syn-punc">.</span><span class="syn-fn">save</span><span class="syn-punc">(</span><span class="syn-attr">response</span><span class="syn-punc">.</span><span class="syn-attr">accessToken</span><span class="syn-punc">, {</span>
+        <span class="syn-attr">id</span><span class="syn-punc">:</span> <span class="syn-attr">response</span><span class="syn-punc">.</span><span class="syn-attr">usuario</span><span class="syn-punc">.</span><span class="syn-attr">id</span><span class="syn-punc">,</span>
+        <span class="syn-attr">nome</span><span class="syn-punc">:</span> <span class="syn-attr">response</span><span class="syn-punc">.</span><span class="syn-attr">usuario</span><span class="syn-punc">.</span><span class="syn-attr">nome</span><span class="syn-punc">,</span>
+        <span class="syn-attr">apelido</span><span class="syn-punc">:</span> <span class="syn-attr">response</span><span class="syn-punc">.</span><span class="syn-attr">usuario</span><span class="syn-punc">.</span><span class="syn-attr">apelido</span><span class="syn-punc">,</span>
+        <span class="syn-attr">email</span><span class="syn-punc">:</span> <span class="syn-attr">response</span><span class="syn-punc">.</span><span class="syn-attr">usuario</span><span class="syn-punc">.</span><span class="syn-attr">email</span><span class="syn-punc">,</span>
+        <span class="syn-attr">tipo</span><span class="syn-punc">:</span> <span class="syn-attr">response</span><span class="syn-punc">.</span><span class="syn-attr">usuario</span><span class="syn-punc">.</span><span class="syn-attr">tipo</span><span class="syn-punc">,</span>
+      <span class="syn-punc">})</span>
+      <span class="syn-key">return</span> <span class="syn-attr">response</span>
+    <span class="syn-punc">}</span> <span class="syn-key">catch</span> <span class="syn-punc">(</span><span class="syn-attr">err</span><span class="syn-punc">) {</span>
+      <span class="syn-key">if</span> <span class="syn-punc">(</span><span class="syn-attr">err</span> <span class="syn-key">instanceof</span> <span class="syn-type">CredenciaisInvalidasError</span><span class="syn-punc">)</span> <span class="syn-key">throw</span> <span class="syn-attr">err</span>
+      <span class="syn-key">throw</span> <span class="syn-key">new</span> <span class="syn-type">CredenciaisInvalidasError</span><span class="syn-punc">()</span>
+    <span class="syn-punc">}</span>
+  <span class="syn-punc">}</span></code></pre>
+                  </div>
+                </div>
+
+              </div>
             </div>
+
           </div>
-        </section>
+        </div>
 
-        <!-- ============================================================
-           SLIDE 5 — CAMADA DE APRESENTAÇÃO
-           ============================================================ -->
-        <section class="slide" id="slide-4">
-          <div class="slide-badge">Slide 05</div>
-          <h1>Camada de <span class="highlight">Apresentação</span></h1>
-          <p class="slide-subtitle">Logic-Free UI & Open Code — JSX magro, componentes locais</p>
-          <div class="slide-divider"></div>
+        <!-- SLIDE 6 — Camada de Infraestrutura -->
+        <div class="slide" id="slide-5">
+          <div class="slide-content">
 
-          <ul class="topic-list" style="margin-bottom: 28px;">
-            <li class="topic-item">
-              <div class="topic-bullet"></div>
-              <div class="topic-text">
-                <strong>Componentes Magros (JSX-Only):</strong> <code>LoginPage</code> delega 100% dos estados do React
-                19 e submissões para o Custom Hook <code>useLogin</code> (controlador puro).
+            <!-- Header -->
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <!-- Lucide: Server / HardDrive / Cpu -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <rect width="20" height="8" x="2" y="2" rx="2" ry="2" />
+                  <rect width="20" height="8" x="2" y="14" rx="2" ry="2" />
+                  <line x1="6" y1="6" x2="6.01" y2="6" />
+                  <line x1="6" y1="18" x2="6.01" y2="18" />
+                </svg>
               </div>
-            </li>
-            <li class="topic-item">
-              <div class="topic-bullet teal"></div>
-              <div class="topic-text">
-                <strong>Paradigma Open Code (Shadcn/ui):</strong> Componentes locais na pasta de código fonte usando
-                <code>React.forwardRef</code> para repassar referências nativas do DOM e a função <code>cn()</code>
-                (<code>clsx</code> + <code>twMerge</code>) para fusão inteligente de classes Tailwind.
+              <h2 class="slide-title">Camada de Infraestrutura: Tecnologia e Integração</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <!-- Topic Cards (2 rows of 2) -->
+            <div class="topic-row">
+              <!-- O que é -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <!-- Lucide: Globe -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path
+                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">O que é</span>
+                </div>
+                <p class="topic-card-text">
+                  A <strong>borda tecnológica</strong> que lida com o mundo externo (APIs, Storage de cookies, etc.),
+                  concretizando os contratos do domínio.
+                </p>
               </div>
-            </li>
-          </ul>
 
-          <div class="code-showcase">
-            <div class="code-showcase-header">
-              <span class="label">Código Real</span>
-              <span class="filepath">src/components/ui/input.tsx</span>
+              <!-- O que está incluso -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <!-- Lucide: Cpu -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <rect x="4" y="4" width="16" height="16" rx="2" ry="2" />
+                      <rect x="9" y="9" width="6" height="6" />
+                      <line x1="9" y1="1" x2="9" y2="4" />
+                      <line x1="15" y1="1" x2="15" y2="4" />
+                      <line x1="9" y1="20" x2="9" y2="23" />
+                      <line x1="15" y1="20" x2="15" y2="23" />
+                      <line x1="20" y1="9" x2="23" y2="9" />
+                      <line x1="20" y1="15" x2="23" y2="15" />
+                      <line x1="1" y1="9" x2="4" y2="9" />
+                      <line x1="1" y1="15" x2="4" y2="15" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">O que está incluso</span>
+                </div>
+                <p class="topic-card-text">
+                  <code>HttpClient</code> (Fetch Nativo), repositórios concretos (ex: <code>AuthHttpRepository</code>) e
+                  o container central de injeção de dependências.
+                </p>
+              </div>
+
+              <!-- Onde está localizado -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-viaje">
+                    <!-- Lucide: Folder -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Onde está localizado</span>
+                </div>
+                <p class="topic-card-text">
+                  Localizado em <code>frontend/src/infrastructure/</code>, contendo pastas como <code>http/</code>,
+                  <code>repositories/</code> e <code>di/</code>.
+                </p>
+              </div>
+
+              <!-- De que forma / Justificativa -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <!-- Lucide: Settings -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="3" />
+                      <path
+                        d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">De que forma / Justificativa</span>
+                </div>
+                <p class="topic-card-text">
+                  <strong>Design Sustentável</strong>: Usamos Fetch API nativa eliminando dependência do Axios. A fiação
+                  centralizada no <code>container.ts</code> cria um local único para montagem das dependências.
+                </p>
+              </div>
             </div>
-            <div class="code-block">
-              <pre><span class="im">import</span> <span class="op">*</span> <span class="im">as</span> <span class="tp">React</span> <span class="im">from</span> <span class="st">"react"</span>
-<span class="im">import</span> { <span class="fn">cn</span> } <span class="im">from</span> <span class="st">"@/src/lib/utils"</span>
 
-<span class="kw">export interface</span> <span class="dc">InputProps</span>
-  <span class="kw">extends</span> <span class="tp">React</span>.<span class="tp">InputHTMLAttributes</span>&lt;<span class="tp">HTMLInputElement</span>&gt; {}
+            <!-- Evidence Section -->
+            <div class="evidence-section">
+              <div class="evidence-label">Evidência no Código Fonte</div>
 
-<span class="kw">const</span> <span class="pr">Input</span> <span class="op">=</span> <span class="tp">React</span>.<span class="fn">forwardRef</span>&lt;<span class="tp">HTMLInputElement</span>, <span class="dc">InputProps</span>&gt;(
-  ({ <span class="pr">className</span>, <span class="pr">type</span>, ...<span class="pr">props</span> }, <span class="pr">ref</span>) <span class="op">=&gt;</span> {
-    <span class="kw">return</span> (
-      &lt;<span class="fn">input</span>
-        <span class="pr">type</span><span class="op">=</span>{<span class="pr">type</span>}
-        <span class="pr">className</span><span class="op">=</span>{<span class="fn">cn</span>(
-          <span class="st">"flex h-10 w-full rounded-md border border-input bg-background ..."</span>,
-          <span class="pr">className</span>
-        )}
-        <span class="pr">ref</span><span class="op">=</span>{<span class="pr">ref</span>}
-        {<span class="op">...</span><span class="pr">props</span>}
-      /&gt;
-    )
-  }
-)
-<span class="pr">Input</span>.<span class="pr">displayName</span> <span class="op">=</span> <span class="st">"Input"</span>
+              <div class="code-cards-grid stacked">
 
-<span class="kw">export</span> { <span class="pr">Input</span> }</pre>
+                <!-- Card 1: FetchHttpClient fetch implementation -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">FetchHttpClient: HTTP Nativo</span>
+                    <span class="code-card-path">infrastructure/http/FetchHttpClient.ts</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code>  <span class="syn-key">async</span> <span class="syn-fn">post</span><span class="syn-punc">&lt;</span><span class="syn-type">T</span><span class="syn-punc">&gt;(</span><span class="syn-attr">endpoint</span><span class="syn-punc">:</span> <span class="syn-type">string</span><span class="syn-punc">,</span> <span class="syn-attr">tokenStorage</span><span class="syn-punc">:</span> <span class="syn-type">ITokenStorage</span><span class="syn-punc">,</span> <span class="syn-attr">body</span><span class="syn-punc">:</span> <span class="syn-type">Record</span><span class="syn-punc">&lt;</span><span class="syn-type">string</span><span class="syn-punc">,</span> <span class="syn-type">unknown</span><span class="syn-punc">&gt;):</span> <span class="syn-type">Promise</span><span class="syn-punc">&lt;</span><span class="syn-type">T</span><span class="syn-punc">&gt; {</span>
+    <span class="syn-key">const</span> <span class="syn-attr">response</span> <span class="syn-punc">=</span> <span class="syn-key">await</span> <span class="syn-fn">fetch</span><span class="syn-punc">(</span><span class="syn-str">`<span class="syn-punc">${</span><span class="syn-key">this</span><span class="syn-punc">.</span><span class="syn-attr">baseUrl</span><span class="syn-punc">}${</span><span class="syn-attr">endpoint</span><span class="syn-punc">}</span>`</span><span class="syn-punc">, {</span>
+      <span class="syn-attr">method</span><span class="syn-punc">:</span> <span class="syn-str">'POST'</span><span class="syn-punc">,</span>
+      <span class="syn-attr">headers</span><span class="syn-punc">:</span> <span class="syn-key">this</span><span class="syn-punc">.</span><span class="syn-fn">buildHeaders</span><span class="syn-punc">(</span><span class="syn-attr">tokenStorage</span><span class="syn-punc">),</span>
+      <span class="syn-attr">body</span><span class="syn-punc">:</span> <span class="syn-type">JSON</span><span class="syn-punc">.</span><span class="syn-fn">stringify</span><span class="syn-punc">(</span><span class="syn-attr">body</span><span class="syn-punc">),</span>
+    <span class="syn-punc">})</span>
+    <span class="syn-key">return</span> <span class="syn-key">this</span><span class="syn-punc">.</span><span class="syn-fn">handleResponse</span><span class="syn-punc">&lt;</span><span class="syn-type">T</span><span class="syn-punc">&gt;(</span><span class="syn-attr">response</span><span class="syn-punc">)</span>
+  <span class="syn-punc">}</span></code></pre>
+                  </div>
+                </div>
+
+                <!-- Card 2: container.ts wiring -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">DI Container: Central de Fiação</span>
+                    <span class="code-card-path">infrastructure/di/container.ts</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code><span class="syn-key">export</span> <span class="syn-key">const</span> <span class="syn-attr">tokenStorage</span> <span class="syn-punc">=</span> <span class="syn-key">new</span> <span class="syn-type">LocalStorageTokenStorage</span><span class="syn-punc">()</span>
+<span class="syn-key">export</span> <span class="syn-key">const</span> <span class="syn-attr">httpClient</span> <span class="syn-punc">=</span> <span class="syn-key">new</span> <span class="syn-type">FetchHttpClient</span><span class="syn-punc">()</span>
+
+<span class="syn-comment">// --- Repositórios concretos ---</span>
+<span class="syn-key">export</span> <span class="syn-key">const</span> <span class="syn-attr">authRepository</span> <span class="syn-punc">=</span> <span class="syn-key">new</span> <span class="syn-type">AuthHttpRepository</span><span class="syn-punc">(</span><span class="syn-attr">httpClient</span><span class="syn-punc">,</span> <span class="syn-attr">tokenStorage</span><span class="syn-punc">)</span>
+
+<span class="syn-comment">// --- Casos de Uso ---</span>
+<span class="syn-key">export</span> <span class="syn-key">const</span> <span class="syn-attr">loginUseCase</span> <span class="syn-punc">=</span> <span class="syn-key">new</span> <span class="syn-type">LoginUseCase</span><span class="syn-punc">(</span><span class="syn-attr">authRepository</span><span class="syn-punc">,</span> <span class="syn-attr">tokenStorage</span><span class="syn-punc">)</span>
+<span class="syn-key">export</span> <span class="syn-key">const</span> <span class="syn-attr">criarReservaUseCase</span> <span class="syn-punc">=</span> <span class="syn-key">new</span> <span class="syn-type">CriarReservaUseCase</span><span class="syn-punc">(</span><span class="syn-attr">reservaRepository</span><span class="syn-punc">,</span> <span class="syn-attr">viagemRepository</span><span class="syn-punc">)</span></code></pre>
+                  </div>
+                </div>
+
+              </div>
             </div>
+
           </div>
-        </section>
+        </div>
 
-        <!-- ============================================================
-           SLIDE 6 — ESTRATÉGIA DE TESTES
-           ============================================================ -->
-        <section class="slide" id="slide-5">
-          <div class="slide-badge">Slide 06</div>
-          <h1>Estratégia de <span class="highlight">Testes</span></h1>
-          <p class="slide-subtitle">A Pirâmide Completa — DOM virtual, comportamento real, isolamento cirúrgico</p>
-          <div class="slide-divider"></div>
+        <!-- SLIDE 7 — Testes de Interface e Qualidade -->
+        <div class="slide" id="slide-6">
+          <div class="slide-content">
 
-          <ul class="topic-list" style="margin-bottom: 28px;">
-            <li class="topic-item">
-              <div class="topic-bullet"></div>
-              <div class="topic-text">
-                <strong>DOM Virtual em Memória:</strong> O Vitest executa sobre o ambiente JSDOM, montando a árvore de
-                componentes na memória do Node sem precisar abrir navegadores lentos.
+            <!-- Header -->
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <!-- Lucide: Microscope / TestTube -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M10 2v8" />
+                  <path d="M14 2v8" />
+                  <path
+                    d="M8.5 10a4.5 4.5 0 0 0-4.5 4.5v3a4.5 4.5 0 0 0 4.5 4.5h7a4.5 4.5 0 0 0 4.5-4.5v-3a4.5 4.5 0 0 0-4.5-4.5z" />
+                  <path d="M4.5 15h15" />
+                </svg>
               </div>
-            </li>
-            <li class="topic-item">
-              <div class="topic-bullet teal"></div>
-              <div class="topic-text">
-                <strong>Comportamento Real do Usuário:</strong> Uso do <code>fireEvent</code> para simular interações
-                reais de preenchimento e clique, validando a ponte UI → Hook → UseCase.
-              </div>
-            </li>
-            <li class="topic-item">
-              <div class="topic-bullet green"></div>
-              <div class="topic-text">
-                <strong>Isolamento Cirúrgico:</strong> O <code>vi.mock</code> intercepta exclusivamente o container de
-                DI, garantindo que o componente de tela e o Custom Hook <code>useLogin</code> sejam testados juntos em
-                integração real.
-              </div>
-            </li>
-          </ul>
-
-          <div class="code-showcase">
-            <div class="code-showcase-header">
-              <span class="label">Código Real</span>
-              <span class="filepath">app/login/__tests__/page.test.tsx</span>
+              <h2 class="slide-title">Testes de Interface e Qualidade</h2>
             </div>
-            <div class="code-block">
-              <pre><span class="im">import</span> { <span class="fn">render</span>, <span class="fn">screen</span>, <span class="fn">fireEvent</span>, <span class="fn">waitFor</span> } <span class="im">from</span> <span class="st">'@testing-library/react'</span>
-<span class="im">import</span> { <span class="fn">describe</span>, <span class="fn">it</span>, <span class="fn">expect</span>, <span class="fn">vi</span> } <span class="im">from</span> <span class="st">'vitest'</span>
-<span class="im">import</span> <span class="tp">LoginPage</span> <span class="im">from</span> <span class="st">'../page'</span>
-<span class="im">import</span> { <span class="pr">loginUseCase</span> } <span class="im">from</span> <span class="st">'@/src/infrastructure/di/container'</span>
+            <div class="slide-title-divider"></div>
 
-<span class="cm">// Mockamos apenas a Injeção de Dependência do Caso de Uso
-// Assim, o componente E o custom hook (useLogin) são testados em integração real!</span>
-<span class="fn">vi</span>.<span class="fn">mock</span>(<span class="st">'@/src/infrastructure/di/container'</span>, () <span class="op">=&gt;</span> ({
-  <span class="pr">loginUseCase</span>: { <span class="pr">execute</span>: <span class="fn">vi</span>.<span class="fn">fn</span>() }
-}))
+            <!-- Topic Cards (2 rows of 2) -->
+            <div class="topic-row">
+              <!-- O que é -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <!-- Lucide: CheckCircle -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">O que é</span>
+                </div>
+                <p class="topic-card-text">
+                  A <strong>garantia automatizada</strong> de que os componentes da interface visual e as regras de
+                  negócio subjacentes funcionam em perfeita harmonia.
+                </p>
+              </div>
 
-<span class="fn">render</span>(&lt;<span class="tp">LoginPage</span> /&gt;)
+              <!-- O que está incluso -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <!-- Lucide: ShieldCheck -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                      <path d="m9 12 2 2 4-4" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">O que está incluso</span>
+                </div>
+                <p class="topic-card-text">
+                  Testes de unidade da camada de domínio e testes de integração de UI simulando fluxos completos com a
+                  <strong>React Testing Library</strong>.
+                </p>
+              </div>
 
-<span class="fn">fireEvent</span>.<span class="fn">change</span>(<span class="fn">screen</span>.<span class="fn">getByLabelText</span>(<span class="st">/E-mail/i</span>), {
-  <span class="pr">target</span>: { <span class="pr">value</span>: <span class="st">'maria@email.com'</span> }
-})
-<span class="fn">fireEvent</span>.<span class="fn">change</span>(<span class="fn">screen</span>.<span class="fn">getByLabelText</span>(<span class="st">/Senha/i</span>), {
-  <span class="pr">target</span>: { <span class="pr">value</span>: <span class="st">'123456'</span> }
-})
-<span class="fn">fireEvent</span>.<span class="fn">click</span>(<span class="fn">screen</span>.<span class="fn">getByRole</span>(<span class="st">'button'</span>, { <span class="pr">name</span>: <span class="st">/entrar/i</span> }))
+              <!-- Onde está localizado -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-viaje">
+                    <!-- Lucide: Search -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <circle cx="11" cy="11" r="8" />
+                      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Onde está localizado</span>
+                </div>
+                <p class="topic-card-text">
+                  Distribuidos nas pastas <code>__tests__/</code> do projeto, especificamente em
+                  <code>app/login/__tests__/page.test.tsx</code>.
+                </p>
+              </div>
 
-<span class="kw">await</span> <span class="fn">waitFor</span>(() <span class="op">=&gt;</span> {
-  <span class="fn">expect</span>(<span class="pr">loginUseCase</span>.<span class="pr">execute</span>).<span class="fn">toHaveBeenCalledWith</span>({
-    <span class="pr">email</span>: <span class="st">'maria@email.com'</span>,
-    <span class="pr">senha</span>: <span class="st">'123456'</span>
-  })
-})</pre>
+              <!-- De que forma / Justificativa -->
+              <div class="topic-card">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <!-- Lucide: Activity -->
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">De que forma / Justificativa</span>
+                </div>
+                <p class="topic-card-text">
+                  <strong>Simulação Real do Usuário</strong>: Usando Vitest e ambiente JSDOM para renderização em
+                  memória. Garante que a integração entre componentes de UI, Custom Hooks e Use Cases esteja 100%
+                  blindada.
+                </p>
+              </div>
             </div>
+
+            <!-- Evidence Section -->
+            <div class="evidence-section">
+              <div class="evidence-label">Evidência no Código Fonte</div>
+
+              <div class="code-cards-grid stacked">
+
+                <!-- Card 1: fireEvent user interaction -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Interação e Preenchimento do Formulário</span>
+                    <span class="code-card-path">app/login/__tests__/page.test.tsx</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code>    <span class="syn-comment">// Capturando os elementos da tela</span>
+    <span class="syn-key">const</span> <span class="syn-attr">emailInput</span> <span class="syn-punc">=</span> <span class="syn-attr">screen</span><span class="syn-punc">.</span><span class="syn-fn">getByLabelText</span><span class="syn-punc">(</span><span class="syn-str">/E-mail/i</span><span class="syn-punc">)</span>
+    <span class="syn-key">const</span> <span class="syn-attr">senhaInput</span> <span class="syn-punc">=</span> <span class="syn-attr">screen</span><span class="syn-punc">.</span><span class="syn-fn">getByLabelText</span><span class="syn-punc">(</span><span class="syn-str">/Senha/i</span><span class="syn-punc">)</span>
+    <span class="syn-key">const</span> <span class="syn-attr">submitBtn</span> <span class="syn-punc">=</span> <span class="syn-attr">screen</span><span class="syn-punc">.</span><span class="syn-fn">getByRole</span><span class="syn-punc">(</span><span class="syn-str">'button'</span><span class="syn-punc">, {</span> <span class="syn-attr">name</span><span class="syn-punc">:</span> <span class="syn-str">/entrar/i</span> <span class="syn-punc">})</span>
+
+    <span class="syn-comment">// Simulação do comportamento real do usuário</span>
+    <span class="syn-attr">fireEvent</span><span class="syn-punc">.</span><span class="syn-fn">change</span><span class="syn-punc">(</span><span class="syn-attr">emailInput</span><span class="syn-punc">, {</span> <span class="syn-attr">target</span><span class="syn-punc">: {</span> <span class="syn-attr">value</span><span class="syn-punc">:</span> <span class="syn-str">'maria@email.com'</span> <span class="syn-punc">} })</span>
+    <span class="syn-attr">fireEvent</span><span class="syn-punc">.</span><span class="syn-fn">change</span><span class="syn-punc">(</span><span class="syn-attr">senhaInput</span><span class="syn-punc">, {</span> <span class="syn-attr">target</span><span class="syn-punc">: {</span> <span class="syn-attr">value</span><span class="syn-punc">:</span> <span class="syn-str">'123456'</span> <span class="syn-punc">} })</span>
+    
+    <span class="syn-comment">// Submissão</span>
+    <span class="syn-attr">fireEvent</span><span class="syn-punc">.</span><span class="syn-fn">click</span><span class="syn-punc">(</span><span class="syn-attr">submitBtn</span><span class="syn-punc">)</span></code></pre>
+                  </div>
+                </div>
+
+                <!-- Card 2: Assertions and waitFor -->
+                <div class="code-card">
+                  <div class="code-card-header">
+                    <span class="code-card-title">Asserção de Chamada do Caso de Uso</span>
+                    <span class="code-card-path">app/login/__tests__/page.test.tsx</span>
+                  </div>
+                  <div class="code-card-body">
+                    <pre><code>    <span class="syn-comment">// A asserção assíncrona garante que os dados integrados fluíram corretamente</span>
+    <span class="syn-key">await</span> <span class="syn-fn">waitFor</span><span class="syn-punc">(() =&gt; {</span>
+      <span class="syn-attr">expect</span><span class="syn-punc">(</span><span class="syn-attr">loginUseCase</span><span class="syn-punc">.</span><span class="syn-attr">execute</span><span class="syn-punc">).</span><span class="syn-fn">toHaveBeenCalledWith</span><span class="syn-punc">({</span>
+        <span class="syn-attr">email</span><span class="syn-punc">:</span> <span class="syn-str">'maria@email.com'</span><span class="syn-punc">,</span>
+        <span class="syn-attr">senha</span><span class="syn-punc">:</span> <span class="syn-str">'123456'</span>
+      <span class="syn-punc">})</span>
+    <span class="syn-punc">})</span></code></pre>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
           </div>
-        </section>
+        </div>
+
+        <!-- SLIDE 8 — Conclusão & Próximos Passos -->
+        <div class="slide" id="slide-7">
+          <div class="slide-content">
+
+            <!-- Header -->
+            <div class="slide-header">
+              <div class="slide-header-icon bg-primary">
+                <!-- Lucide: Rocket -->
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path d="M4.5 16.5c-1.5 1.25-2.5 3.5-2.5 3.5s2.25-1 3.5-2.5" />
+                  <path d="M12 12 2 22l3-3" />
+                  <path d="M9 15 3 21l3-3" />
+                  <path
+                    d="M18.5 5.5c-1.75-1.75-4.5-2.25-6.5-1.75l-4 4 1 1 2-2 1.5 1.5-3 3 1.5 1.5 3-3 1.5 1.5-2 2 1 1 4-4c.5-2 0-4.75-1.75-6.5z" />
+                </svg>
+              </div>
+              <h2 class="slide-title">Conclusão & Próximos Passos</h2>
+            </div>
+            <div class="slide-title-divider"></div>
+
+            <!-- Topic Cards (2 rows of 2) -->
+            <div class="topic-row">
+              <!-- Visão Geral -->
+              <div class="topic-card" style="grid-column: span 2;">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-primary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10" />
+                      <line x1="2" y1="12" x2="22" y2="12" />
+                      <path
+                        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Visão Geral</span>
+                </div>
+                <p class="topic-card-text">
+                  A arquitetura implementada no ViajeBem provou ser <strong>resiliente, escalável e tecnologicamente
+                    independente</strong>, seguindo rigorosamente as diretrizes e boas práticas da Engenharia de
+                  Software Moderna (Clean Architecture + DDD).
+                </p>
+              </div>
+
+              <!-- Status Atual do Desenvolvimento -->
+              <div class="topic-card" style="grid-column: span 2;">
+                <div class="topic-card-header">
+                  <div class="topic-icon t-secondary">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                      stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                      <line x1="9" y1="3" x2="9" y2="21" />
+                      <line x1="15" y1="3" x2="15" y2="21" />
+                      <line x1="3" y1="9" x2="21" y2="9" />
+                      <line x1="3" y1="15" x2="21" y2="15" />
+                    </svg>
+                  </div>
+                  <span class="topic-card-title">Status Atual do Desenvolvimento</span>
+                </div>
+                <p class="topic-card-text">
+                  O ecossistema frontend encontra-se em estágio extremamente avançado, com <strong>92% da interface e
+                    das integrações concluídas</strong>, operando de forma estável com o backend.
+                </p>
+              </div>
+            </div>
+
+            <!-- Próximos Passos Card -->
+            <div class="topic-card" style="margin-top: 16px;">
+              <div class="topic-card-header">
+                <div class="topic-icon t-viaje">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </div>
+                <span class="topic-card-title">Próximos Passos (Ajustes Finos)</span>
+              </div>
+              <ul style="margin: 12px 0 0 20px; padding: 0; line-height: 1.6;">
+                <li><strong>Refinamento de UI/UX:</strong> Ajustes pontuais de espaçamento, micro-interações e polimento
+                  visual final.</li>
+                <li><strong>Homologação de Responsividade:</strong> Garantia de experiência fluida em todos os tamanhos
+                  de tela em múltiplos navegadores.</li>
+                <li><strong>Finalização de Fluxos Secundários:</strong> Polimento fino nas telas de perfil do usuário e
+                  histórico de viagens agendadas.</li>
+              </ul>
+            </div>
+
+            <!-- Elemento de Destaque Visual (Status de Conclusão de 92%) -->
+            <div class="topic-card"
+              style="margin-top: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center;">
+              <div style="font-size: 1.1rem; font-weight: 600; color: #1f1f1f; margin-bottom: 12px;">Progresso Geral do
+                Frontend</div>
+
+              <!-- Custom Horizontal Progress Bar -->
+              <div
+                style="width: 100%; max-width: 500px; height: 28px; background: #e9ecef; border-radius: 14px; overflow: hidden; position: relative; border: 1px solid #dee2e6; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
+                <div
+                  style="width: 92%; height: 100%; background: linear-gradient(90deg, #FFA914 0%, #E69500 100%); display: flex; align-items: center; justify-content: flex-end; padding-right: 12px; color: white; font-weight: bold; font-size: 0.95rem; text-shadow: 0 1px 2px rgba(0,0,0,0.2); transition: width 0.6s ease;">
+                  92%
+                </div>
+              </div>
+
+              <div style="font-size: 0.85rem; color: #6c757d; margin-top: 8px;">
+                Núcleo da arquitetura (100%), Domínio (100%), Aplicação/Casos de Uso (100%), Testes (85%), Ajustes de
+                Interface (70%).
+              </div>
+            </div>
+
+            <!-- Encerramento -->
+            <div style="margin-top: 40px; text-align: center; padding: 24px 0 12px 0;">
+              <h3 style="font-size: 2rem; font-weight: 700; color: #FFA914; margin: 0 0 8px 0;">Obrigado!</h3>
+              <p style="font-size: 1.2rem; color: #1f1f1f; margin: 0;">Perguntas?</p>
+            </div>
+
+          </div>
+        </div>
 
       </div>
 
-      <!-- ================================================================
-         FOOTER NAVIGATION
-         ================================================================ -->
-      <footer class="footer-nav">
-        <button class="nav-btn" id="btnPrev" onclick="prevSlide()" disabled>
-          <svg viewBox="0 0 24 24">
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
-          Anterior
-        </button>
-
-        <div class="footer-nav-progress" id="progressDots">
-          <div class="progress-dot active"></div>
-          <div class="progress-dot"></div>
-          <div class="progress-dot"></div>
-          <div class="progress-dot"></div>
-          <div class="progress-dot"></div>
-          <div class="progress-dot"></div>
-          <span class="kbd-hint" style="margin-left: 12px;">
-            <span class="kbd">←</span> <span class="kbd">→</span> navegar
-          </span>
+      <!-- Navigation Bar -->
+      <div class="nav-bar">
+        <div class="nav-hint">
+          Navegar com <span class="kbd">←</span> <span class="kbd">→</span> ou clique nos botões
         </div>
+        <div class="nav-buttons">
+          <button class="nav-btn btn-prev" id="btnPrev" onclick="prevSlide()" disabled>
+            <span class="arrow">←</span> Anterior
+          </button>
+          <button class="nav-btn btn-next" id="btnNext" onclick="nextSlide()">
+            Próximo <span class="arrow">→</span>
+          </button>
+        </div>
+      </div>
 
-        <button class="nav-btn nav-btn-next" id="btnNext" onclick="nextSlide()">
-          Próximo
-          <svg viewBox="0 0 24 24">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-        </button>
-      </footer>
     </div>
+
   </div>
 
+  <!-- ============================================================
+       SCRIPTS
+       ============================================================ -->
   <script>
-    // ================================================================
-    // SLIDE NAVIGATION ENGINE
-    // ================================================================
-    const TOTAL_SLIDES = 6;
-    let current = 0;
+    (() => {
+      'use strict';
 
-    function goToSlide(index) {
-      if (index < 0 || index >= TOTAL_SLIDES || index === current) return;
-      current = index;
-      updateUI();
-    }
+      const TOTAL_SLIDES = 8;
+      let currentSlide = 0;
 
-    function nextSlide() { goToSlide(current + 1); }
-    function prevSlide() { goToSlide(current - 1); }
+      const slides = document.querySelectorAll('.slide');
+      const navItems = document.querySelectorAll('.nav-item');
+      const btnPrev = document.getElementById('btnPrev');
+      const btnNext = document.getElementById('btnNext');
+      const currentNum = document.getElementById('currentSlideNum');
+      const progressFill = document.getElementById('progressFill');
 
-    function updateUI() {
-      // Slides
-      document.querySelectorAll('.slide').forEach((s, i) => {
-        s.classList.toggle('active', i === current);
-      });
+      function updateUI() {
+        slides.forEach((s, i) => {
+          s.classList.remove('active', 'exit-left');
+          if (i === currentSlide) s.classList.add('active');
+          else if (i < currentSlide) s.classList.add('exit-left');
+        });
 
-      // Sidebar
-      document.querySelectorAll('.sidebar-item').forEach((item, i) => {
-        item.classList.toggle('active', i === current);
-      });
+        navItems.forEach((item, i) => {
+          item.classList.remove('active');
+          if (i === currentSlide) item.classList.add('active');
+        });
 
-      // Progress dots
-      document.querySelectorAll('.progress-dot').forEach((dot, i) => {
-        dot.classList.toggle('active', i === current);
-        dot.classList.toggle('visited', i < current);
-      });
+        currentNum.textContent = currentSlide + 1;
+        progressFill.style.width = ((currentSlide + 1) / TOTAL_SLIDES * 100) + '%';
 
-      // Buttons
-      document.getElementById('btnPrev').disabled = (current === 0);
-      document.getElementById('btnNext').disabled = (current === TOTAL_SLIDES - 1);
-
-      // Scroll slide viewport to top
-      document.querySelector('.slide-viewport').scrollTop = 0;
-
-      // Close mobile sidebar
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('open');
-    }
-
-    // Keyboard Navigation
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        e.preventDefault();
-        nextSlide();
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        e.preventDefault();
-        prevSlide();
+        btnPrev.disabled = currentSlide === 0;
+        btnNext.disabled = currentSlide === TOTAL_SLIDES - 1;
       }
-    });
 
-    // Mobile Sidebar Toggle
-    document.getElementById('sidebarToggle').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.toggle('open');
-      document.getElementById('sidebarOverlay').classList.toggle('open');
-    });
+      window.goToSlide = function (index) {
+        if (index < 0 || index >= TOTAL_SLIDES) return;
+        currentSlide = index;
+        updateUI();
+      };
 
-    document.getElementById('sidebarOverlay').addEventListener('click', () => {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('open');
-    });
+      window.nextSlide = function () {
+        if (currentSlide < TOTAL_SLIDES - 1) { currentSlide++; updateUI(); }
+      };
+
+      window.prevSlide = function () {
+        if (currentSlide > 0) { currentSlide--; updateUI(); }
+      };
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); nextSlide(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { e.preventDefault(); prevSlide(); }
+      });
+
+      updateUI();
+    })();
   </script>
 
 </body>
