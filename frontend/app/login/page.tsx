@@ -2,6 +2,8 @@
 
 import { LogIn, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { useLogin } from "@/src/presentation/hooks/useLogin";
+import { Input } from "@/src/components/ui/input";
+import { Button } from "@/src/components/ui/button";
 
 export default function LoginPage() {
   const { email, setEmail, senha, setSenha, mostrarSenha, setMostrarSenha, erro, carregando, handleSubmit } = useLogin();
@@ -27,15 +29,15 @@ export default function LoginPage() {
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-stone-700 mb-1.5">E-mail</label>
             <div className="relative">
-              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-viaje-neutral" />
-              <input
+              <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-viaje-neutral z-10" />
+              <Input
                 id="email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
-                className="w-full rounded-lg border border-stone-300 bg-stone-50 py-2.5 pl-10 pr-4 text-sm text-stone-800 placeholder:text-stone-400 focus:border-viaje-primary focus:outline-none focus:ring-2 focus:ring-viaje-primary/20"
+                className="w-full rounded-lg border border-stone-300 bg-stone-50 py-2.5 pl-10 pr-4 text-sm text-stone-800 placeholder:text-stone-400 focus-visible:border-viaje-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-viaje-primary/20"
               />
             </div>
           </div>
@@ -43,15 +45,15 @@ export default function LoginPage() {
           <div>
             <label htmlFor="senha" className="block text-sm font-medium text-stone-700 mb-1.5">Senha</label>
             <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-viaje-neutral" />
-              <input
+              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-viaje-neutral z-10" />
+              <Input
                 id="senha"
                 type={mostrarSenha ? "text" : "password"}
                 required
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 placeholder="Sua senha"
-                className="w-full rounded-lg border border-stone-300 bg-stone-50 py-2.5 pl-10 pr-10 text-sm text-stone-800 placeholder:text-stone-400 focus:border-viaje-primary focus:outline-none focus:ring-2 focus:ring-viaje-primary/20"
+                className="w-full rounded-lg border border-stone-300 bg-stone-50 py-2.5 pl-10 pr-10 text-sm text-stone-800 placeholder:text-stone-400 focus-visible:border-viaje-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-viaje-primary/20"
               />
               <button
                 type="button"
@@ -64,13 +66,13 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={carregando}
-            className="w-full rounded-full bg-viaje-primary py-2.5 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2"
+            className="w-full rounded-full bg-viaje-primary h-auto py-2.5 text-sm font-semibold text-white transition-all hover:brightness-110 active:scale-[0.98] disabled:opacity-70 flex justify-center items-center gap-2 hover:bg-viaje-primary"
           >
             {carregando ? <><Loader2 size={18} className="animate-spin" /> Entrando...</> : "Entrar"}
-          </button>
+          </Button>
         </form>
 
         <p className="mt-6 text-center text-sm text-viaje-neutral">

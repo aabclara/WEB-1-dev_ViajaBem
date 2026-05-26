@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { CalendarCheck } from "lucide-react";
-import type { Viagem } from "@/src/types/viagem";
+import type { Viagem } from "@/src/domain/entities/Viagem";
 
 interface ViagemCardProps {
   viagem: Viagem;
 }
 
 export function ViagemCard({ viagem }: ViagemCardProps) {
-  const ocupacao = viagem.vagas_totais > 0
-    ? Math.round(((viagem.vagas_totais - viagem.vagas_disponiveis) / viagem.vagas_totais) * 100)
+  const ocupacao = viagem.vagasTotais > 0
+    ? Math.round(((viagem.vagasTotais - viagem.vagasDisponiveis) / viagem.vagasTotais) * 100)
     : 0;
 
   return (
@@ -20,12 +20,12 @@ export function ViagemCard({ viagem }: ViagemCardProps) {
         </div>
 
         {/* Badge */}
-        {viagem.ultimas_vagas && (
+        {viagem.ultimasVagas && (
           <div className="absolute top-4 right-4 bg-error text-on-error text-sm font-bold px-3 py-1 rounded-full shadow-sm">
             Ultimas Vagas
           </div>
         )}
-        {!viagem.ultimas_vagas && ocupacao >= 70 && (
+        {!viagem.ultimasVagas && ocupacao >= 70 && (
           <div className="absolute top-4 right-4 bg-primary text-on-primary text-sm font-bold px-3 py-1 rounded-full shadow-sm">
             Em Alta
           </div>
@@ -40,9 +40,9 @@ export function ViagemCard({ viagem }: ViagemCardProps) {
 
         {/* Price */}
         <div className="flex items-baseline gap-2 mb-4">
-          {viagem.descricao_precos ? (
+          {viagem.descricaoPrecos ? (
             <span className="text-primary text-2xl font-black">
-              {viagem.descricao_precos}
+              {viagem.descricaoPrecos}
             </span>
           ) : (
             <span className="text-on-surface-variant text-sm font-medium">
@@ -55,7 +55,7 @@ export function ViagemCard({ viagem }: ViagemCardProps) {
         <div className="space-y-2 mb-6">
           <div className="flex justify-between items-center text-sm font-bold">
             <span className="text-on-background">Ocupacao</span>
-            <span className={viagem.ultimas_vagas ? "text-error" : "text-primary"}>
+            <span className={viagem.ultimasVagas ? "text-error" : "text-primary"}>
               {ocupacao}%
             </span>
           </div>
