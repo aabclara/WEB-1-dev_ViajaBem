@@ -7,7 +7,7 @@ from tests.conftest import _criar_usuario, _token
 class TestAdmin:
     async def test_listar_viagens_admin_vazia(self, cliente, sessao_teste):
         # Criar admin
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="admin@adm.com", tipo=TipoUsuario.ADMIN, cpf="0001"
         )
         token = await _token(cliente, "admin@adm.com")
@@ -19,7 +19,7 @@ class TestAdmin:
         assert r.json() == []
 
     async def test_criar_e_editar_viagem(self, cliente, sessao_teste):
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="admin2@adm.com", tipo=TipoUsuario.ADMIN, cpf="0002"
         )
         token = await _token(cliente, "admin2@adm.com")
@@ -48,7 +48,7 @@ class TestAdmin:
         assert r.json()["vagas_totais"] == 50
 
     async def test_kanban_reservas(self, cliente, sessao_teste):
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="admin3@adm.com", tipo=TipoUsuario.ADMIN, cpf="0003"
         )
         token = await _token(cliente, "admin3@adm.com")
@@ -71,7 +71,7 @@ class TestAdmin:
         assert StatusReserva.SOLICITADO.value in r.json()["colunas"]
 
     async def test_exportar_antt(self, cliente, sessao_teste):
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="admin4@adm.com", tipo=TipoUsuario.ADMIN, cpf="0004"
         )
         token = await _token(cliente, "admin4@adm.com")
@@ -101,7 +101,7 @@ class TestAdmin:
         assert "text/csv" in r.headers["content-type"]
 
     async def test_resumo_whatsapp_erro_sem_valor(self, cliente, sessao_teste):
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="admin5@adm.com", tipo=TipoUsuario.ADMIN, cpf="0005"
         )
         token = await _token(cliente, "admin5@adm.com")
@@ -130,7 +130,7 @@ class TestAdmin:
         assert "Defina o valor acordado" in r.json()["detail"]
 
     async def test_atualizar_reserva_admin(self, cliente, sessao_teste):
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="admin6@adm.com", tipo=TipoUsuario.ADMIN, cpf="0006"
         )
         token = await _token(cliente, "admin6@adm.com")
@@ -160,7 +160,7 @@ class TestAdmin:
         assert float(r.json()["valor_acordado"]) == 500.0
 
     async def test_resumo_whatsapp_sucesso(self, cliente, sessao_teste):
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="admin7@adm.com", tipo=TipoUsuario.ADMIN, cpf="0007"
         )
         token = await _token(cliente, "admin7@adm.com")
@@ -187,7 +187,7 @@ class TestAdmin:
         assert "Rio" in r.json()["texto"]
 
     async def test_listar_viagens_busca(self, cliente, sessao_teste):
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="admin8@adm.com", tipo=TipoUsuario.ADMIN, cpf="0008"
         )
         token = await _token(cliente, "admin8@adm.com")

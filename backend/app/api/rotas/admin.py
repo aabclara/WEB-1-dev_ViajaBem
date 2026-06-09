@@ -215,7 +215,7 @@ async def atualizar_reserva_admin(
         raise ReservaNaoEncontradaException()
 
     viagem = reserva.viagem
-    servico_reservas = ReservasService(sessao)
+    ReservasService(sessao)
 
     # Trava de seguro para CANCELADO
     # if dados.status == StatusReserva.CANCELADO and servico_reservas.dentro_da_trava_seguro(viagem.data_partida):

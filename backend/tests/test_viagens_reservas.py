@@ -77,7 +77,7 @@ class TestReservas:
     async def test_criar_reserva_gera_slots(self, cliente, sessao_teste):
         from tests.conftest import _criar_usuario, _token
 
-        lider = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="lider_slots@test.com", cpf="30303030303"
         )
         viagem = await _criar_viagem(sessao_teste)
@@ -94,7 +94,7 @@ class TestReservas:
     async def test_checkout_bloqueado_viagem_esgotada(self, cliente, sessao_teste):
         from tests.conftest import _criar_usuario, _token
 
-        lider = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="lider_esgotado@test.com", cpf="40404040404"
         )
         viagem = await _criar_viagem(sessao_teste)
@@ -111,7 +111,7 @@ class TestReservas:
     async def test_trava_cancelamento_7_dias(self, cliente, sessao_teste):
         from tests.conftest import _criar_usuario, _token
 
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste,
             email="admin_trava@test.com",
             tipo=TipoUsuario.ADMIN,
@@ -136,7 +136,7 @@ class TestReservas:
     async def test_trava_concorrencia_vagas(self, cliente, sessao_teste):
         from tests.conftest import _criar_usuario, _token
 
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste,
             email="admin_concorr@test.com",
             tipo=TipoUsuario.ADMIN,
@@ -167,7 +167,7 @@ class TestReservas:
         lider = await _criar_usuario(
             sessao_teste, email="lider_resumo@test.com", cpf="90909090909"
         )
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste,
             email="admin_resumo@test.com",
             tipo=TipoUsuario.ADMIN,
@@ -207,7 +207,7 @@ class TestReservas:
     async def test_listar_passageiros_reserva(self, cliente, sessao_teste):
         from tests.conftest import _criar_usuario, _token
 
-        lider = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste, email="lider_pass@test.com", cpf="77777777771"
         )
         viagem = await _criar_viagem(sessao_teste)

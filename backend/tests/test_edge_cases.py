@@ -89,7 +89,7 @@ class TestEdgeCases:
         await sessao_teste.flush()
 
         u1 = await _criar_usuario(sessao_teste, email="u1@test.com", cpf="u1")
-        u2 = await _criar_usuario(sessao_teste, email="u2@test.com", cpf="u2")
+        await _criar_usuario(sessao_teste, email="u2@test.com", cpf="u2")
         reserva = ReservaGrupo(id_viagem=v.id, id_lider=u1.id, qtd_vagas=1)
         sessao_teste.add(reserva)
         await sessao_teste.commit()

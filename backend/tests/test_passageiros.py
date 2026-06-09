@@ -57,9 +57,7 @@ class TestPassageiros:
         lider1, viagem, reserva = await _setup_reserva(
             sessao_teste, "lider_p1@test.com", "11100011100"
         )
-        lider2 = await _criar_usuario(
-            sessao_teste, email="lider_p2@test.com", cpf="22200022200"
-        )
+        await _criar_usuario(sessao_teste, email="lider_p2@test.com", cpf="22200022200")
         tk2 = await _token(cliente, "lider_p2@test.com")
         r = await cliente.get(
             f"/reservas/{reserva.id}/passageiros",
@@ -118,7 +116,7 @@ class TestPassageiros:
     async def test_exportacao_pendente(self, cliente, sessao_teste):
         from tests.conftest import _criar_usuario, _token
 
-        admin = await _criar_usuario(
+        await _criar_usuario(
             sessao_teste,
             email="admin_exp@test.com",
             tipo=TipoUsuario.ADMIN,
