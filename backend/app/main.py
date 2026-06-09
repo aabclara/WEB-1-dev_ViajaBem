@@ -18,12 +18,17 @@ from app.api.rotas.passageiros import roteador_passageiros
 from app.api.rotas.admin import roteador_admin
 
 from app.core.excecoes import (
-    DominioException, ViagemNaoEncontradaException, ViagemEsgotadaException,
-    ReservaNaoEncontradaException, AcessoNegadoException, ValorAcordadoNaoDefinidoException,
-    PassageiroNaoEncontradoException, EdicaoBloqueadaException, 
-    CancelamentoBloqueadoException, VagasInsuficientesException
+    DominioException,
+    ViagemNaoEncontradaException,
+    ViagemEsgotadaException,
+    ReservaNaoEncontradaException,
+    AcessoNegadoException,
+    ValorAcordadoNaoDefinidoException,
+    PassageiroNaoEncontradoException,
+    EdicaoBloqueadaException,
+    CancelamentoBloqueadoException,
+    VagasInsuficientesException,
 )
-
 
 
 async def _criar_admin_seed():
@@ -51,7 +56,7 @@ async def ciclo_de_vida(app: FastAPI):
     os.environ["TZ"] = configuracoes.TIMEZONE
     if hasattr(time, "tzset"):
         time.tzset()
-    
+
     await _criar_admin_seed()
     yield
 
@@ -77,6 +82,7 @@ app.include_router(roteador_reservas)
 app.include_router(roteador_passageiros)
 app.include_router(roteador_admin)
 
+
 @app.exception_handler(DominioException)
 async def dominio_exception_handler(request: Request, exc: DominioException):
     status_map = {
@@ -96,15 +102,14 @@ async def dominio_exception_handler(request: Request, exc: DominioException):
         content = {
             "detail": {
                 "mensagem": exc.mensagem,
-                "candidatos_cancelamento": exc.candidatos
+                "candidatos_cancelamento": exc.candidatos,
             }
         }
-    
+
     return JSONResponse(
         status_code=status_code,
         content=content,
     )
-
 
 
 @app.get("/", tags=["Saúde"])

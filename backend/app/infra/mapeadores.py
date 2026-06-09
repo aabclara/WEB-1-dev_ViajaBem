@@ -1,6 +1,7 @@
 from app.dominio import entidades as dom
 from app.infra import modelos as infra
 
+
 class MapeadorUsuario:
     @staticmethod
     def para_dominio(modelo: infra.Usuario) -> dom.Usuario:
@@ -14,7 +15,7 @@ class MapeadorUsuario:
             data_nascimento=modelo.data_nascimento,
             tipo=dom.TipoUsuario(modelo.tipo.value),
             apelido=modelo.apelido,
-            criado_em=modelo.criado_em
+            criado_em=modelo.criado_em,
         )
 
     @staticmethod
@@ -28,8 +29,9 @@ class MapeadorUsuario:
             telefone=entidade.telefone,
             data_nascimento=entidade.data_nascimento,
             tipo=infra.TipoUsuario(entidade.tipo.value),
-            apelido=entidade.apelido
+            apelido=entidade.apelido,
         )
+
 
 class MapeadorViagem:
     @staticmethod
@@ -45,7 +47,7 @@ class MapeadorViagem:
             url_capa=modelo.url_capa,
             vagas_totais=modelo.vagas_totais,
             status=dom.StatusViagem(modelo.status.value),
-            criado_em=modelo.criado_em
+            criado_em=modelo.criado_em,
         )
 
     @staticmethod
@@ -60,8 +62,9 @@ class MapeadorViagem:
             data_retorno=entidade.data_retorno,
             url_capa=entidade.url_capa,
             vagas_totais=entidade.vagas_totais,
-            status=infra.StatusViagem(entidade.status.value)
+            status=infra.StatusViagem(entidade.status.value),
         )
+
 
 class MapeadorReserva:
     @staticmethod
@@ -71,12 +74,14 @@ class MapeadorReserva:
             id_viagem=modelo.id_viagem,
             id_lider=modelo.id_lider,
             qtd_vagas=modelo.qtd_vagas,
-            valor_acordado=float(modelo.valor_acordado) if modelo.valor_acordado else None,
+            valor_acordado=float(modelo.valor_acordado)
+            if modelo.valor_acordado
+            else None,
             status=dom.StatusReserva(modelo.status.value),
             substatus=dom.SubstatusReserva(modelo.substatus.value),
             data_expiracao=modelo.data_expiracao,
             admin_responsavel_id=modelo.admin_responsavel_id,
-            criado_em=modelo.criado_em
+            criado_em=modelo.criado_em,
         )
 
     @staticmethod
@@ -90,8 +95,9 @@ class MapeadorReserva:
             status=infra.StatusReserva(entidade.status.value),
             substatus=infra.SubstatusReserva(entidade.substatus.value),
             data_expiracao=entidade.data_expiracao,
-            admin_responsavel_id=entidade.admin_responsavel_id
+            admin_responsavel_id=entidade.admin_responsavel_id,
         )
+
 
 class MapeadorPassageiro:
     @staticmethod
@@ -101,7 +107,7 @@ class MapeadorPassageiro:
             id_reserva=modelo.id_reserva,
             nome=modelo.nome,
             documento=modelo.documento,
-            eh_lider=modelo.eh_lider
+            eh_lider=modelo.eh_lider,
         )
 
     @staticmethod
@@ -111,5 +117,5 @@ class MapeadorPassageiro:
             id_reserva=entidade.id_reserva,
             nome=entidade.nome,
             documento=entidade.documento,
-            eh_lider=entidade.eh_lider
+            eh_lider=entidade.eh_lider,
         )

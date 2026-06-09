@@ -5,23 +5,22 @@ from app.infra.modelos import ReservaGrupo as ReservaModel, Viagem as ViagemMode
 from app.dominio.entidades import ReservaGrupo
 from app.infra.mapeadores import MapeadorReserva
 
+
 class ReservaRepositorio:
     def __init__(self, sessao: AsyncSession):
         self.sessao = sessao
 
     async def listar_por_lider(self, id_lider: int) -> list[ReservaGrupo]:
         from sqlalchemy import case
+
         resultado = await self.sessao.execute(
             select(ReservaModel)
             .join(ReservaModel.viagem)
             .options(selectinload(ReservaModel.viagem))
             .where(ReservaModel.id_lider == id_lider)
             .order_by(
-                case(
-                    (ViagemModel.status.in_(["ATIVO", "ESGOTADO"]), 1),
-                    else_=2
-                ),
-                ViagemModel.data_partida.asc()
+                case((ViagemModel.status.in_(["ATIVO", "ESGOTADO"]), 1), else_=2),
+                ViagemModel.data_partida.asc(),
             )
         )
         modelos = resultado.scalars().all()
@@ -41,7 +40,7 @@ class ReservaRepositorio:
             .options(
                 selectinload(ReservaModel.passageiros),
                 selectinload(ReservaModel.viagem),
-                selectinload(ReservaModel.lider)
+                selectinload(ReservaModel.lider),
             )
             .where(ReservaModel.id == id_reserva)
         )
@@ -52,10 +51,13 @@ class ReservaRepositorio:
         await self.sessao.flush()
         return reserva
 
+
 class ViagemRepositorio:
     def __init__(self, sessao: AsyncSession):
         self.sessao = sessao
 
     async def buscar_por_id(self, id_viagem: int) -> ViagemModel | None:
-        resultado = await self.sessao.execute(select(ViagemModel).where(ViagemModel.id == id_viagem))
+        resultado = await self.sessao.execute(
+            select(ViagemModel).where(ViagemModel.id == id_viagem)
+        )
         return resultado.scalar_one_or_none()

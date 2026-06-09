@@ -3,10 +3,12 @@ from datetime import datetime, date
 from typing import List, Optional
 from .enums import TipoUsuario, StatusViagem, StatusReserva, SubstatusReserva
 
+
 @dataclass
 class EntidadeBase:
     id: Optional[int] = None
     criado_em: Optional[datetime] = None
+
 
 @dataclass
 class Usuario(EntidadeBase):
@@ -19,6 +21,7 @@ class Usuario(EntidadeBase):
     tipo: TipoUsuario = TipoUsuario.LIDER
     apelido: Optional[str] = None
     reservas: List["ReservaGrupo"] = field(default_factory=list)
+
 
 @dataclass
 class Viagem(EntidadeBase):
@@ -37,9 +40,12 @@ class Viagem(EntidadeBase):
         if self.status == StatusViagem.ESGOTADO:
             raise ValueError("Viagem esgotada")
         # Conta as vagas já ocupadas (desconsidera reservas canceladas)
-        vagas_ocupadas = sum(r.qtd_vagas for r in self.reservas if r.status != StatusReserva.CANCELADO)
+        vagas_ocupadas = sum(
+            r.qtd_vagas for r in self.reservas if r.status != StatusReserva.CANCELADO
+        )
         if self.vagas_totais - vagas_ocupadas < vagas_solicitadas:
             raise ValueError("Vagas insuficientes para esta viagem")
+
 
 @dataclass
 class ReservaGrupo(EntidadeBase):
@@ -62,6 +68,7 @@ class ReservaGrupo(EntidadeBase):
         if not self.valor_acordado:
             raise ValueError("Valor acordado não definido")
         from decimal import Decimal
+
         valor = Decimal(str(self.valor_acordado))
         sinal = round(valor * Decimal("0.5"), 2)
         restante = valor - sinal
@@ -70,14 +77,18 @@ class ReservaGrupo(EntidadeBase):
             "valor_acordado": valor,
             "sinal": sinal,
             "restante": restante,
-            "valor_por_pessoa": por_pessoa
+            "valor_por_pessoa": por_pessoa,
         }
 
     def calcular_valor_por_pessoa(self) -> Optional[float]:
         if not self.valor_acordado or not self.qtd_vagas:
             return None
         from decimal import Decimal
-        return float(round(Decimal(str(self.valor_acordado)) / Decimal(str(self.qtd_vagas)), 2))
+
+        return float(
+            round(Decimal(str(self.valor_acordado)) / Decimal(str(self.qtd_vagas)), 2)
+        )
+
 
 @dataclass
 class Passageiro:

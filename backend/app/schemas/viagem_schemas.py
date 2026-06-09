@@ -7,29 +7,65 @@ from app.infra.modelos import StatusViagem, StatusReserva, SubstatusReserva
 
 class ViagemPublicaSchema(BaseModel):
     id: int = Field(..., description="ID da viagem", examples=[1])
-    titulo: str = Field(..., description="Título descritivo da viagem", examples=["Final de Semana em Campos do Jordão"])
-    descricao_precos: Optional[str] = Field(None, description="Resumo textual dos preços", examples=["A partir de R$ 350,00"])
-    data_partida: date = Field(..., description="Data agendada para a partida", examples=["2026-05-15"])
-    vagas_totais: int = Field(..., description="Capacidade máxima da viagem", examples=[46])
-    status: StatusViagem = Field(..., description="Status atual da viagem", examples=["ATIVO"])
-    descricao_curta: Optional[str] = Field(None, description="Resumo conciso da viagem", examples=["Aproveite um final de semana inesquecível na montanha."])
-    itens_inclusos: Optional[str] = Field(None, description="Itens inclusos no pacote", examples=["Transporte, Seguro Viagem, Guia"])
+    titulo: str = Field(
+        ...,
+        description="Título descritivo da viagem",
+        examples=["Final de Semana em Campos do Jordão"],
+    )
+    descricao_precos: Optional[str] = Field(
+        None,
+        description="Resumo textual dos preços",
+        examples=["A partir de R$ 350,00"],
+    )
+    data_partida: date = Field(
+        ..., description="Data agendada para a partida", examples=["2026-05-15"]
+    )
+    vagas_totais: int = Field(
+        ..., description="Capacidade máxima da viagem", examples=[46]
+    )
+    status: StatusViagem = Field(
+        ..., description="Status atual da viagem", examples=["ATIVO"]
+    )
+    descricao_curta: Optional[str] = Field(
+        None,
+        description="Resumo conciso da viagem",
+        examples=["Aproveite um final de semana inesquecível na montanha."],
+    )
+    itens_inclusos: Optional[str] = Field(
+        None,
+        description="Itens inclusos no pacote",
+        examples=["Transporte, Seguro Viagem, Guia"],
+    )
     data_retorno: Optional[date] = Field(None, description="Data prevista para retorno")
     url_capa: Optional[str] = Field(None, description="URL da imagem de capa da viagem")
-    vagas_disponiveis: int = Field(..., description="Quantidade de vagas ainda disponíveis", examples=[10])
-    ultimas_vagas: bool = Field(..., description="Indica se a viagem atingiu o limiar de últimas vagas", examples=[False])
+    vagas_disponiveis: int = Field(
+        ..., description="Quantidade de vagas ainda disponíveis", examples=[10]
+    )
+    ultimas_vagas: bool = Field(
+        ...,
+        description="Indica se a viagem atingiu o limiar de últimas vagas",
+        examples=[False],
+    )
 
     model_config = {"from_attributes": True}
 
 
 class CriarViagemSchema(BaseModel):
-    titulo: str = Field(..., description="Título da viagem", examples=["Bate-volta Campos do Jordão"])
-    descricao_precos: Optional[str] = Field(None, description="Resumo de preços", examples=["R$ 150 (Adultos)"])
-    data_partida: date = Field(..., description="Data da partida", examples=["2026-06-20"])
+    titulo: str = Field(
+        ..., description="Título da viagem", examples=["Bate-volta Campos do Jordão"]
+    )
+    descricao_precos: Optional[str] = Field(
+        None, description="Resumo de preços", examples=["R$ 150 (Adultos)"]
+    )
+    data_partida: date = Field(
+        ..., description="Data da partida", examples=["2026-06-20"]
+    )
     data_retorno: Optional[date] = Field(None, description="Data de retorno")
     url_capa: Optional[str] = Field(None, description="URL da imagem de capa")
     vagas_totais: int = Field(..., description="Capacidade", examples=[40])
-    descricao_curta: Optional[str] = Field(None, description="Resumo para home", examples=["Um dia inesquecível..."])
+    descricao_curta: Optional[str] = Field(
+        None, description="Resumo para home", examples=["Um dia inesquecível..."]
+    )
     itens_inclusos: Optional[str] = None
 
 
@@ -47,9 +83,15 @@ class AtualizarViagemSchema(BaseModel):
 
 class PassageiroSchema(BaseModel):
     id: int = Field(..., description="ID do passageiro", examples=[123])
-    nome: Optional[str] = Field(None, description="Nome do passageiro", examples=["João da Silva"])
-    documento: Optional[str] = Field(None, description="Documento do passageiro", examples=["123.456.789-00"])
-    eh_lider: bool = Field(..., description="Indica se é o líder do grupo", examples=[True])
+    nome: Optional[str] = Field(
+        None, description="Nome do passageiro", examples=["João da Silva"]
+    )
+    documento: Optional[str] = Field(
+        None, description="Documento do passageiro", examples=["123.456.789-00"]
+    )
+    eh_lider: bool = Field(
+        ..., description="Indica se é o líder do grupo", examples=[True]
+    )
 
     model_config = {"from_attributes": True}
 
@@ -64,14 +106,28 @@ class ReservaSchema(BaseModel):
     id_viagem: int = Field(..., description="ID da viagem associada", examples=[1])
     id_lider: int = Field(..., description="ID do líder reservante", examples=[10])
     qtd_vagas: int = Field(..., description="Vagas reservadas", examples=[2])
-    valor_acordado: Optional[Decimal] = Field(None, description="Valor final acordado para a reserva", examples=[300.00])
-    status: StatusReserva = Field(..., description="Status atual da reserva", examples=["SOLICITADO"])
-    substatus: SubstatusReserva = Field(..., description="Substatus ou pendência da reserva", examples=["AGUARDANDO_CONTATO"])
-    admin_responsavel_id: Optional[int] = Field(None, description="ID do admin responsável", examples=[1])
+    valor_acordado: Optional[Decimal] = Field(
+        None, description="Valor final acordado para a reserva", examples=[300.00]
+    )
+    status: StatusReserva = Field(
+        ..., description="Status atual da reserva", examples=["SOLICITADO"]
+    )
+    substatus: SubstatusReserva = Field(
+        ...,
+        description="Substatus ou pendência da reserva",
+        examples=["AGUARDANDO_CONTATO"],
+    )
+    admin_responsavel_id: Optional[int] = Field(
+        None, description="ID do admin responsável", examples=[1]
+    )
     titulo_viagem: Optional[str] = Field(None, description="Título da viagem associada")
-    data_partida_viagem: Optional[date] = Field(None, description="Data de partida da viagem associada")
+    data_partida_viagem: Optional[date] = Field(
+        None, description="Data de partida da viagem associada"
+    )
     nome_lider: Optional[str] = Field(None, description="Nome do líder da reserva")
-    passageiros: list[PassageiroSchema] = Field(default=[], description="Lista de passageiros vinculados")
+    passageiros: list[PassageiroSchema] = Field(
+        default=[], description="Lista de passageiros vinculados"
+    )
 
     model_config = {"from_attributes": True}
 

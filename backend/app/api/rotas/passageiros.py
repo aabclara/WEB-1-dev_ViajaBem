@@ -1,23 +1,19 @@
-from datetime import date, timedelta
-from app.core.tempo import obter_agora
-import datetime as dt
-
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 
 from app.core.banco import obter_sessao
 from app.core.seguranca import obter_usuario_atual
-from app.core.configuracao import configuracoes
 from app.infra.modelos import Passageiro, ReservaGrupo, Usuario
 from app.schemas.viagem_schemas import PassageiroSchema, AtualizarPassageiroSchema
-from app.core.excecoes import PassageiroNaoEncontradoException, AcessoNegadoException, EdicaoBloqueadaException
+from app.core.excecoes import (
+    PassageiroNaoEncontradoException,
+    AcessoNegadoException,
+    EdicaoBloqueadaException,
+)
 from app.casos_uso.reservas_service import ReservasService
 
 roteador_passageiros = APIRouter(prefix="/passageiros", tags=["Passageiros"])
-
-
-
 
 
 @roteador_passageiros.patch("/{id_passageiro}", response_model=PassageiroSchema)
@@ -42,6 +38,7 @@ async def atualizar_passageiro(
 
     # Buscar viagem para trava
     from app.infra.modelos import Viagem
+
     res_v = await sessao.execute(select(Viagem).where(Viagem.id == reserva.id_viagem))
     viagem = res_v.scalar_one()
 

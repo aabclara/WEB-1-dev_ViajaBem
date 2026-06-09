@@ -1,4 +1,3 @@
-import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
@@ -6,7 +5,7 @@ from datetime import date
 
 from app.main import app
 from app.core.banco import obter_sessao
-from app.infra.modelos import Base, Usuario, TipoUsuario, Viagem, StatusViagem
+from app.infra.modelos import Base, Usuario, TipoUsuario
 from app.core.seguranca import gerar_hash_senha
 
 # Banco de testes em memória (SQLite async)
@@ -37,16 +36,24 @@ async def cliente(sessao_teste: AsyncSession):
         yield sessao_teste
 
     app.dependency_overrides[obter_sessao] = _obter_sessao_teste
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as c:
         yield c
     app.dependency_overrides.clear()
 
 
-async def _criar_usuario(sessao, email="lider@test.com", tipo=TipoUsuario.LIDER, cpf="12345678901"):
+async def _criar_usuario(
+    sessao, email="lider@test.com", tipo=TipoUsuario.LIDER, cpf="12345678901"
+):
     u = Usuario(
-        email=email, senha_hash=gerar_hash_senha("Senha123!"),
-        nome="Teste", cpf=cpf, telefone="11999999999",
-        data_nascimento=date(1990, 5, 15), tipo=tipo,
+        email=email,
+        senha_hash=gerar_hash_senha("Senha123!"),
+        nome="Teste",
+        cpf=cpf,
+        telefone="11999999999",
+        data_nascimento=date(1990, 5, 15),
+        tipo=tipo,
     )
     sessao.add(u)
     await sessao.commit()

@@ -1,42 +1,47 @@
 import csv
 import io
-import datetime as dt
-from datetime import date, timedelta
 from app.core.tempo import obter_agora
 from decimal import Decimal
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query, status
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func
 from sqlalchemy.orm import selectinload
 
 from app.core.banco import obter_sessao
 from app.core.seguranca import requerer_admin
 from app.core.configuracao import configuracoes
 from app.infra.modelos import (
-    Viagem, ReservaGrupo, Passageiro, Usuario,
-    StatusViagem, StatusReserva, SubstatusReserva,
+    Viagem,
+    ReservaGrupo,
+    Passageiro,
+    Usuario,
+    StatusViagem,
+    StatusReserva,
 )
 from app.schemas.viagem_schemas import (
-    ViagemPublicaSchema, CriarViagemSchema, AtualizarViagemSchema,
-    ReservaSchema, AtualizarReservaAdminSchema, KanbanViagemSchema,
-    ResumoWhatsappSchema, PassageiroSchema,
+    CriarViagemSchema,
+    AtualizarViagemSchema,
+    ReservaSchema,
+    AtualizarReservaAdminSchema,
+    KanbanViagemSchema,
+    ResumoWhatsappSchema,
 )
 from app.infra.mapeadores import MapeadorReserva
 from app.core.excecoes import (
-    ViagemNaoEncontradaException, ReservaNaoEncontradaException,
-    CancelamentoBloqueadoException, VagasInsuficientesException,
-    ValorAcordadoNaoDefinidoException
+    ViagemNaoEncontradaException,
+    ReservaNaoEncontradaException,
+    VagasInsuficientesException,
+    ValorAcordadoNaoDefinidoException,
 )
-from app.casos_uso.viagens_service import ViagensService
 from app.casos_uso.reservas_service import ReservasService
 
 roteador_admin = APIRouter(prefix="/admin", tags=["Admin"])
 
 
-
 # ─── Viagens (Admin) ─────────────────────────────────────────────────────────
+
 
 @roteador_admin.get("/viagens/", tags=["Admin — Viagens"])
 async def listar_viagens_admin(
@@ -48,26 +53,32 @@ async def listar_viagens_admin(
 ):
     # Arquivamento dinâmico
     from sqlalchemy import update
+
     hoje = obter_agora().date()
     await sessao.execute(
-        update(Viagem).where(
+        update(Viagem)
+        .where(
             Viagem.data_retorno < hoje,
-            Viagem.status.not_in([StatusViagem.FINALIZADO, StatusViagem.CANCELADO])
-        ).values(status=StatusViagem.FINALIZADO)
+            Viagem.status.not_in([StatusViagem.FINALIZADO, StatusViagem.CANCELADO]),
+        )
+        .values(status=StatusViagem.FINALIZADO)
     )
     await sessao.commit()
 
     query = select(Viagem)
     if busca:
         query = query.where(Viagem.titulo.ilike(f"%{busca}%"))
-        
+
     from sqlalchemy import case
+
     ordem_status = case(
         (Viagem.status.in_([StatusViagem.FINALIZADO, StatusViagem.CANCELADO]), 2),
-        else_=1
+        else_=1,
     )
-    
-    resultado = await sessao.execute(query.order_by(ordem_status, Viagem.data_partida).offset(skip).limit(limit))
+
+    resultado = await sessao.execute(
+        query.order_by(ordem_status, Viagem.data_partida).offset(skip).limit(limit)
+    )
     viagens = resultado.scalars().all()
 
     resposta = []
@@ -75,15 +86,27 @@ async def listar_viagens_admin(
         contagens = {}
         for s in StatusReserva:
             res = await sessao.execute(
-                select(func.count()).where(ReservaGrupo.id_viagem == v.id, ReservaGrupo.status == s)
+                select(func.count()).where(
+                    ReservaGrupo.id_viagem == v.id, ReservaGrupo.status == s
+                )
             )
             contagens[s.value] = int(res.scalar())
-        resposta.append({"id": v.id, "titulo": v.titulo, "data_partida": v.data_partida,
-                         "status": v.status, "vagas_totais": v.vagas_totais, "reservas_por_status": contagens})
+        resposta.append(
+            {
+                "id": v.id,
+                "titulo": v.titulo,
+                "data_partida": v.data_partida,
+                "status": v.status,
+                "vagas_totais": v.vagas_totais,
+                "reservas_por_status": contagens,
+            }
+        )
     return resposta
 
 
-@roteador_admin.post("/viagens/", status_code=status.HTTP_201_CREATED, tags=["Admin — Viagens"])
+@roteador_admin.post(
+    "/viagens/", status_code=status.HTTP_201_CREATED, tags=["Admin — Viagens"]
+)
 async def criar_viagem(
     dados: CriarViagemSchema,
     admin: Usuario = Depends(requerer_admin),
@@ -126,7 +149,12 @@ async def editar_viagem(
 
 # ─── Kanban ──────────────────────────────────────────────────────────────────
 
-@roteador_admin.get("/viagens/{id_viagem}/reservas", response_model=KanbanViagemSchema, tags=["Admin — Kanban"])
+
+@roteador_admin.get(
+    "/viagens/{id_viagem}/reservas",
+    response_model=KanbanViagemSchema,
+    tags=["Admin — Kanban"],
+)
 async def kanban_reservas(
     id_viagem: int,
     admin: Usuario = Depends(requerer_admin),
@@ -139,12 +167,14 @@ async def kanban_reservas(
 
     res_r = await sessao.execute(
         select(ReservaGrupo)
-        .options(selectinload(ReservaGrupo.passageiros), selectinload(ReservaGrupo.lider))
+        .options(
+            selectinload(ReservaGrupo.passageiros), selectinload(ReservaGrupo.lider)
+        )
         .where(ReservaGrupo.id_viagem == id_viagem)
     )
     modelos = res_r.scalars().all()
     reservas = []
-    
+
     for m in modelos:
         entidade = MapeadorReserva.para_dominio(m)
         if m.lider:
@@ -155,12 +185,17 @@ async def kanban_reservas(
     for r in reservas:
         colunas[r.status.value].append(r)
 
-    return KanbanViagemSchema(id_viagem=viagem.id, titulo=viagem.titulo, colunas=colunas)
+    return KanbanViagemSchema(
+        id_viagem=viagem.id, titulo=viagem.titulo, colunas=colunas
+    )
 
 
 # ─── Reservas (Admin) ────────────────────────────────────────────────────────
 
-@roteador_admin.patch("/reservas/{id_reserva}", response_model=ReservaSchema, tags=["Admin — Reservas"])
+
+@roteador_admin.patch(
+    "/reservas/{id_reserva}", response_model=ReservaSchema, tags=["Admin — Reservas"]
+)
 async def atualizar_reserva_admin(
     id_reserva: int,
     dados: AtualizarReservaAdminSchema,
@@ -169,7 +204,9 @@ async def atualizar_reserva_admin(
 ):
     res = await sessao.execute(
         select(ReservaGrupo)
-        .options(selectinload(ReservaGrupo.passageiros), selectinload(ReservaGrupo.viagem))
+        .options(
+            selectinload(ReservaGrupo.passageiros), selectinload(ReservaGrupo.viagem)
+        )
         .where(ReservaGrupo.id == id_reserva)
         .with_for_update()
     )
@@ -189,7 +226,9 @@ async def atualizar_reserva_admin(
         res_ocupadas = await sessao.execute(
             select(func.coalesce(func.sum(ReservaGrupo.qtd_vagas), 0)).where(
                 ReservaGrupo.id_viagem == viagem.id,
-                ReservaGrupo.status.in_([StatusReserva.BLOQUEADO, StatusReserva.CONFIRMADO]),
+                ReservaGrupo.status.in_(
+                    [StatusReserva.BLOQUEADO, StatusReserva.CONFIRMADO]
+                ),
                 ReservaGrupo.id != reserva.id,
             )
         )
@@ -204,7 +243,8 @@ async def atualizar_reserva_admin(
                 )
             )
             candidatos = [
-                {"id": c.id, "qtd_vagas": c.qtd_vagas} for c in res_candidatos.scalars().all()
+                {"id": c.id, "qtd_vagas": c.qtd_vagas}
+                for c in res_candidatos.scalars().all()
             ]
             raise VagasInsuficientesException(candidatos=candidatos)
 
@@ -221,26 +261,36 @@ async def atualizar_reserva_admin(
     # Recarregar com selectinload para evitar erro de lazy loading no schema
     res_final = await sessao.execute(
         select(ReservaGrupo)
-        .options(selectinload(ReservaGrupo.passageiros), selectinload(ReservaGrupo.viagem))
+        .options(
+            selectinload(ReservaGrupo.passageiros), selectinload(ReservaGrupo.viagem)
+        )
         .where(ReservaGrupo.id == reserva.id)
     )
     return res_final.scalar_one()
 
 
-@roteador_admin.get("/reservas/{id_reserva}/resumo-whatsapp", response_model=ResumoWhatsappSchema, tags=["Admin — Reservas"])
+@roteador_admin.get(
+    "/reservas/{id_reserva}/resumo-whatsapp",
+    response_model=ResumoWhatsappSchema,
+    tags=["Admin — Reservas"],
+)
 async def resumo_whatsapp(
     id_reserva: int,
     admin: Usuario = Depends(requerer_admin),
     sessao: AsyncSession = Depends(obter_sessao),
 ):
     res = await sessao.execute(
-        select(ReservaGrupo).options(selectinload(ReservaGrupo.viagem)).where(ReservaGrupo.id == id_reserva)
+        select(ReservaGrupo)
+        .options(selectinload(ReservaGrupo.viagem))
+        .where(ReservaGrupo.id == id_reserva)
     )
     reserva = res.scalar_one_or_none()
     if not reserva:
         raise ReservaNaoEncontradaException()
     if not reserva.valor_acordado:
-        raise ValorAcordadoNaoDefinidoException("Defina o valor acordado antes de gerar o resumo")
+        raise ValorAcordadoNaoDefinidoException(
+            "Defina o valor acordado antes de gerar o resumo"
+        )
 
     valor = Decimal(str(reserva.valor_acordado))
     sinal = round(valor * Decimal("0.5"), 2)
@@ -263,7 +313,10 @@ async def resumo_whatsapp(
 
 # ─── Exportação ANTT ─────────────────────────────────────────────────────────
 
-@roteador_admin.get("/viagens/{id_viagem}/exportar-passageiros", tags=["Admin — Exportação"])
+
+@roteador_admin.get(
+    "/viagens/{id_viagem}/exportar-passageiros", tags=["Admin — Exportação"]
+)
 async def exportar_passageiros(
     id_viagem: int,
     formato: str = Query("json", pattern="^(json|csv)$"),
@@ -297,14 +350,18 @@ async def exportar_passageiros(
 
     if formato == "csv":
         saida = io.StringIO()
-        escritor = csv.DictWriter(saida, fieldnames=["id", "nome", "documento", "eh_lider"])
+        escritor = csv.DictWriter(
+            saida, fieldnames=["id", "nome", "documento", "eh_lider"]
+        )
         escritor.writeheader()
         escritor.writerows(dados)
         saida.seek(0)
         return StreamingResponse(
             io.BytesIO(saida.getvalue().encode("utf-8")),
             media_type="text/csv",
-            headers={"Content-Disposition": f"attachment; filename=passageiros_viagem_{id_viagem}.csv"},
+            headers={
+                "Content-Disposition": f"attachment; filename=passageiros_viagem_{id_viagem}.csv"
+            },
         )
 
     return dados

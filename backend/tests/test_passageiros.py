@@ -10,23 +10,32 @@ async def _setup_reserva(sessao, email_lider, cpf_lider, dias=30, qtd=3):
     from app.core.seguranca import gerar_hash_senha
 
     lider = Usuario(
-        email=email_lider, senha_hash=gerar_hash_senha("Senha123!"),
-        nome="Lider", cpf=cpf_lider, telefone="11999",
-        data_nascimento=date(1990, 1, 1), tipo=TipoUsuario.LIDER,
+        email=email_lider,
+        senha_hash=gerar_hash_senha("Senha123!"),
+        nome="Lider",
+        cpf=cpf_lider,
+        telefone="11999",
+        data_nascimento=date(1990, 1, 1),
+        tipo=TipoUsuario.LIDER,
     )
     sessao.add(lider)
     await sessao.flush()
 
     viagem = Viagem(
-        titulo="Viagem Teste", data_partida=date.today() + timedelta(days=dias),
-        vagas_totais=20, status=StatusViagem.ATIVO,
+        titulo="Viagem Teste",
+        data_partida=date.today() + timedelta(days=dias),
+        vagas_totais=20,
+        status=StatusViagem.ATIVO,
     )
     sessao.add(viagem)
     await sessao.flush()
 
     reserva = ReservaGrupo(
-        id_viagem=viagem.id, id_lider=lider.id, qtd_vagas=qtd,
-        status=StatusReserva.SOLICITADO, substatus=SubstatusReserva.AGUARDANDO_CONTATO,
+        id_viagem=viagem.id,
+        id_lider=lider.id,
+        qtd_vagas=qtd,
+        status=StatusReserva.SOLICITADO,
+        substatus=SubstatusReserva.AGUARDANDO_CONTATO,
     )
     sessao.add(reserva)
     await sessao.flush()
@@ -44,8 +53,13 @@ async def _setup_reserva(sessao, email_lider, cpf_lider, dias=30, qtd=3):
 class TestPassageiros:
     async def test_acesso_restrito_por_reserva(self, cliente, sessao_teste):
         from tests.conftest import _criar_usuario, _token
-        lider1, viagem, reserva = await _setup_reserva(sessao_teste, "lider_p1@test.com", "11100011100")
-        lider2 = await _criar_usuario(sessao_teste, email="lider_p2@test.com", cpf="22200022200")
+
+        lider1, viagem, reserva = await _setup_reserva(
+            sessao_teste, "lider_p1@test.com", "11100011100"
+        )
+        lider2 = await _criar_usuario(
+            sessao_teste, email="lider_p2@test.com", cpf="22200022200"
+        )
         tk2 = await _token(cliente, "lider_p2@test.com")
         r = await cliente.get(
             f"/reservas/{reserva.id}/passageiros",
@@ -56,12 +70,18 @@ class TestPassageiros:
     async def test_atualizar_passageiro_dentro_do_prazo(self, cliente, sessao_teste):
         from app.infra.modelos import Passageiro
         from sqlalchemy import select
-        lider, viagem, reserva = await _setup_reserva(sessao_teste, "lider_upd@test.com", "33300033300", dias=30)
+
+        lider, viagem, reserva = await _setup_reserva(
+            sessao_teste, "lider_upd@test.com", "33300033300", dias=30
+        )
         res = await sessao_teste.execute(
-            select(Passageiro).where(Passageiro.id_reserva == reserva.id, Passageiro.eh_lider.is_(False))
+            select(Passageiro).where(
+                Passageiro.id_reserva == reserva.id, Passageiro.eh_lider.is_(False)
+            )
         )
         acompanhante = res.scalars().first()
         from tests.conftest import _token
+
         tk = await _token(cliente, "lider_upd@test.com")
         r = await cliente.patch(
             f"/passageiros/{acompanhante.id}",
@@ -74,12 +94,18 @@ class TestPassageiros:
     async def test_edicao_bloqueada_dentro_de_7_dias(self, cliente, sessao_teste):
         from app.infra.modelos import Passageiro
         from sqlalchemy import select
-        lider, viagem, reserva = await _setup_reserva(sessao_teste, "lider_blq@test.com", "44400044400", dias=3)
+
+        lider, viagem, reserva = await _setup_reserva(
+            sessao_teste, "lider_blq@test.com", "44400044400", dias=3
+        )
         res = await sessao_teste.execute(
-            select(Passageiro).where(Passageiro.id_reserva == reserva.id, Passageiro.eh_lider.is_(False))
+            select(Passageiro).where(
+                Passageiro.id_reserva == reserva.id, Passageiro.eh_lider.is_(False)
+            )
         )
         acompanhante = res.scalars().first()
         from tests.conftest import _token
+
         tk = await _token(cliente, "lider_blq@test.com")
         r = await cliente.patch(
             f"/passageiros/{acompanhante.id}",
@@ -91,8 +117,16 @@ class TestPassageiros:
 
     async def test_exportacao_pendente(self, cliente, sessao_teste):
         from tests.conftest import _criar_usuario, _token
-        admin = await _criar_usuario(sessao_teste, email="admin_exp@test.com", tipo=TipoUsuario.ADMIN, cpf="55500055500")
-        lider, viagem, reserva = await _setup_reserva(sessao_teste, "lider_exp@test.com", "66600066600", dias=60)
+
+        admin = await _criar_usuario(
+            sessao_teste,
+            email="admin_exp@test.com",
+            tipo=TipoUsuario.ADMIN,
+            cpf="55500055500",
+        )
+        lider, viagem, reserva = await _setup_reserva(
+            sessao_teste, "lider_exp@test.com", "66600066600", dias=60
+        )
         reserva.status = StatusReserva.CONFIRMADO
         await sessao_teste.commit()
         tk = await _token(cliente, "admin_exp@test.com")

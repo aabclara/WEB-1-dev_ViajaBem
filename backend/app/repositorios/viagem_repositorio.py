@@ -1,8 +1,13 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
-from app.infra.modelos import Viagem as ViagemModel, ReservaGrupo as ReservaModel, StatusReserva as StatusInfra
+from app.infra.modelos import (
+    Viagem as ViagemModel,
+    ReservaGrupo as ReservaModel,
+    StatusReserva as StatusInfra,
+)
 from app.dominio.entidades import Viagem
 from app.infra.mapeadores import MapeadorViagem
+
 
 class ViagemRepositorio:
     def __init__(self, sessao: AsyncSession):
@@ -19,7 +24,9 @@ class ViagemRepositorio:
         resultado = await self.sessao.execute(
             select(func.coalesce(func.sum(ReservaModel.qtd_vagas), 0)).where(
                 ReservaModel.id_viagem == id_viagem,
-                ReservaModel.status.in_([StatusInfra.BLOQUEADO, StatusInfra.CONFIRMADO]),
+                ReservaModel.status.in_(
+                    [StatusInfra.BLOQUEADO, StatusInfra.CONFIRMADO]
+                ),
             )
         )
         return int(resultado.scalar())

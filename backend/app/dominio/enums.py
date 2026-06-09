@@ -1,5 +1,6 @@
 import enum
 
+
 class TipoUsuario(str, enum.Enum):
     LIDER = "LIDER"
     ADMIN = "ADMIN"
