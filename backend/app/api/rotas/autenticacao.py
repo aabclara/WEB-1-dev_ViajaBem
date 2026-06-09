@@ -2,6 +2,11 @@ from datetime import datetime, timedelta, timezone, date
 from app.core.tempo import obter_agora
 import uuid
 
+from app.core.seguranca import obter_usuario_atual
+from app.schemas.usuario_schemas import AtualizarUsuarioSchema, UsuarioPerfilSchema
+from app.repositorios.usuario_repositorio import UsuarioRepositorio
+from app.casos_uso.usuarios_service import UsuariosService
+
 from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -177,12 +182,6 @@ async def redefinir_senha(
     token_obj.usado = True
     await sessao.commit()
     return {"mensagem": "Senha redefinida com sucesso"}
-
-
-from app.core.seguranca import obter_usuario_atual
-from app.schemas.usuario_schemas import AtualizarUsuarioSchema, UsuarioPerfilSchema
-from app.repositorios.usuario_repositorio import UsuarioRepositorio
-from app.casos_uso.usuarios_service import UsuariosService
 
 
 @roteador_auth.get("/me", response_model=UsuarioPerfilSchema, tags=["Perfil"])
