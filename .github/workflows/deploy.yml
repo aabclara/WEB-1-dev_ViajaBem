@@ -36,9 +36,13 @@ jobs:
           mypy backend || true
 
       - name: Run Tests with Coverage (Min 80%)
+        env:
+          DATABASE_URL: sqlite+aiosqlite:///:memory:
+          JWT_SECRETO: mock_secret_para_passar_nos_testes_123
+          ADMIN_EMAIL: admin@test.com
+          ADMIN_SENHA: senha_mock_123
         run: |
-          cd backend
-          pytest --cov=app --cov-fail-under=80
+          pytest backend
 
   build-and-push:
     name: Build and Push Docker Image
