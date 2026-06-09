@@ -118,8 +118,7 @@ class TestReservas:
             cpf="50505050505",
         )
         lider = await _criar_usuario(
-            sessao_teste, email="lider_trava@test.com", cpf="60606060606"
-        )
+            sessao_teste, email="lider_trava@test.com", cpf="60606060606")
         viagem = await _criar_viagem(
             sessao_teste, dias_ate_partida=3
         )  # Dentro da trava
