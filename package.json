@@ -1,6 +1,9 @@
 {
   "dependencies": {
     "@fission-ai/openspec": "^1.2.0",
+    "next": "^16.2.9",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
     "uipro-cli": "^2.2.3"
   }
 }
