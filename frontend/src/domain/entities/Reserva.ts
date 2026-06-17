@@ -1,5 +1,12 @@
 import { StatusReserva } from '../value-objects/StatusReserva'
 
+export interface PassageiroProps {
+  id: number
+  nome: string | null
+  documento: string | null
+  eh_lider: boolean
+}
+
 export interface ReservaProps {
   id: number
   idViagem: number
@@ -7,6 +14,7 @@ export interface ReservaProps {
   dataPartidaViagem: string
   qtdVagas: number
   status: StatusReserva
+  passageiros?: PassageiroProps[]
 }
 
 export class Reserva {
@@ -16,6 +24,7 @@ export class Reserva {
   readonly dataPartidaViagem: string
   readonly qtdVagas: number
   readonly status: StatusReserva
+  readonly passageiros: PassageiroProps[]
 
   constructor(props: ReservaProps) {
     this.id = props.id
@@ -24,6 +33,7 @@ export class Reserva {
     this.dataPartidaViagem = props.dataPartidaViagem
     this.qtdVagas = props.qtdVagas
     this.status = props.status
+    this.passageiros = props.passageiros || []
   }
 
   get estaFinalizada(): boolean {
@@ -35,6 +45,14 @@ export class Reserva {
   }
 
   static fromApi(raw: Record<string, unknown>): Reserva {
+    const rawPassageiros = (raw['passageiros'] as Record<string, unknown>[]) || []
+    const passageiros = rawPassageiros.map((p) => ({
+      id: p['id'] as number,
+      nome: p['nome'] as string | null,
+      documento: p['documento'] as string | null,
+      eh_lider: p['eh_lider'] as boolean,
+    }))
+
     return new Reserva({
       id: raw['id'] as number,
       idViagem: raw['id_viagem'] as number,
@@ -42,6 +60,7 @@ export class Reserva {
       dataPartidaViagem: raw['data_partida_viagem'] as string,
       qtdVagas: raw['qtd_vagas'] as number,
       status: raw['status'] as StatusReserva,
+      passageiros,
     })
   }
 }

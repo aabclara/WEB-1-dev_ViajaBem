@@ -7,15 +7,15 @@ if "sslmode=" in configuracoes.DATABASE_URL:
     configuracoes.DATABASE_URL = configuracoes.DATABASE_URL.replace("sslmode=", "ssl=")
 
 from app.core.banco import FabricaSessao
-from app.infra.modelos import Viagem
+from app.infra.modelos import Passageiro
 
 async def main():
     async with FabricaSessao() as sessao:
-        resultado = await sessao.execute(select(Viagem))
-        viagens = resultado.scalars().all()
-        print(f"Total de viagens: {len(viagens)}")
-        for v in viagens:
-            print(f"ID: {v.id} | Titulo: {v.titulo} | Status: {v.status} | Partida: {v.data_partida} | Retorno: {v.data_retorno}")
+        resultado = await sessao.execute(select(Passageiro))
+        passageiros = resultado.scalars().all()
+        print(f"Total de passageiros: {len(passageiros)}")
+        for p in passageiros:
+            print(f"ID: {p.id} | Reserva ID: {p.id_reserva} | Nome: {p.nome} | Documento: {p.documento} | Lider: {p.eh_lider}")
 
 if __name__ == "__main__":
     asyncio.run(main())

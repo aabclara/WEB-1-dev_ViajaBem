@@ -1,15 +1,15 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
   "/cadastro/page": "app/cadastro/page.js",
-  "/painel/kanban/[id]/page": "app/painel/kanban/[id]/page.js",
-  "/login/page": "app/login/page.js",
-  "/page": "app/page.js",
   "/painel/kanban/[id]/editar/page": "app/painel/kanban/[id]/editar/page.js",
-  "/painel/page": "app/painel/page.js",
+  "/page": "app/page.js",
   "/painel/kanban/[id]/reserva/[idReserva]/page": "app/painel/kanban/[id]/reserva/[idReserva]/page.js",
-  "/reservas/[id]/page": "app/reservas/[id]/page.js",
+  "/painel/kanban/[id]/page": "app/painel/kanban/[id]/page.js",
+  "/painel/page": "app/painel/page.js",
   "/perfil/page": "app/perfil/page.js",
-  "/termos/page": "app/termos/page.js",
   "/viagens/[id]/page": "app/viagens/[id]/page.js",
+  "/reservas/[id]/page": "app/reservas/[id]/page.js",
+  "/login/page": "app/login/page.js",
+  "/termos/page": "app/termos/page.js",
   "/sobre/page": "app/sobre/page.js"
 }
