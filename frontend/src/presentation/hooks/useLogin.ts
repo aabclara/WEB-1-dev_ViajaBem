@@ -17,7 +17,9 @@ export function useLogin() {
 
     try {
       await loginUseCase.execute({ email, senha })
-      window.location.href = '/painel'
+      const params = new URLSearchParams(window.location.search)
+      const redirectUrl = params.get('redirect')
+      window.location.href = redirectUrl ? decodeURIComponent(redirectUrl) : '/painel'
     } catch (err) {
       setErro(err instanceof Error ? err.message : 'Falha ao entrar')
     } finally {

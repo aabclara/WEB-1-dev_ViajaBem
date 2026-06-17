@@ -4,9 +4,18 @@ import { LogIn, Mail, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { useLogin } from "@/src/presentation/hooks/useLogin";
 import { Input } from "@/src/components/ui/input";
 import { Button } from "@/src/components/ui/button";
+import { useState, useEffect } from "react";
 
 export default function LoginPage() {
   const { email, setEmail, senha, setSenha, mostrarSenha, setMostrarSenha, erro, carregando, handleSubmit } = useLogin();
+  const [redirect, setRedirect] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setRedirect(params.get("redirect"));
+  }, []);
+
+  const cadastroUrl = redirect ? `/cadastro?redirect=${encodeURIComponent(redirect)}` : "/cadastro";
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-stone-50 px-4">
@@ -77,7 +86,7 @@ export default function LoginPage() {
 
         <p className="mt-6 text-center text-sm text-viaje-neutral">
           Ainda nao tem conta?{" "}
-          <a href="/cadastro" className="font-medium text-viaje-primary hover:underline">Cadastre-se</a>
+          <a href={cadastroUrl} className="font-medium text-viaje-primary hover:underline">Cadastre-se</a>
         </p>
       </div>
     </div>

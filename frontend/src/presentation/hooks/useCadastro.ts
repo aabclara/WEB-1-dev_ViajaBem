@@ -64,9 +64,14 @@ export function useCadastro() {
           email: dataLogin.email,
           tipo: dataLogin.tipo,
         })
-        window.location.href = '/painel'
+        const params = new URLSearchParams(window.location.search)
+        const redirectUrl = params.get('redirect')
+        window.location.href = redirectUrl ? decodeURIComponent(redirectUrl) : '/painel'
       } catch {
-        window.location.href = '/login?msg=cadastro_ok'
+        const params = new URLSearchParams(window.location.search)
+        const redirectUrl = params.get('redirect')
+        const redirectSuffix = redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : ''
+        window.location.href = `/login?msg=cadastro_ok${redirectSuffix}`
       }
     } catch (err) {
       setErro(err instanceof Error ? err.message : 'Erro ao realizar cadastro')

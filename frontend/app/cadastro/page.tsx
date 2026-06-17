@@ -2,9 +2,18 @@
 
 import { UserPlus, Mail, Lock, User, Phone, CreditCard, Calendar, Loader2, Eye, EyeOff } from "lucide-react";
 import { useCadastro } from "@/src/presentation/hooks/useCadastro";
+import { useState, useEffect } from "react";
 
 export default function CadastroPage() {
   const { formData, handleChange, mostrarSenha, setMostrarSenha, erro, carregando, handleSubmit } = useCadastro();
+  const [redirect, setRedirect] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setRedirect(params.get("redirect"));
+  }, []);
+
+  const loginUrl = redirect ? `/login?redirect=${encodeURIComponent(redirect)}` : "/login";
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-4rem)] bg-stone-50 py-12 px-4">
@@ -160,7 +169,7 @@ export default function CadastroPage() {
 
         <p className="mt-6 text-center text-sm text-on-surface-variant">
           Já tem uma conta?{" "}
-          <a href="/login" className="font-medium text-secondary hover:underline">
+          <a href={loginUrl} className="font-medium text-secondary hover:underline">
             Faça login
           </a>
         </p>

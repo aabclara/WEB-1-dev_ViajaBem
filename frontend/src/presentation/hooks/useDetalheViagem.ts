@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { Viagem } from '../../domain/entities/Viagem'
-import { buscarViagemUseCase, criarReservaUseCase } from '../../infrastructure/di/container'
+import { buscarViagemUseCase, criarReservaUseCase, tokenStorage } from '../../infrastructure/di/container'
 
 export function useDetalheViagem(id: number | string) {
   const [viagem, setViagem] = useState<Viagem | null>(null)
@@ -29,6 +29,11 @@ export function useDetalheViagem(id: number | string) {
   const handleReserva = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     if (!viagem) return
+
+    if (!tokenStorage.getToken()) {
+      window.location.href = `/login?redirect=${encodeURIComponent(window.location.pathname)}`
+      return
+    }
 
     setErro(null)
     setEnviando(true)
