@@ -1,8 +1,11 @@
 import asyncio
 from app.core.configuracao import configuracoes
+
 # Ajusta a URL para asyncpg se necessário
 if configuracoes.DATABASE_URL.startswith("postgresql://"):
-    configuracoes.DATABASE_URL = configuracoes.DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
+    configuracoes.DATABASE_URL = configuracoes.DATABASE_URL.replace(
+        "postgresql://", "postgresql+asyncpg://", 1
+    )
 if "sslmode=" in configuracoes.DATABASE_URL:
     configuracoes.DATABASE_URL = configuracoes.DATABASE_URL.replace("sslmode=", "ssl=")
 
@@ -10,6 +13,7 @@ from app.core.banco import FabricaSessao
 from app.infra.modelos import Viagem, ReservaGrupo, StatusViagem, StatusReserva
 from app.core.tempo import obter_agora
 from sqlalchemy import select, func, update, case
+
 
 async def test_listar_viagens_admin():
     async with FabricaSessao() as sessao:
@@ -60,6 +64,7 @@ async def test_listar_viagens_admin():
             )
         print("Success! Resposta:")
         print(resposta)
+
 
 if __name__ == "__main__":
     asyncio.run(test_listar_viagens_admin())
