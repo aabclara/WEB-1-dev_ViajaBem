@@ -109,7 +109,7 @@ class ReservaSchema(BaseModel):
     valor_acordado: Optional[Decimal] = Field(
         None, description="Valor final acordado para a reserva", examples=[300.00]
     )
-    valor_previsto: Optional[Decimal] = Field(
+    valor_previsto: Optional[float] = Field(
         None, description="Valor previsto para a reserva", examples=[540.00]
     )
     status: StatusReserva = Field(
