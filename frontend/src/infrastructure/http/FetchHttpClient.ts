@@ -4,24 +4,26 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000'
 
 export class FetchHttpClient {
   private readonly baseUrl: string
-
   constructor(baseUrl: string = API_URL) {
-    // Ajusta URL para ambiente browser (docker → localhost)
-    if (typeof window !== 'undefined') {
-      try {
-        const url = new URL(baseUrl)
-        if (url.hostname === 'backend') {
-          url.hostname = 'localhost'
-          this.baseUrl = url.toString().replace(/\/$/, '')
-        } else {
-          this.baseUrl = baseUrl
-        }
-      } catch {
-        this.baseUrl = baseUrl
-      }
-    } else {
-      this.baseUrl = baseUrl
-    }
+    // Garante que remove barras no final se existirem, sem condicionais malucas
+    this.baseUrl = baseUrl.replace(/\/$/, '')
+    //  constructor(baseUrl: string = API_URL) {
+    //    // Ajusta URL para ambiente browser (docker → localhost)
+    //    if (typeof window !== 'undefined') {
+    //      try {
+    //        const url = new URL(baseUrl)
+    //        if (url.hostname === 'backend') {
+    //          url.hostname = 'localhost'
+    //          this.baseUrl = url.toString().replace(/\/$/, '')
+    //        } else {
+    //          this.baseUrl = baseUrl
+    //        }
+    //      } catch {
+    //        this.baseUrl = baseUrl
+    //      }
+    //    } else {
+    //      this.baseUrl = baseUrl
+    //    }
   }
 
   private buildHeaders(tokenStorage: ITokenStorage): HeadersInit {
