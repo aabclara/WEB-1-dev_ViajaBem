@@ -36,7 +36,7 @@ async def _criar_admin_seed():
         resultado = await sessao.execute(
             select(Usuario).where(Usuario.tipo == TipoUsuario.ADMIN)
         )
-        if resultado.scalar_one_or_none() is None:
+        if resultado.scalars().first() is None:
             admin = Usuario(
                 email=configuracoes.ADMIN_EMAIL,
                 senha_hash=gerar_hash_senha(configuracoes.ADMIN_SENHA),
