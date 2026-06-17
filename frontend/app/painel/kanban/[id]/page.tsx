@@ -132,7 +132,13 @@ export default function KanbanPage() {
                           </div>
 
                           <h4 className="font-bold text-stone-800 text-sm mb-1 leading-tight">{reserva.nome_lider || `Líder ID #${reserva.id_lider}`}</h4>
-                          <p className="text-xs font-semibold text-stone-400 mb-4">R$ {reserva.valor_acordado?.toFixed(2) || "---"}</p>
+                          <p className="text-xs font-semibold text-stone-400 mb-4">
+                            R$ {reserva.valor_acordado !== undefined && reserva.valor_acordado !== null
+                              ? reserva.valor_acordado.toFixed(2)
+                              : reserva.valor_previsto
+                                ? `${reserva.valor_previsto.toFixed(2)} (Previsto)`
+                                : "---"}
+                          </p>
 
                            <div className="flex gap-2">
                              {statusKey !== "CONFIRMADO" && (

@@ -53,6 +53,7 @@ class ReservaGrupo(EntidadeBase):
     id_lider: int = 0
     qtd_vagas: int = 0
     valor_acordado: Optional[float] = None
+    valor_previsto: Optional[float] = None
     status: StatusReserva = StatusReserva.SOLICITADO
     substatus: SubstatusReserva = SubstatusReserva.AGUARDANDO_CONTATO
     data_expiracao: Optional[datetime] = None

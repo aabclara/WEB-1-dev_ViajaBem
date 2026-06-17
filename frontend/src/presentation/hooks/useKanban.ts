@@ -11,6 +11,7 @@ export interface KanbanReserva {
   status: string;
   substatus: string;
   valor_acordado?: number;
+  valor_previsto?: number;
   titulo_viagem?: string;
   passageiros: any[];
 }

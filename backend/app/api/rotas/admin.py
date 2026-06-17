@@ -175,10 +175,24 @@ async def kanban_reservas(
     modelos = res_r.scalars().all()
     reservas = []
 
+    import re
+
+    match = re.search(r"(?:R\$)?\s*(\d+(?:[.,]\d+)?)", viagem.descricao_precos or "")
+    preco_unitario = None
+    if match:
+        try:
+            preco_unitario = float(match.group(1).replace(",", "."))
+        except ValueError:
+            pass
+
     for m in modelos:
         entidade = MapeadorReserva.para_dominio(m)
         if m.lider:
             entidade.nome_lider = m.lider.nome
+        if preco_unitario is not None:
+            entidade.valor_previsto = preco_unitario * m.qtd_vagas
+        else:
+            entidade.valor_previsto = None
         reservas.append(entidade)
 
     colunas: dict[str, list] = {s.value: [] for s in StatusReserva}
