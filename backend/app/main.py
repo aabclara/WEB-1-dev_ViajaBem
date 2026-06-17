@@ -71,10 +71,10 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://web-1-dev-viaja-bem.vercel.app",
+        "https://viajebem.vercel.app",  # <--- O seu novo domínio lindão aqui!
         "http://localhost:3000",
-        "http://localhost:8000",
         "http://127.0.0.1:3000",
+        "http://localhost:8000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
