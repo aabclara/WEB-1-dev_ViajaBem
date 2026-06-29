@@ -13,12 +13,9 @@ export function Footer() {
             &copy; {new Date().getFullYear()} Viaje Bem. Sua agência de viagens.
           </p>
         </div>
-        <div className="flex gap-8">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-8 items-center text-center">
           <a className="text-on-surface-variant font-medium text-lg hover:text-primary transition-colors" href="/termos">
             Termos e Privacidade
-          </a>
-          <a className="text-on-surface-variant font-medium text-lg hover:text-primary transition-colors" href="/suporte">
-            Suporte
           </a>
           <a className="text-on-surface-variant font-medium text-lg hover:text-primary transition-colors" href="/contato">
             Contato

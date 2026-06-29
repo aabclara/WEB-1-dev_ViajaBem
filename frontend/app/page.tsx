@@ -89,11 +89,11 @@ export default function PaginaInicial() {
         <p className="text-base font-medium text-on-surface-variant max-w-2xl mb-10">
           A forma mais inteligente de viajar. Conforto e segurança garantidos!
         </p>
-        <div className="flex flex-row gap-6">
-          <Link href="#viagens" className="h-14 px-10 bg-primary text-on-primary rounded-xl font-bold text-lg shadow-sm hover:scale-[1.02] transition-transform active:scale-95 flex items-center">
+        <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full max-w-md sm:max-w-none sm:w-auto px-4 sm:px-0 justify-center">
+          <Link href="#viagens" className="h-14 px-6 sm:px-10 bg-primary text-on-primary rounded-xl font-bold text-base sm:text-lg shadow-sm hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center w-full sm:w-auto">
             Explorar Destinos
           </Link>
-          <Link href="/sobre" className="h-14 px-10 bg-secondary text-on-secondary rounded-xl font-bold text-lg shadow-sm hover:scale-[1.02] transition-transform active:scale-95 flex items-center">
+          <Link href="/sobre" className="h-14 px-6 sm:px-10 bg-secondary text-on-secondary rounded-xl font-bold text-base sm:text-lg shadow-sm hover:scale-[1.02] transition-transform active:scale-95 flex items-center justify-center w-full sm:w-auto">
             Conheça nossa agência
           </Link>
         </div>
